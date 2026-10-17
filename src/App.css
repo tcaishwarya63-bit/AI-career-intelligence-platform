@@ -533,7 +533,55 @@
   font-size: 0.82rem;
 }
 
-/* ================= MILESTONE 1 STYLES ================= */
+/* ================= RESUME PARSING & PREDICTION STYLES ================= */
+.resume-upload-zone {
+  border: 2px dashed rgba(59, 130, 246, 0.4);
+  background: rgba(17, 24, 39, 0.6);
+  border-radius: 14px;
+  padding: 2.2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.resume-upload-zone:hover {
+  border-color: var(--primary);
+  background: rgba(30, 58, 138, 0.15);
+  transform: translateY(-2px);
+}
+
+.upload-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.file-selected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 14px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
 .m1-badge {
   background: rgba(139, 92, 246, 0.2);
   color: #c4b5fd;
