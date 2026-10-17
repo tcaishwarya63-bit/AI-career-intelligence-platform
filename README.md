@@ -1,4 +1,4 @@
-# 🚀 AI-Powered Career Intelligence Platform (SIH 2025)
+# 🚀 AI-Powered Career Intelligence Platform 
 
 An intelligent, data-driven career counseling and progression platform built for students, job seekers, and career changers. Designed for the Smart India Hackathon (SIH) 2025 initiative.
 
