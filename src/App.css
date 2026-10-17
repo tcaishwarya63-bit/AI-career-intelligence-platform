@@ -533,6 +533,183 @@
   font-size: 0.82rem;
 }
 
+/* ================= MILESTONE 1 STYLES ================= */
+.m1-badge {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.m1-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 992px) {
+  .m1-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.m1-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.m1-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.85rem;
+}
+
+.m1-card-header h3 {
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ner-box {
+  background: rgba(10, 15, 29, 0.9);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 1.25rem;
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: #e2e8f0;
+  min-height: 180px;
+  margin-bottom: 1.25rem;
+}
+
+/* SpaCy NER Entity Highlights */
+.ner-entity {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  margin: 0 3px;
+  font-size: 0.85rem;
+}
+
+.ner-entity .ner-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  margin-left: 4px;
+  opacity: 0.85;
+}
+
+.ner-skill {
+  background: rgba(6, 182, 212, 0.2);
+  border: 1px solid #06b6d4;
+  color: #67e8f9;
+}
+
+.ner-role {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10b981;
+  color: #6ee7b7;
+}
+
+.ner-edu {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #f59e0b;
+  color: #fde68a;
+}
+
+/* Prediction Results */
+.accuracy-banner {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.accuracy-title {
+  font-size: 0.8rem;
+  color: #93c5fd;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.accuracy-score {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.prob-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.prob-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prob-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.prob-track {
+  width: 100%;
+  height: 12px;
+  background: rgba(31, 41, 55, 0.8);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.prob-fill {
+  height: 100%;
+  background: var(--accent-gradient);
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.prob-fill.secondary {
+  background: linear-gradient(to right, #3b82f6, #60a5fa);
+}
+
+.prob-fill.tertiary {
+  background: linear-gradient(to right, #6b7280, #9ca3af);
+}
+
+/* Profile Ingestion Form */
+.profile-ingestion-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
