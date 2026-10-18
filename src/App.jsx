@@ -126,6 +126,31 @@ export default function App() {
             prob: Math.round(item.probability),
             type: idx === 0 ? 'primary' : idx === 1 ? 'secondary' : 'tertiary'
           })))
+
+          // Save to Supabase Database (profiles & predictions tables)
+          if (session?.user?.id && isSupabaseConfigured) {
+            try {
+              await supabase.from('profiles').upsert({
+                id: session.user.id,
+                full_name: session.user.user_metadata?.full_name || fullName || 'Student Explorer',
+                skills: m1Skills.split(',').map(s => s.trim()).filter(Boolean),
+                target_role: data.top_predicted_role || 'Data Scientist',
+                education_level: m1Degree,
+                institution: m1University,
+                updated_at: new Date().toISOString()
+              })
+
+              await supabase.from('predictions').insert({
+                user_id: session.user.id,
+                predicted_role: data.top_predicted_role || 'Data Scientist',
+                confidence_score: parseFloat(data.confidence_score) || 85.0,
+                all_probabilities: data.all_ranked_probabilities
+              })
+            } catch (dbErr) {
+              console.warn('Could not save to Supabase database:', dbErr)
+            }
+          }
+
           setM1IsCalculating(false)
           return
         }
