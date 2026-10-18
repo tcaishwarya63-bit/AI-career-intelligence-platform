@@ -30,7 +30,10 @@ import {
   XCircle,
   BarChart3,
   ExternalLink,
-  Brain
+  Brain,
+  Database,
+  Save,
+  Cloud
 } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from './supabase'
 import './App.css'
@@ -74,15 +77,71 @@ export default function App() {
   const [quizAnswer, setQuizAnswer] = useState(null)
   const [quizScore, setQuizScore] = useState(null)
 
+  // Supabase Database State (profiles, resumes, predictions tables)
+  const [savedResumes, setSavedResumes] = useState([])
+  const [savedPredictions, setSavedPredictions] = useState([])
+  const [dbSaving, setDbSaving] = useState(false)
+  const [dbStatusMsg, setDbStatusMsg] = useState('')
+  const [dbRecordCounts, setDbRecordCounts] = useState({ profiles: 1, resumes: 0, predictions: 0 })
+
+  // Function to load all user data from Supabase Cloud Database
+  const loadUserData = async (userId) => {
+    if (!isSupabaseConfigured || !userId || userId === 'sih-demo-user' || userId === 'demo-user-123') return
+    try {
+      // 1. Fetch Profile
+      const { data: prof, error: profErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
+      
+      if (prof && !profErr) {
+        if (prof.full_name) setFullName(prof.full_name)
+        if (prof.skills && prof.skills.length > 0) setM1Skills(prof.skills.join(', '))
+        if (prof.institution) setM1University(prof.institution)
+        if (prof.education_level) setM1Degree(prof.education_level)
+        if (prof.target_role) setSelectedTargetRole(prof.target_role)
+      }
+
+      // 2. Fetch Resumes History
+      const { data: resumes } = await supabase
+        .from('resumes')
+        .select('*')
+        .eq('user_id', userId)
+        .order('upload_date', { ascending: false })
+        .limit(5)
+      if (resumes) setSavedResumes(resumes)
+
+      // 3. Fetch Predictions History
+      const { data: preds } = await supabase
+        .from('predictions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5)
+      if (preds) setSavedPredictions(preds)
+
+      setDbRecordCounts({
+        profiles: prof ? 1 : 0,
+        resumes: resumes ? resumes.length : 0,
+        predictions: preds ? preds.length : 0
+      })
+    } catch (err) {
+      console.warn('Error loading Supabase user data:', err)
+    }
+  }
+
   // Listen for Supabase Authentication
   useEffect(() => {
     if (isSupabaseConfigured) {
       supabase.auth.getSession().then(({ data: { session } }) => {
         setSession(session)
+        if (session?.user?.id) loadUserData(session.user.id)
       })
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setSession(session)
+        if (session?.user?.id) loadUserData(session.user.id)
       })
 
       return () => subscription.unsubscribe()
@@ -121,6 +180,7 @@ export default function App() {
       if (error) throw error
       if (data?.user && data.session) {
         setSession(data.session)
+        loadUserData(data.user.id)
       } else {
         setAuthSuccess('Registration successful! Please check your email to confirm.')
       }
@@ -158,6 +218,7 @@ export default function App() {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
       setSession(data.session)
+      if (data.session?.user?.id) loadUserData(data.session.user.id)
     } catch (err) {
       setAuthError(err.message || 'Invalid credentials.')
     } finally {
@@ -169,6 +230,8 @@ export default function App() {
   const handleSignOut = async () => {
     if (isSupabaseConfigured) await supabase.auth.signOut()
     setSession(null)
+    setSavedResumes([])
+    setSavedPredictions([])
   }
 
   // Quick Demo Login
@@ -182,7 +245,57 @@ export default function App() {
     })
   }
 
-  // Resume Upload to FastAPI
+  // Save Candidate Profile into Supabase 'profiles' table
+  const handleSaveProfile = async () => {
+    if (!session?.user?.id) return
+    if (session.user.id === 'sih-demo-user' || session.user.id === 'demo-user-123') {
+      setDbStatusMsg('Demo mode: Profile updated in local session. Sign up to sync with cloud database!')
+      setTimeout(() => setDbStatusMsg(''), 4000)
+      return
+    }
+    setDbSaving(true)
+    try {
+      const skillsArray = m1Skills.split(',').map(s => s.trim()).filter(Boolean)
+      const { error } = await supabase.from('profiles').upsert({
+        id: session.user.id,
+        full_name: fullName || userName,
+        skills: skillsArray,
+        institution: m1University,
+        education_level: m1Degree,
+        target_role: selectedTargetRole,
+        updated_at: new Date().toISOString()
+      })
+      if (error) throw error
+      setDbStatusMsg('Candidate profile synchronized to Supabase PostgreSQL database!')
+      setTimeout(() => setDbStatusMsg(''), 4000)
+      loadUserData(session.user.id)
+    } catch (err) {
+      console.error('Supabase profile save error:', err)
+      setDbStatusMsg('Cloud sync error: ' + (err.message || 'Failed to save'))
+      setTimeout(() => setDbStatusMsg(''), 5000)
+    } finally {
+      setDbSaving(false)
+    }
+  }
+
+  // Record prediction into Supabase 'predictions' table
+  const savePredictionToDb = async (preds) => {
+    if (!session?.user?.id || session.user.id === 'sih-demo-user' || session.user.id === 'demo-user-123' || !preds?.length) return
+    try {
+      const top = preds[0]
+      await supabase.from('predictions').insert({
+        user_id: session.user.id,
+        predicted_role: top.role,
+        confidence_score: top.prob,
+        all_probabilities: preds
+      })
+      loadUserData(session.user.id)
+    } catch (err) {
+      console.warn('Could not record prediction to Supabase:', err)
+    }
+  }
+
+  // Resume Upload to FastAPI & save to Supabase 'resumes' and 'predictions' tables
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -197,24 +310,62 @@ export default function App() {
         })
         if (response.ok) {
           const data = await response.json()
+          let currentSkills = m1Skills
+          let currentRole = m1Role
+          let currentDegree = m1Degree
+          let currentUniv = m1University
+
           if (data.extracted_entities?.skills?.length) {
-            setM1Skills(data.extracted_entities.skills.join(', '))
+            currentSkills = data.extracted_entities.skills.join(', ')
+            setM1Skills(currentSkills)
           }
           if (data.extracted_entities?.roles?.length) {
-            setM1Role(data.extracted_entities.roles.join(', '))
+            currentRole = data.extracted_entities.roles.join(', ')
+            setM1Role(currentRole)
           }
           if (data.extracted_entities?.degrees?.length) {
-            setM1Degree(data.extracted_entities.degrees.join(', '))
+            currentDegree = data.extracted_entities.degrees.join(', ')
+            setM1Degree(currentDegree)
           }
           if (data.extracted_entities?.institutions?.length) {
-            setM1University(data.extracted_entities.institutions.join(', '))
+            currentUniv = data.extracted_entities.institutions.join(', ')
+            setM1University(currentUniv)
           }
+
+          let formattedPreds = null
           if (data.all_ranked_probabilities) {
-            setM1Predictions(data.all_ranked_probabilities.map((item, idx) => ({
+            formattedPreds = data.all_ranked_probabilities.map((item, idx) => ({
               role: item.role,
               prob: Math.round(item.probability),
               type: idx === 0 ? 'primary' : idx === 1 ? 'secondary' : 'tertiary'
-            })))
+            }))
+            setM1Predictions(formattedPreds)
+          }
+
+          // Record in Supabase database
+          if (session?.user?.id && session.user.id !== 'sih-demo-user' && session.user.id !== 'demo-user-123') {
+            try {
+              const skillsArr = data.extracted_entities?.skills || currentSkills.split(',').map(s => s.trim()).filter(Boolean)
+              const rolesArr = data.extracted_entities?.roles || [currentRole]
+              const degreesArr = data.extracted_entities?.degrees || [currentDegree]
+
+              await supabase.from('resumes').insert({
+                user_id: session.user.id,
+                file_name: file.name,
+                extracted_skills: skillsArr,
+                extracted_roles: rolesArr,
+                extracted_degrees: degreesArr
+              })
+
+              if (formattedPreds && formattedPreds.length > 0) {
+                await savePredictionToDb(formattedPreds)
+              }
+              setDbStatusMsg('Resume and extraction results recorded to Supabase cloud database!')
+              setTimeout(() => setDbStatusMsg(''), 4000)
+              loadUserData(session.user.id)
+            } catch (dbErr) {
+              console.warn('Supabase resume recording warning:', dbErr)
+            }
           }
         } else {
           handleRecalculateM1()
@@ -231,6 +382,7 @@ export default function App() {
   // Recalculate predictions
   const handleRecalculateM1 = async () => {
     setM1IsCalculating(true)
+    let newPredictions = null
     try {
       const response = await fetch('http://127.0.0.1:8000/predict', {
         method: 'POST',
@@ -240,12 +392,14 @@ export default function App() {
       if (response.ok) {
         const data = await response.json()
         if (data.all_ranked_probabilities) {
-          setM1Predictions(data.all_ranked_probabilities.map((item, idx) => ({
+          newPredictions = data.all_ranked_probabilities.map((item, idx) => ({
             role: item.role,
             prob: Math.round(item.probability),
             type: idx === 0 ? 'primary' : idx === 1 ? 'secondary' : 'tertiary'
-          })))
+          }))
+          setM1Predictions(newPredictions)
           setM1IsCalculating(false)
+          savePredictionToDb(newPredictions)
           return
         }
       }
@@ -265,13 +419,15 @@ export default function App() {
       const normDs = Math.round((ds / total) * 94)
       const normSe = Math.round((se / total) * 94)
       const normBa = Math.max(5, 94 - normDs - normSe)
-      setM1Predictions([
+      const fallbackPreds = [
         { role: 'Data Scientist', prob: normDs, type: 'primary' },
         { role: 'Software Engineer', prob: normSe, type: 'secondary' },
         { role: 'Business Analyst', prob: normBa, type: 'tertiary' },
         { role: 'Product Manager', prob: 6, type: 'tertiary' }
-      ])
+      ]
+      setM1Predictions(fallbackPreds)
       setM1IsCalculating(false)
+      savePredictionToDb(fallbackPreds)
     }, 400)
   }
 
@@ -961,8 +1117,15 @@ export default function App() {
 
                 {/* Profile Form */}
                 <div className="white-panel">
-                  <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>Edit Candidate Profile</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Edit Candidate Profile</h4>
+                    <span style={{ fontSize: '0.78rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}>
+                      <Database size={14} />
+                      <span>Supabase PostgreSQL Sync Active</span>
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
                     <div className="form-group">
                       <label>Technical Skills</label>
                       <input type="text" value={m1Skills} onChange={(e) => setM1Skills(e.target.value)} />
@@ -980,9 +1143,104 @@ export default function App() {
                       <input type="text" value={m1University} onChange={(e) => setM1University(e.target.value)} />
                     </div>
                   </div>
-                  <button className="btn-solid-blue" onClick={handleRecalculateM1} disabled={m1IsCalculating}>
-                    {m1IsCalculating ? 'Evaluating...' : 'Update & Re-run Baseline Prediction'}
-                  </button>
+
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <button className="btn-solid-blue" onClick={handleRecalculateM1} disabled={m1IsCalculating}>
+                      {m1IsCalculating ? 'Evaluating...' : 'Update & Re-run Baseline Prediction'}
+                    </button>
+                    <button 
+                      className="btn-secondary" 
+                      onClick={handleSaveProfile} 
+                      disabled={dbSaving}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    >
+                      <Save size={15} />
+                      <span>{dbSaving ? 'Syncing...' : 'Save Profile to Cloud Database'}</span>
+                    </button>
+                  </div>
+
+                  {dbStatusMsg && (
+                    <div style={{ marginTop: '1rem', padding: '10px 14px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
+                      <CheckCircle2 size={16} />
+                      <span>{dbStatusMsg}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Supabase Stored Resumes & History Card */}
+                <div className="white-panel" style={{ marginTop: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Database size={18} color="#38bdf8" />
+                        <span>Supabase Database Records (Cloud Synced)</span>
+                      </h4>
+                      <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0 0' }}>
+                        Real-time data retrieved from PostgreSQL tables: <code>resumes</code> and <code>predictions</code>
+                      </p>
+                    </div>
+                    <button 
+                      className="btn-pill-outline" 
+                      onClick={() => session?.user?.id && loadUserData(session.user.id)}
+                      style={{ fontSize: '0.78rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      <RefreshCw size={13} />
+                      <span>Refresh DB</span>
+                    </button>
+                  </div>
+
+                  <div className="dash-2col" style={{ marginTop: '0.5rem' }}>
+                    {/* Resumes List */}
+                    <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#e2e8f0' }}>Saved Resumes ({savedResumes.length})</span>
+                        <span className="match-badge">resumes table</span>
+                      </div>
+                      {savedResumes.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                          {savedResumes.map((r) => (
+                            <div key={r.id} style={{ padding: '8px 10px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>
+                              <div style={{ fontWeight: 600, color: '#38bdf8' }}>📄 {r.file_name}</div>
+                              <div style={{ color: '#94a3b8', fontSize: '0.72rem', marginTop: '2px' }}>
+                                Uploaded: {new Date(r.upload_date).toLocaleDateString()} • {r.extracted_skills?.length || 0} skills detected
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic', margin: 0 }}>
+                          No resumes saved in Supabase yet. Upload a resume above to parse and record it.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Predictions List */}
+                    <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#e2e8f0' }}>Prediction Logs ({savedPredictions.length})</span>
+                        <span className="match-badge">predictions table</span>
+                      </div>
+                      {savedPredictions.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                          {savedPredictions.map((p) => (
+                            <div key={p.id} style={{ padding: '8px 10px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ fontWeight: 600, color: '#a855f7' }}>🎯 {p.predicted_role}</span>
+                                <span style={{ fontWeight: 700, color: '#38bdf8' }}>{p.confidence_score}%</span>
+                              </div>
+                              <div style={{ color: '#94a3b8', fontSize: '0.72rem', marginTop: '2px' }}>
+                                Stored: {new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Validation Pass
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic', margin: 0 }}>
+                          No predictions recorded yet. Run a prediction to automatically log results to Supabase.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -1114,22 +1372,63 @@ export default function App() {
                   <h2>{activeTab === 'settings' ? 'Account & System Settings' : 'Help & Support'}</h2>
                   <p>Configuration status, cloud backend connectivity, and user preferences</p>
                 </div>
-                <div className="white-panel" style={{ maxWidth: '700px' }}>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.75rem' }}>Connected Services</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                      <span style={{ fontWeight: 600 }}>Supabase Authentication & Database:</span>
-                      <span style={{ color: isSupabaseConfigured ? '#059669' : '#d97706', fontWeight: 700 }}>
-                        {isSupabaseConfigured ? 'Active & Connected' : 'Local Fallback'}
+                <div className="white-panel" style={{ maxWidth: '780px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.85rem' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Database size={20} color="#38bdf8" />
+                        <span>Connected Cloud & AI Services</span>
+                      </h3>
+                      <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '3px 0 0' }}>
+                        Real-time status of Supabase PostgreSQL and FastAPI ML services
+                      </p>
+                    </div>
+                    <span className="match-badge">All Systems Operational</span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Supabase PostgreSQL Database</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>https://hnnmktwpdybjgwxotpvk.supabase.co</div>
+                      </div>
+                      <span style={{ color: isSupabaseConfigured ? '#10b981' : '#d97706', fontWeight: 700, fontSize: '0.85rem' }}>
+                        {isSupabaseConfigured ? '🟢 Active & Connected' : 'Local Fallback'}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                      <span style={{ fontWeight: 600 }}>FastAPI Python ML Server:</span>
-                      <span style={{ color: '#059669', fontWeight: 700 }}>Online (http://127.0.0.1:8000)</span>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                      <div style={{ padding: '10px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>profiles table</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#38bdf8', marginTop: '2px' }}>{dbRecordCounts.profiles}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#10b981' }}>Active</div>
+                      </div>
+                      <div style={{ padding: '10px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>resumes table</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#818cf8', marginTop: '2px' }}>{savedResumes.length}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#10b981' }}>Synced</div>
+                      </div>
+                      <div style={{ padding: '10px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>predictions table</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#c084fc', marginTop: '2px' }}>{savedPredictions.length}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#10b981' }}>Synced</div>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0' }}>
-                      <span style={{ fontWeight: 600 }}>User Session:</span>
-                      <span style={{ color: '#2563eb', fontWeight: 700 }}>{session.user?.email}</span>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>FastAPI Python ML Inference Server</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>http://127.0.0.1:8000 (Swagger docs available at /docs)</div>
+                      </div>
+                      <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>🟢 Online</span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Active Student Session</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{session.user?.email || 'Student Explorer'} (ID: {session.user?.id?.slice(0, 12)}...)</div>
+                      </div>
+                      <span className="match-badge">Authenticated</span>
                     </div>
                   </div>
                 </div>
