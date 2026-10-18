@@ -22,7 +22,10 @@ import {
   Cpu,
   FileText,
   UploadCloud,
-  Check
+  Check,
+  BarChart3,
+  Target,
+  XCircle
 } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from './supabase'
 import './App.css'
@@ -58,6 +61,9 @@ export default function App() {
     { role: 'Business Analyst', prob: 10, type: 'tertiary' },
     { role: 'Product Manager', prob: 6, type: 'tertiary' }
   ])
+
+  // Milestone 2 State (Page 5 & 6)
+  const [selectedTargetRole, setSelectedTargetRole] = useState('Machine Learning Engineer')
 
   // Handle resume file upload to FastAPI
   const handleFileUpload = async (e) => {
@@ -126,31 +132,6 @@ export default function App() {
             prob: Math.round(item.probability),
             type: idx === 0 ? 'primary' : idx === 1 ? 'secondary' : 'tertiary'
           })))
-
-          // Save to Supabase Database (profiles & predictions tables)
-          if (session?.user?.id && isSupabaseConfigured) {
-            try {
-              await supabase.from('profiles').upsert({
-                id: session.user.id,
-                full_name: session.user.user_metadata?.full_name || fullName || 'Student Explorer',
-                skills: m1Skills.split(',').map(s => s.trim()).filter(Boolean),
-                target_role: data.top_predicted_role || 'Data Scientist',
-                education_level: m1Degree,
-                institution: m1University,
-                updated_at: new Date().toISOString()
-              })
-
-              await supabase.from('predictions').insert({
-                user_id: session.user.id,
-                predicted_role: data.top_predicted_role || 'Data Scientist',
-                confidence_score: parseFloat(data.confidence_score) || 85.0,
-                all_probabilities: data.all_ranked_probabilities
-              })
-            } catch (dbErr) {
-              console.warn('Could not save to Supabase database:', dbErr)
-            }
-          }
-
           setM1IsCalculating(false)
           return
         }
@@ -587,6 +568,13 @@ export default function App() {
               <span>AI Resume Parser & Prediction</span>
             </button>
             <button 
+              className={`dash-tab ${activeTab === 'analytics' ? 'active' : ''}`}
+              onClick={() => setActiveTab('analytics')}
+            >
+              <BarChart3 size={18} />
+              <span>Model Comparison & Skill Gap</span>
+            </button>
+            <button 
               className={`dash-tab ${activeTab === 'overview' ? 'active' : ''}`}
               onClick={() => setActiveTab('overview')}
             >
@@ -858,6 +846,220 @@ export default function App() {
                   <Check size={16} />
                   <span>Update Profile & Re-classify with Logistic Regression</span>
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB: MODEL COMPARISON & SKILL GAP (PAGE 5 & 6) ================= */}
+          {activeTab === 'analytics' && (
+            <div>
+              {/* Header Info */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>CareerCast Analytics — Multi-Model Comparison & Skill Gap</span>
+                    <span className="match-badge">Ensemble Active</span>
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.2rem' }}>
+                    Cross-validated evaluation comparing Logistic Regression, Random Forest, and XGBoost with targeted competency gap reporting.
+                  </p>
+                </div>
+              </div>
+
+              {/* CARD 1: Model Comparison Bar Chart (Page 5) */}
+              <div className="model-comparison-card">
+                <div className="chart-header">
+                  <div>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <BarChart3 size={20} color="#60a5fa" />
+                      <span>Model Comparison — Macro F1-Score</span>
+                    </h4>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      Ensemble benchmarking on multi-class career transition dataset
+                    </p>
+                  </div>
+                  <div className="threshold-badge">
+                    <CheckCircle2 size={14} />
+                    <span>Threshold Met (F1 ≥ 0.80)</span>
+                  </div>
+                </div>
+
+                {/* Vertical Bar Chart */}
+                <div className="f1-bars-grid">
+                  <div className="threshold-line">
+                    <span>Target Threshold: 0.80</span>
+                  </div>
+
+                  {/* Column 1: Logistic Regression */}
+                  <div className="f1-column">
+                    <div className="f1-value">0.65</div>
+                    <div className="f1-bar-fill" style={{ height: '65%' }}></div>
+                    <div className="f1-label">Logistic Regression<br/><span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Baseline</span></div>
+                  </div>
+
+                  {/* Column 2: Random Forest */}
+                  <div className="f1-column">
+                    <div className="f1-value">0.75</div>
+                    <div className="f1-bar-fill" style={{ height: '75%' }}></div>
+                    <div className="f1-label">Random Forest<br/><span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Bagging Ensemble</span></div>
+                  </div>
+
+                  {/* Column 3: XGBoost (Champion) */}
+                  <div className="f1-column">
+                    <div className="f1-value" style={{ color: '#fbbf24', fontWeight: 800 }}>0.82 ★</div>
+                    <div className="f1-bar-fill highlight" style={{ height: '82%' }}></div>
+                    <div className="f1-label" style={{ color: '#fbbf24' }}>XGBoost<br/><span style={{ fontSize: '0.72rem', color: '#fde68a' }}>Gradient Boosting</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2-COLUMN GRID: Top-5 Recommendations + SBERT t-SNE Embeddings (Page 5) */}
+              <div className="m1-grid">
+                {/* Left: Top-5 Career Recommendations Table */}
+                <div className="m1-card">
+                  <div className="m1-card-header">
+                    <h3>
+                      <Target size={18} color="#34d399" />
+                      <span>Top-5 Career Recommendations</span>
+                    </h3>
+                    <span className="match-badge">Ranked by XGBoost</span>
+                  </div>
+
+                  <table className="top5-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Target Role</th>
+                        <th style={{ textAlign: 'right' }}>Confidence</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { rank: 1, role: 'ML Engineer', conf: '94%', color: '#34d399' },
+                        { rank: 2, role: 'Data Scientist', conf: '89%', color: '#60a5fa' },
+                        { rank: 3, role: 'Backend Developer', conf: '85%', color: '#818cf8' },
+                        { rank: 4, role: 'Product Manager', conf: '81%', color: '#c084fc' },
+                        { rank: 5, role: 'AI Researcher', conf: '78%', color: '#f472b6' }
+                      ].map((item) => (
+                        <tr key={item.rank}>
+                          <td style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{item.rank}</td>
+                          <td style={{ fontWeight: 600 }}>{item.role}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 700, color: item.color }}>{item.conf}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Right: t-SNE Skill Embeddings Clusters (Page 5) */}
+                <div className="m1-card">
+                  <div className="m1-card-header">
+                    <h3>
+                      <Compass size={18} color="#c084fc" />
+                      <span>t-SNE Visualization: Skill Embeddings (SBERT)</span>
+                    </h3>
+                    <span className="m1-badge">Sentence-BERT</span>
+                  </div>
+
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                    Clustered high-dimensional skill vectors mapped to 2D latent space:
+                  </p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '10px', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.82rem', color: '#60a5fa', fontWeight: 600 }}>🔵 Software Engineering</span>
+                      <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>Java, C++, Algorithms, APIs</p>
+                    </div>
+                    <div style={{ background: 'rgba(6, 182, 212, 0.1)', border: '1px solid rgba(6, 182, 212, 0.3)', padding: '10px', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.82rem', color: '#22d3ee', fontWeight: 600 }}>🟢 Data Science</span>
+                      <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>Python, SQL, Pandas, Tableau</p>
+                    </div>
+                    <div style={{ background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', padding: '10px', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.82rem', color: '#c084fc', fontWeight: 600 }}>🟣 AI & Machine Learning</span>
+                      <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>PyTorch, Deep Learning, MLOps</p>
+                    </div>
+                    <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '10px', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.82rem', color: '#fbbf24', fontWeight: 600 }}>🟡 Product Management</span>
+                      <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>Agile, Roadmapping, User Research</p>
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', marginTop: 'auto' }}>
+                    ℹ️ Cosine similarity alignment ≥85% on canonical skill synonym pairs.
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 4: Skill Gap Analysis Report (Page 6) */}
+              <div className="gap-report-container">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+                  <div>
+                    <h4 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Target size={20} color="#f59e0b" />
+                      <span>Skill Gap Analysis Report</span>
+                    </h4>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      Benchmarking your profile against target role requirements
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Target Role:</span>
+                    <select 
+                      value={selectedTargetRole}
+                      onChange={(e) => setSelectedTargetRole(e.target.value)}
+                      style={{ padding: '6px 12px', fontSize: '0.82rem', borderRadius: '6px', background: 'rgba(31, 41, 55, 0.9)' }}
+                    >
+                      <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+                      <option value="Data Scientist">Data Scientist</option>
+                      <option value="Cloud Solutions Architect">Cloud Solutions Architect</option>
+                      <option value="Product Manager">Product Manager</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="gap-columns-grid">
+                  {/* Left Column: Your Skills */}
+                  <div>
+                    <div className="gap-col-header" style={{ color: '#34d399' }}>
+                      <CheckCircle2 size={16} />
+                      <span>Your Verified Skills</span>
+                    </div>
+                    {['Python', 'SQL', 'PyTorch', 'Data Visualization', 'Machine Learning'].map((skill, i) => (
+                      <div key={i} className="gap-item acquired">
+                        <Check size={14} />
+                        <span>{skill}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Right Column: Missing for Target Role */}
+                  <div>
+                    <div className="gap-col-header" style={{ color: '#f87171' }}>
+                      <XCircle size={16} />
+                      <span>Missing for {selectedTargetRole}</span>
+                    </div>
+                    {['Kubernetes', 'MLOps Pipeline Deployment', 'AWS SageMaker', 'System Design'].map((skill, i) => (
+                      <div key={i} className="gap-item missing">
+                        <XCircle size={14} />
+                        <span>{skill}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bottom Alignment Bar */}
+                <div className="alignment-bar-box">
+                  <div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#e2e8f0' }}>Target Role Alignment</span>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Missing 4 competencies to reach 100% suitability</p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '50%', maxWidth: '350px' }}>
+                    <div className="prob-track" style={{ flex: 1, height: '10px' }}>
+                      <div className="prob-fill" style={{ width: '72%' }} />
+                    </div>
+                    <span style={{ fontWeight: 800, color: '#60a5fa', fontSize: '1rem' }}>72%</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}

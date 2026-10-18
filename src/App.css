@@ -758,6 +758,188 @@
   margin-bottom: 2rem;
 }
 
+/* ================= MILESTONE 2: MODEL COMPARISON & SKILL GAP STYLES ================= */
+.model-comparison-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.threshold-badge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.f1-bars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  align-items: flex-end;
+  height: 220px;
+  padding: 1.5rem 2rem 0;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  position: relative;
+}
+
+.threshold-line {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed rgba(245, 158, 11, 0.5);
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 1rem;
+}
+
+.threshold-line span {
+  font-size: 0.7rem;
+  color: #fbbf24;
+  font-weight: 600;
+  margin-top: -18px;
+}
+
+.f1-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.f1-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #cbd5e1;
+}
+
+.f1-bar-fill {
+  width: 100%;
+  max-width: 90px;
+  background: rgba(59, 130, 246, 0.4);
+  border: 1px solid rgba(59, 130, 246, 0.6);
+  border-radius: 8px 8px 0 0;
+  transition: height 0.8s ease;
+}
+
+.f1-bar-fill.highlight {
+  background: linear-gradient(to top, rgba(245, 158, 11, 0.4), rgba(245, 158, 11, 0.8));
+  border: 1px solid #f59e0b;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+}
+
+.f1-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* Top-5 Recommendations Table */
+.top5-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.top5-table th {
+  text-align: left;
+  padding: 10px 14px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.top5-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.88rem;
+}
+
+.top5-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Skill Gap Report (Page 6) */
+.gap-report-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.gap-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.gap-col-header {
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.gap-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.gap-item.acquired {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+}
+
+.gap-item.missing {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+}
+
+.alignment-bar-box {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
@@ -768,5 +950,11 @@
   .dashboard-hero {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .f1-bars-grid {
+    gap: 0.75rem;
+  }
+  .gap-columns-grid {
+    grid-template-columns: 1fr;
   }
 }

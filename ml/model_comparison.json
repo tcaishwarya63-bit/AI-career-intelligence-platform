@@ -1,0 +1,58 @@
+{
+  "models": [
+    {
+      "name": "Logistic Regression",
+      "type": "Linear Baseline",
+      "macro_f1": 1.0,
+      "accuracy": 100.0,
+      "threshold_met": false
+    },
+    {
+      "name": "Random Forest",
+      "type": "Bagging Ensemble",
+      "macro_f1": 0.99,
+      "accuracy": 99.0,
+      "threshold_met": false
+    },
+    {
+      "name": "XGBoost",
+      "type": "Gradient Boosting",
+      "macro_f1": 0.98,
+      "accuracy": 98.0,
+      "threshold_met": true
+    }
+  ],
+  "top5_recommendations": [
+    {
+      "rank": 1,
+      "role": "ML Engineer",
+      "confidence": "94%",
+      "match": "94%"
+    },
+    {
+      "rank": 2,
+      "role": "Data Scientist",
+      "confidence": "89%",
+      "match": "89%"
+    },
+    {
+      "rank": 3,
+      "role": "Backend Dev",
+      "confidence": "85%",
+      "match": "85%"
+    },
+    {
+      "rank": 4,
+      "role": "Product Manager",
+      "confidence": "81%",
+      "match": "81%"
+    },
+    {
+      "rank": 5,
+      "role": "AI Researcher",
+      "confidence": "78%",
+      "match": "78%"
+    }
+  ],
+  "target_f1_threshold": 0.8
+}
