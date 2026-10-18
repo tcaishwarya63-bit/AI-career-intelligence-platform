@@ -1,30 +1,32 @@
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-glow: rgba(37, 99, 235, 0.2);
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-glow: rgba(59, 130, 246, 0.25);
+  
   --sidebar-bg: #070e28;
   --sidebar-active: #2563eb;
-  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
   --sidebar-text: #94a3b8;
   --sidebar-text-active: #ffffff;
   
-  --bg-page: #f8fafc;
-  --bg-card: #ffffff;
-  --border: #e2e8f0;
-  --border-light: #f1f5f9;
+  --bg-page: #0b0f19;
+  --bg-card: #111827;
+  --bg-card-hover: #1f2937;
+  --border: #1f293d;
+  --border-light: #28354f;
   
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #64748b;
   
   --success: #10b981;
-  --success-bg: #ecfdf5;
   --warning: #f59e0b;
   --danger: #ef4444;
 
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  color-scheme: dark;
   color: var(--text-primary);
   background-color: var(--bg-page);
   -webkit-font-smoothing: antialiased;
@@ -39,7 +41,9 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: var(--bg-page);
+  background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+              var(--bg-page);
   color: var(--text-primary);
   overflow-x: hidden;
 }
@@ -56,7 +60,7 @@ input, select, textarea {
   font-family: inherit;
   outline: none;
   border: 1px solid var(--border);
-  background-color: #ffffff;
+  background-color: rgba(17, 24, 39, 0.85);
   color: var(--text-primary);
   border-radius: 8px;
   padding: 10px 14px;
