@@ -59,24 +59,83 @@ export default function App() {
     { role: 'Product Manager', prob: 6, type: 'tertiary' }
   ])
 
-  // Handle resume file upload
-  const handleFileUpload = (e) => {
+  // Handle resume file upload to FastAPI
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
     if (file) {
       setUploadingResume(true)
       setUploadedFileName(file.name)
-      setTimeout(() => {
-        setUploadingResume(false)
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        const response = await fetch('http://127.0.0.1:8000/upload-resume', {
+          method: 'POST',
+          body: formData
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.extracted_entities?.skills?.length) {
+            setM1Skills(data.extracted_entities.skills.join(', '))
+          }
+          if (data.extracted_entities?.roles?.length) {
+            setM1Role(data.extracted_entities.roles.join(', '))
+          }
+          if (data.extracted_entities?.degrees?.length) {
+            setM1Degree(data.extracted_entities.degrees.join(', '))
+          }
+          if (data.extracted_entities?.institutions?.length) {
+            setM1University(data.extracted_entities.institutions.join(', '))
+          }
+          if (data.all_ranked_probabilities) {
+            setM1Predictions(data.all_ranked_probabilities.map((item, idx) => ({
+              role: item.role,
+              prob: Math.round(item.probability),
+              type: idx === 0 ? 'primary' : idx === 1 ? 'secondary' : 'tertiary'
+            })))
+          }
+        } else {
+          handleRecalculateM1()
+        }
+      } catch (err) {
+        console.warn('FastAPI backend offline, running local fallback:', err)
         handleRecalculateM1()
-      }, 1000)
+      } finally {
+        setUploadingResume(false)
+      }
     }
   }
 
-  // Recalculate baseline model predictions
-  const handleRecalculateM1 = () => {
+  // Recalculate baseline model predictions via FastAPI /predict
+  const handleRecalculateM1 = async () => {
     setM1IsCalculating(true)
+    try {
+      const response = await fetch('http://127.0.0.1:8000/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          skills: m1Skills,
+          experience_role: m1Role,
+          degree: m1Degree
+        })
+      })
+      if (response.ok) {
+        const data = await response.json()
+        if (data.all_ranked_probabilities) {
+          setM1Predictions(data.all_ranked_probabilities.map((item, idx) => ({
+            role: item.role,
+            prob: Math.round(item.probability),
+            type: idx === 0 ? 'primary' : idx === 1 ? 'secondary' : 'tertiary'
+          })))
+          setM1IsCalculating(false)
+          return
+        }
+      }
+    } catch (err) {
+      console.warn('FastAPI not reachable, using local computation:', err)
+    }
+
+    // Dynamic local fallback if server is connecting
     setTimeout(() => {
-      // Dynamic calculation based on input skills
       const lower = m1Skills.toLowerCase()
       let ds = 55
       let se = 20
@@ -106,7 +165,7 @@ export default function App() {
         { role: 'Product Manager', prob: normPm, type: 'tertiary' }
       ])
       setM1IsCalculating(false)
-    }, 600)
+    }, 400)
   }
 
   // Aptitude Quiz State
