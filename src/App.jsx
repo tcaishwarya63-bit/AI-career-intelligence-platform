@@ -174,6 +174,22 @@ export default function App() {
     return () => clearInterval(interval)
   }, [interviewActive, timerRunning, timerSeconds])
 
+  // Reset interview state whenever user navigates to the Interview Preparation tab
+  useEffect(() => {
+    if (activeTab === 'interview-preparation') {
+      setInterviewActive(false)
+      setSessionFinished(false)
+      setUserAnswerText('')
+      setSavedAnswers({})
+      setEvaluationResults({})
+      setTimerRunning(false)
+      setTimerSeconds(285)
+      setCurrentQIdx(0)
+      setShowModelAnswer(false)
+      setIsEvaluating(false)
+    }
+  }, [activeTab])
+
   // Toggle Roadmap Step Status
   const handleToggleStepStatus = (id) => {
     setRoadmapSteps(prev => prev.map(step => {
@@ -881,6 +897,7 @@ export default function App() {
       setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
     }
     setTimerRunning(false)
+    setInterviewActive(false)
     setSessionFinished(true)
   }
 
