@@ -118,6 +118,7 @@ export default function App() {
   const [timerRunning, setTimerRunning] = useState(false)
   const [sessionFinished, setSessionFinished] = useState(false)
   const [showModelAnswer, setShowModelAnswer] = useState(false)
+  const [sessionQuestions, setSessionQuestions] = useState([]) // shuffled 5-question subset per session
 
   // Notification Center State
   const [notificationsList, setNotificationsList] = useState([
@@ -179,6 +180,7 @@ export default function App() {
     if (activeTab === 'interview-preparation') {
       setInterviewActive(false)
       setSessionFinished(false)
+      setSessionQuestions([])
       setUserAnswerText('')
       setSavedAnswers({})
       setEvaluationResults({})
@@ -561,93 +563,833 @@ export default function App() {
   }
 
   // Curated Technical Question Bank for AI Mock Interview Simulator
+  // SESSION_SIZE: number of questions shown per interview session (randomly sampled from the 20-question bank)
+  const SESSION_SIZE = 5
+
+  // Fisher-Yates shuffle utility
+  const shuffleArray = (arr) => {
+    const a = [...arr]
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+  }
+
   const interviewQuestions = {
+    // ─────────────────────────── TECHNICAL (20 Qs) ───────────────────────────
     technical: [
       {
         id: 1,
         title: "Python Fundamentals & Advantages",
         difficulty: "Fundamental",
         tags: ["Python Developer", "Technical"],
-        question: "What is Python? Name any two advantages of Python.",
-        hint: "Think about its features and popularity...",
+        question: "What is Python? Name any two advantages of Python over other programming languages.",
+        hint: "Think about its features, readability, and ecosystem...",
         keywords: ["interpreted", "high-level", "dynamic typing", "readable", "extensive libraries", "cross-platform", "syntax", "advantages"],
         modelAnswer: "Python is a high-level, interpreted, general-purpose programming language designed with an emphasis on code readability. Two key advantages: 1) Clean, readable syntax that accelerates developer productivity and prototyping speed; 2) Vast ecosystem of standard and third-party libraries (NumPy, Pandas, PyTorch, FastAPI) supporting web development, machine learning, and automation."
       },
       {
         id: 2,
-        title: "Object-Oriented Programming (OOP) Concepts",
+        title: "OOP – Four Core Principles",
         difficulty: "Intermediate",
         tags: ["OOP Concepts", "Python"],
         question: "Explain the four core principles of Object-Oriented Programming (OOP) and give an example of inheritance in Python.",
         hint: "Consider Encapsulation, Abstraction, Inheritance, and Polymorphism...",
         keywords: ["encapsulation", "abstraction", "inheritance", "polymorphism", "class", "super()", "methods"],
-        modelAnswer: "The four core OOP principles are: 1) Encapsulation (bundling data and methods while restricting direct access); 2) Abstraction (hiding implementation complexity behind clear interfaces); 3) Inheritance (deriving new classes from base classes to reuse code); 4) Polymorphism (allowing different classes to be treated through a common interface). In Python, inheritance is achieved by passing the parent class in the class definition: `class Child(Parent): def __init__(self): super().__init__()`."
+        modelAnswer: "The four OOP principles: 1) Encapsulation – bundling data and methods while restricting direct access; 2) Abstraction – hiding implementation details; 3) Inheritance – deriving classes from base classes to reuse code; 4) Polymorphism – objects of different classes responding to the same interface. In Python: `class Child(Parent): def __init__(self): super().__init__()`."
       },
       {
         id: 3,
-        title: "Database Connectivity & Transactions",
+        title: "Database Connectivity & ACID",
         difficulty: "Intermediate",
-        tags: ["Database Connectivity", "SQL"],
-        question: "How does Python connect to relational databases (e.g., PostgreSQL / SQLite), and why are database transactions (ACID properties) important?",
+        tags: ["Database", "SQL"],
+        question: "How does Python connect to relational databases, and why are ACID properties important for database transactions?",
         hint: "Recall psycopg2, connection pooling, commit, and rollback...",
         keywords: ["acid", "connection pool", "commit", "rollback", "psycopg2", "sqlite3", "atomicity", "transactions"],
-        modelAnswer: "Python connects to relational databases using drivers like psycopg2, asyncpg, or sqlite3, often managed through connection pools and ORMs like SQLAlchemy. Database transactions enforce ACID properties (Atomicity, Consistency, Isolation, Durability). Atomicity ensures all operations in a transaction succeed together or are rolled back on failure with `conn.rollback()`, preventing corrupted or partial data states."
+        modelAnswer: "Python connects using drivers like psycopg2 (PostgreSQL) or sqlite3, managed via connection pools and ORMs like SQLAlchemy. ACID properties (Atomicity, Consistency, Isolation, Durability) guarantee that transactions either fully succeed or are fully rolled back, preventing partial data corruption."
       },
       {
         id: 4,
-        title: "System Design & Scalability Basics",
+        title: "Horizontal vs Vertical Scaling",
         difficulty: "Intermediate",
         tags: ["System Design", "Scalability"],
-        question: "What is the difference between horizontal and vertical scaling, and how does a Load Balancer distribute incoming web traffic?",
-        hint: "Think about adding more machines vs adding more RAM/CPU...",
+        question: "What is the difference between horizontal and vertical scaling, and how does a Load Balancer distribute traffic?",
+        hint: "Think about adding more machines vs upgrading one machine...",
         keywords: ["horizontal scaling", "vertical scaling", "scale out", "scale up", "load balancer", "round robin", "least connections"],
-        modelAnswer: "Vertical scaling (scale up) adds more CPU, RAM, or storage to a single server, which hits hardware ceilings and creates a single point of failure. Horizontal scaling (scale out) adds more server instances to distribute load across clusters. A Load Balancer (e.g., NGINX, AWS ALB) distributes traffic across instances using algorithms like Round Robin, Least Connections, or IP Hash, while performing health checks to route around failing nodes."
+        modelAnswer: "Vertical scaling adds more CPU/RAM to one server (limited by hardware ceiling). Horizontal scaling adds more server instances. A Load Balancer distributes requests using Round Robin, Least Connections, or IP Hash, performing health checks to route away from failing nodes."
       },
       {
         id: 5,
-        title: "RESTful API Integration & Status Codes",
+        title: "HTTP Methods & Status Codes",
         difficulty: "Fundamental",
-        tags: ["APIs", "FastAPI"],
-        question: "What are the common HTTP methods (GET, POST, PUT, DELETE) in RESTful APIs, and what is the difference between status codes 200, 400, 404, and 500?",
+        tags: ["APIs", "HTTP"],
+        question: "What are GET, POST, PUT, DELETE in RESTful APIs, and what do status codes 200, 201, 400, 404, 500 mean?",
         hint: "Review client vs server errors and idempotency...",
-        keywords: ["get", "post", "put", "delete", "200 ok", "400 bad request", "404 not found", "500 internal server error"],
-        modelAnswer: "HTTP methods: GET retrieves data without side effects; POST creates new resources; PUT replaces or updates a resource idempotently; DELETE removes a resource. Status codes: 200 OK signifies success; 400 Bad Request indicates client validation error; 404 Not Found indicates the resource doesn't exist; and 500 Internal Server Error denotes an unhandled server-side fault."
+        keywords: ["get", "post", "put", "delete", "200 ok", "201 created", "400 bad request", "404 not found", "500 internal server error"],
+        modelAnswer: "GET retrieves data, POST creates resources, PUT updates idempotently, DELETE removes resources. Status codes: 200 OK (success), 201 Created (resource created), 400 Bad Request (client error), 404 Not Found (resource missing), 500 Internal Server Error (unhandled server fault)."
+      },
+      {
+        id: 6,
+        title: "Data Structures – Arrays vs Linked Lists",
+        difficulty: "Fundamental",
+        tags: ["Data Structures", "CS Fundamentals"],
+        question: "Compare arrays and linked lists in terms of time complexity for access, insertion, and deletion operations.",
+        hint: "Think about memory layout, indexing, and pointer overhead...",
+        keywords: ["o(1) access", "o(n) insertion", "linked list", "pointer", "dynamic size", "cache locality", "contiguous memory"],
+        modelAnswer: "Arrays: O(1) random access (index arithmetic), O(N) insertion/deletion (shifting). Linked Lists: O(N) access (pointer traversal), O(1) insertion/deletion at known node. Arrays have better cache locality due to contiguous memory; linked lists have dynamic size without reallocation."
+      },
+      {
+        id: 7,
+        title: "SQL Joins Explained",
+        difficulty: "Intermediate",
+        tags: ["SQL", "Database"],
+        question: "Explain INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN with practical examples.",
+        hint: "Think in terms of matching and unmatched rows between two tables...",
+        keywords: ["inner join", "left join", "right join", "full outer join", "matching rows", "null", "set intersection"],
+        modelAnswer: "INNER JOIN returns only matching rows from both tables. LEFT JOIN returns all rows from the left table plus matches from the right (NULLs for no match). RIGHT JOIN is the mirror image. FULL OUTER JOIN returns all rows from both tables, with NULLs where there is no match on either side."
+      },
+      {
+        id: 8,
+        title: "Recursion & Stack Memory",
+        difficulty: "Intermediate",
+        tags: ["Algorithms", "CS Fundamentals"],
+        question: "What is recursion, how does the call stack work, and what causes a stack overflow in recursive functions?",
+        hint: "Think about base case, stack frames, and depth...",
+        keywords: ["base case", "recursive case", "call stack", "stack frame", "stack overflow", "depth", "tail recursion"],
+        modelAnswer: "Recursion is a function calling itself with a smaller sub-problem. Each call pushes a stack frame (local variables, return address) onto the call stack. A stack overflow occurs when there is no base case or depth exceeds the system stack limit. Tail recursion optimization (TCO) can eliminate stack growth in languages that support it."
+      },
+      {
+        id: 9,
+        title: "Git Version Control",
+        difficulty: "Fundamental",
+        tags: ["Git", "DevTools"],
+        question: "What is the difference between `git merge` and `git rebase`, and when should you use each?",
+        hint: "Think about linear history vs merge commits...",
+        keywords: ["merge commit", "fast-forward", "rebase", "linear history", "conflict", "git log", "feature branch"],
+        modelAnswer: "git merge creates a merge commit preserving the full history of both branches (non-destructive). git rebase rewrites commits on top of the target branch, producing a linear clean history. Use merge for public/shared branches; use rebase for local feature cleanup before merging to avoid noisy merge commits."
+      },
+      {
+        id: 10,
+        title: "Sorting Algorithms & Complexity",
+        difficulty: "Intermediate",
+        tags: ["Algorithms", "CS Fundamentals"],
+        question: "Compare Quick Sort, Merge Sort, and Bubble Sort in terms of time and space complexity and stability.",
+        hint: "Think about average/worst case and divide-and-conquer...",
+        keywords: ["quick sort", "merge sort", "bubble sort", "o(n log n)", "o(n²)", "stable sort", "in-place", "divide and conquer"],
+        modelAnswer: "Quick Sort: O(N log N) average, O(N²) worst, in-place, unstable. Merge Sort: O(N log N) always, O(N) space, stable (preserves relative order of equal elements). Bubble Sort: O(N²) average and worst, in-place, stable — only suitable for nearly-sorted small datasets."
+      },
+      {
+        id: 11,
+        title: "Multithreading vs Multiprocessing",
+        difficulty: "Intermediate",
+        tags: ["Concurrency", "Python"],
+        question: "In Python, what is the difference between multithreading and multiprocessing, and what is the GIL?",
+        hint: "Think about CPU-bound vs I/O-bound tasks and the Global Interpreter Lock...",
+        keywords: ["gil", "global interpreter lock", "threading", "multiprocessing", "cpu-bound", "i/o-bound", "shared memory", "processes"],
+        modelAnswer: "Python's Global Interpreter Lock (GIL) prevents multiple native threads from executing Python bytecode simultaneously. Threading is effective for I/O-bound tasks (network, disk) where threads release the GIL during I/O waits. Multiprocessing spawns separate OS processes each with their own Python interpreter and memory, bypassing the GIL — ideal for CPU-bound computation."
+      },
+      {
+        id: 12,
+        title: "Design Patterns – Singleton & Factory",
+        difficulty: "Intermediate",
+        tags: ["Design Patterns", "Software Engineering"],
+        question: "Explain the Singleton and Factory design patterns with use cases in software development.",
+        hint: "Think about class instantiation control and object creation abstraction...",
+        keywords: ["singleton", "factory", "instance", "creational pattern", "thread-safe", "abstract factory", "dependency injection"],
+        modelAnswer: "Singleton ensures only one instance of a class exists (e.g., database connection pool, config manager) — implemented with a class-level `_instance` check. Factory Pattern abstracts object creation, returning different subclass instances based on input without exposing concrete classes to the caller, promoting loose coupling."
+      },
+      {
+        id: 13,
+        title: "Hashing & Hash Collisions",
+        difficulty: "Intermediate",
+        tags: ["Data Structures", "Algorithms"],
+        question: "How do hash tables work, and what techniques are used to handle hash collisions?",
+        hint: "Think about hash functions, chaining, and open addressing...",
+        keywords: ["hash function", "collision", "chaining", "open addressing", "linear probing", "load factor", "o(1) average"],
+        modelAnswer: "Hash tables map keys to indices via a hash function, achieving O(1) average-case lookup. Collisions occur when two keys hash to the same index. Resolution techniques: 1) Chaining – store a linked list at each bucket; 2) Open Addressing – probe the next available slot (linear probing, quadratic probing, double hashing). Load factor (entries/buckets) is maintained below 0.75 by resizing."
+      },
+      {
+        id: 14,
+        title: "Memory Management & Garbage Collection",
+        difficulty: "Advanced",
+        tags: ["Python Internals", "Memory"],
+        question: "How does Python manage memory, and how does its garbage collector handle reference cycles?",
+        hint: "Think about reference counting and cyclic garbage collector...",
+        keywords: ["reference counting", "garbage collector", "cyclic reference", "gc module", "heap", "memory leak", "refcount"],
+        modelAnswer: "Python primarily uses reference counting: each object tracks how many references point to it; when refcount hits 0, memory is freed immediately. However, reference cycles (A→B→A) prevent refcount from reaching 0, so Python's cyclic garbage collector (gc module) uses generational collection to detect and collect these cycles."
+      },
+      {
+        id: 15,
+        title: "Decorators in Python",
+        difficulty: "Intermediate",
+        tags: ["Python", "Functional Programming"],
+        question: "What is a decorator in Python and how does it work internally? Give a practical example.",
+        hint: "Think about higher-order functions and function wrapping...",
+        keywords: ["decorator", "wrapper", "higher-order function", "functools.wraps", "closure", "@ syntax", "metadata"],
+        modelAnswer: "A decorator is a higher-order function that takes a function and returns a modified version. Using @decorator syntax, Python calls `original_func = decorator(original_func)` automatically. Internally it uses closures. Best practice: use `@functools.wraps(func)` to preserve the original function's `__name__` and `__doc__` metadata."
+      },
+      {
+        id: 16,
+        title: "Networking – TCP vs UDP",
+        difficulty: "Fundamental",
+        tags: ["Networking", "CS Fundamentals"],
+        question: "What is the difference between TCP and UDP protocols? Give two use cases for each.",
+        hint: "Think about reliability, ordering, and handshake overhead...",
+        keywords: ["tcp", "udp", "three-way handshake", "reliable", "ordered", "connectionless", "latency", "streaming"],
+        modelAnswer: "TCP (Transmission Control Protocol) is connection-oriented with guaranteed delivery, ordering, and error correction via three-way handshake — used for HTTP/HTTPS, emails, file transfers. UDP (User Datagram Protocol) is connectionless with no delivery guarantee but minimal latency — used for live video streaming, online gaming, VoIP, DNS queries."
+      },
+      {
+        id: 17,
+        title: "Big O Notation",
+        difficulty: "Fundamental",
+        tags: ["Algorithms", "CS Fundamentals"],
+        question: "Explain O(1), O(log N), O(N), O(N log N), and O(N²) with one real-world algorithm example for each.",
+        hint: "Think about how operations scale with input size...",
+        keywords: ["o(1)", "o(log n)", "o(n)", "o(n log n)", "o(n²)", "constant time", "binary search", "bubble sort", "merge sort"],
+        modelAnswer: "O(1): hash table lookup (constant). O(log N): binary search (halving each step). O(N): linear scan. O(N log N): Merge Sort (divide and conquer). O(N²): Bubble Sort (nested loops). Big O describes worst-case growth rate — independent of hardware or constant factors."
+      },
+      {
+        id: 18,
+        title: "REST vs Microservices Architecture",
+        difficulty: "Advanced",
+        tags: ["System Design", "Architecture"],
+        question: "What is a microservices architecture, and how does it differ from a monolithic application in terms of deployment, fault isolation, and team scaling?",
+        hint: "Think about service boundaries, independent deployments, and inter-service communication...",
+        keywords: ["microservices", "monolith", "independent deployment", "fault isolation", "service mesh", "api gateway", "bounded context"],
+        modelAnswer: "Monolithic apps bundle all features in one deployable unit — simple to develop initially but hard to scale parts independently and risky to deploy. Microservices decompose the app into independently deployable services each owning its data store. Benefits: independent scaling, fault isolation (one service failing doesn't crash others), team autonomy. Drawbacks: network latency, distributed tracing complexity, eventual consistency challenges."
+      },
+      {
+        id: 19,
+        title: "Caching Strategies",
+        difficulty: "Intermediate",
+        tags: ["Performance", "System Design"],
+        question: "What is caching and explain the differences between Cache-Aside, Write-Through, and Write-Back strategies.",
+        hint: "Think about when data is written to cache vs database...",
+        keywords: ["cache aside", "write through", "write back", "cache miss", "ttl", "consistency", "stale data", "redis"],
+        modelAnswer: "Cache-Aside: app checks cache first; on miss, fetches from DB and writes to cache (lazy loading). Write-Through: every write goes to cache and DB simultaneously (consistent, higher write latency). Write-Back (Write-Behind): writes go to cache first, DB updated asynchronously (fast writes, risk of data loss on cache failure)."
+      },
+      {
+        id: 20,
+        title: "Security – SQL Injection & Prevention",
+        difficulty: "Intermediate",
+        tags: ["Security", "Web Development"],
+        question: "What is SQL Injection, how does it work, and what are the best practices to prevent it?",
+        hint: "Think about parameterized queries, ORM, and input sanitization...",
+        keywords: ["sql injection", "parameterized query", "prepared statement", "orm", "input validation", "sanitization", "whitelist", "escaping"],
+        modelAnswer: "SQL Injection occurs when user input is concatenated directly into SQL queries, allowing attackers to manipulate the query (e.g., `' OR 1=1 --`). Prevention: 1) Always use parameterized queries / prepared statements; 2) Use ORMs (SQLAlchemy, Hibernate) that handle escaping; 3) Validate and whitelist user input; 4) Apply least-privilege database permissions."
       }
     ],
+
+    // ─────────────────────────── HR (20 Qs) ───────────────────────────
     hr: [
       {
         id: 1,
-        title: "Behavioral & Conflict Resolution",
+        title: "Conflict Resolution",
         difficulty: "Fundamental",
         tags: ["HR Interview", "Behavioral"],
-        question: "Describe a situation where you had a disagreement with a team member on a project. How did you resolve it, and what was the outcome?",
+        question: "Describe a situation where you had a disagreement with a team member. How did you resolve it and what was the outcome?",
         hint: "Use the STAR framework: Situation, Task, Action, Result...",
         keywords: ["star method", "communication", "compromise", "collaboration", "resolution", "empathy", "outcome"],
-        modelAnswer: "In a collaborative capstone project, my teammate and I disagreed on database choice (MongoDB vs PostgreSQL). I scheduled a 30-minute sync to evaluate our schema requirements objectively. We identified that our relational transactions and ACID compliance were critical, so we chose PostgreSQL while documenting our decision in an ADR. The project launched smoothly with zero schema debt."
+        modelAnswer: "In a capstone project, my teammate and I disagreed on database choice. I scheduled a sync to objectively evaluate requirements. We chose PostgreSQL based on ACID compliance needs, documented the decision, and the project launched successfully."
+      },
+      {
+        id: 2,
+        title: "Tell Me About Yourself",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Introduction"],
+        question: "Tell me about yourself and why you are interested in this role.",
+        hint: "Structure: Background → Skills → Motivation for this role...",
+        keywords: ["background", "skills", "motivation", "goal", "strength", "experience", "relevant"],
+        modelAnswer: "Start with your educational background, highlight 2-3 relevant technical skills, mention a key project achievement, then connect your interests and career goals to the specific role. Keep it under 2 minutes and end with why this company excites you."
+      },
+      {
+        id: 3,
+        title: "Greatest Strength & Weakness",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Self-Awareness"],
+        question: "What is your greatest strength and your biggest weakness? How are you working on the weakness?",
+        hint: "Be honest; show self-awareness and a growth mindset...",
+        keywords: ["strength", "weakness", "self-awareness", "improvement", "growth mindset", "genuine", "working on"],
+        modelAnswer: "Strength: Problem-solving — I enjoy breaking down complex technical challenges into manageable parts. Weakness: I sometimes over-engineer solutions. I'm actively addressing this by setting time-boxed design sessions and reviewing YAGNI ('You Aren't Gonna Need It') principles."
+      },
+      {
+        id: 4,
+        title: "Working Under Pressure",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Stress Management"],
+        question: "Describe a time you worked under tight deadlines. How did you manage stress and deliver results?",
+        hint: "Use STAR: prioritization, delegation, focus strategies...",
+        keywords: ["deadline", "prioritize", "time management", "stress", "deliver", "focus", "break down tasks"],
+        modelAnswer: "During our final semester project, I had three deliverables due in one week. I created a priority matrix (impact vs urgency), time-blocked each task into 2-hour deep work sessions, and communicated daily progress updates to my team. We delivered all three on time with positive feedback."
+      },
+      {
+        id: 5,
+        title: "Leadership & Initiative",
+        difficulty: "Intermediate",
+        tags: ["HR Interview", "Leadership"],
+        question: "Give an example of a time you took initiative or showed leadership without being asked to.",
+        hint: "Think about proactively identifying a problem and solving it...",
+        keywords: ["initiative", "proactive", "leadership", "identify problem", "volunteered", "outcome", "impact"],
+        modelAnswer: "During a hackathon, I noticed our team had no clear task assignment, causing duplicate work. Without being asked, I created a Trello board, broke down the project into 4-hour sprints, and assigned tasks by skill set. We finished 2 hours early and won second place."
+      },
+      {
+        id: 6,
+        title: "5-Year Career Goals",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Career Planning"],
+        question: "Where do you see yourself in 5 years professionally?",
+        hint: "Be realistic and align your answer with the company's growth...",
+        keywords: ["career growth", "technical lead", "skills", "contribute", "learning", "long-term", "promotion"],
+        modelAnswer: "In 5 years I aim to grow from a software engineer into a technical lead or solutions architect. I want to master distributed systems design, contribute to open-source projects, and mentor junior engineers. I see this role as a critical step in building that expertise."
+      },
+      {
+        id: 7,
+        title: "Handling Failure",
+        difficulty: "Intermediate",
+        tags: ["HR Interview", "Resilience"],
+        question: "Tell me about a time you failed at something. What did you learn from it?",
+        hint: "Show accountability, what you learned, and how you improved...",
+        keywords: ["failure", "accountable", "lesson learned", "improvement", "resilience", "bounce back", "reflection"],
+        modelAnswer: "In my first internship, I underestimated the time required for API integration testing, missing a sprint deadline. I took accountability, communicated the delay early, and completed the work in overtime. I learned to add 30% buffer to time estimates and started using test-driven development to catch issues earlier."
+      },
+      {
+        id: 8,
+        title: "Teamwork & Collaboration",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Teamwork"],
+        question: "Describe a successful team project. What was your role and contribution?",
+        hint: "Highlight collaboration, communication, and your specific impact...",
+        keywords: ["team", "role", "collaboration", "contribution", "communication", "shared goal", "outcome"],
+        modelAnswer: "In a 4-member team project building an e-commerce platform, I led the backend API development. I held daily standups, used GitHub for code reviews, and paired with the frontend team to align on API contracts. The project received the highest marks in our cohort."
+      },
+      {
+        id: 9,
+        title: "Adaptability to Change",
+        difficulty: "Intermediate",
+        tags: ["HR Interview", "Adaptability"],
+        question: "Describe a time when plans changed suddenly. How did you adapt?",
+        hint: "Show flexibility, quick thinking, and positive attitude...",
+        keywords: ["adaptability", "change", "flexible", "pivot", "positive attitude", "adjust", "unexpected"],
+        modelAnswer: "Mid-project, our client changed the core technology stack from React to Vue.js. I spent two evenings self-studying Vue fundamentals, then ran a team knowledge-sharing session. We adapted within 3 days with minimal timeline disruption, demonstrating our team's technical flexibility."
+      },
+      {
+        id: 10,
+        title: "Why This Company",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Motivation"],
+        question: "Why do you want to work for our company specifically over our competitors?",
+        hint: "Show you've researched the company, its products, culture, and values...",
+        keywords: ["research", "company values", "culture", "product", "growth opportunity", "mission", "align"],
+        modelAnswer: "I researched your company's work in AI-driven personalization and was impressed by your engineering blog on real-time recommendation systems. Your emphasis on continuous learning, open-source contributions, and collaborative culture aligns perfectly with my technical interests and long-term career goals."
+      },
+      {
+        id: 11,
+        title: "Handling Critical Feedback",
+        difficulty: "Intermediate",
+        tags: ["HR Interview", "Growth Mindset"],
+        question: "Tell me about a time you received critical feedback. How did you handle it and what changed?",
+        hint: "Show you are open to feedback and took action...",
+        keywords: ["feedback", "criticism", "open-minded", "action", "improvement", "mentorship", "growth"],
+        modelAnswer: "My professor criticized my code for lacking modularity and being difficult to maintain. Instead of being defensive, I asked for specific examples, studied clean code principles, and rewrote the module using the Single Responsibility Principle. My next submission received full marks and positive code review comments."
+      },
+      {
+        id: 12,
+        title: "Communication Skills",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Communication"],
+        question: "Describe a situation where you had to explain a complex technical concept to a non-technical person.",
+        hint: "Use analogies, avoid jargon, and confirm understanding...",
+        keywords: ["simplify", "analogy", "non-technical", "clear explanation", "jargon-free", "confirm understanding", "audience"],
+        modelAnswer: "I explained machine learning model overfitting to a business stakeholder by comparing it to memorizing exam answers vs. understanding concepts. Using this analogy, they immediately understood why we needed more diverse training data. They approved the data collection budget on the spot."
+      },
+      {
+        id: 13,
+        title: "Motivation & Work Ethic",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Motivation"],
+        question: "What motivates you to perform your best work every day?",
+        hint: "Be genuine — intrinsic vs extrinsic motivation, purpose-driven...",
+        keywords: ["motivation", "purpose", "challenge", "growth", "impact", "curiosity", "recognition"],
+        modelAnswer: "I'm most motivated by solving challenging problems that have real-world impact. When I see that a feature I built helps users accomplish a goal faster or an ML model reduces decision error rates, that outcome is deeply satisfying. I also draw motivation from learning new technologies and sharing knowledge with teammates."
+      },
+      {
+        id: 14,
+        title: "Prioritization & Time Management",
+        difficulty: "Intermediate",
+        tags: ["HR Interview", "Productivity"],
+        question: "How do you prioritize your tasks when you have multiple projects with competing deadlines?",
+        hint: "Think about frameworks like Eisenhower Matrix or MoSCoW...",
+        keywords: ["prioritize", "eisenhower matrix", "moscow", "urgent", "important", "time-box", "deadline", "communicate"],
+        modelAnswer: "I use the Eisenhower Matrix to categorize tasks by urgency and importance. High-impact, deadline-critical tasks come first. I time-box deep work sessions of 90 minutes, use daily to-do lists with 3 MITs (Most Important Tasks), and proactively communicate to stakeholders when timelines are at risk."
+      },
+      {
+        id: 15,
+        title: "Remote Work & Self-Discipline",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Remote Work"],
+        question: "How do you stay productive and maintain communication when working remotely or independently?",
+        hint: "Talk about tools, routines, and async communication habits...",
+        keywords: ["remote work", "self-discipline", "async communication", "standup", "tools", "schedule", "focus"],
+        modelAnswer: "I maintain a consistent daily schedule: morning standup notes in Slack, 90-minute deep work blocks, and clear task tracking on Notion or Jira. I over-communicate progress updates asynchronously and use video calls for complex design discussions to avoid ambiguity."
+      },
+      {
+        id: 16,
+        title: "Ethical Dilemma at Work",
+        difficulty: "Advanced",
+        tags: ["HR Interview", "Ethics"],
+        question: "Describe a situation where you faced an ethical dilemma at work or in a project. What did you do?",
+        hint: "Show integrity, decision-making process, and outcome...",
+        keywords: ["ethics", "integrity", "transparency", "right thing", "dilemma", "values", "consequence"],
+        modelAnswer: "During a project, I discovered a data privacy issue where user emails were being logged in plaintext. I could have ignored it to meet the sprint deadline, but instead I immediately reported it to my team lead, documented the security risk, and helped fix the logging middleware before deployment. Integrity over speed."
+      },
+      {
+        id: 17,
+        title: "Learning New Technologies",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Learning Agility"],
+        question: "How do you keep up with rapidly evolving technology trends and learn new skills?",
+        hint: "Talk about your learning habits, resources, and practice methods...",
+        keywords: ["continuous learning", "online courses", "documentation", "side projects", "tech blogs", "community", "practice"],
+        modelAnswer: "I dedicate 1 hour daily to learning: reading official documentation, following engineering blogs (Uber, Netflix Engineering), and completing hands-on projects. I learn by building — my GitHub has projects in React, FastAPI, and ML. I also contribute to open-source and attend local tech meetups."
+      },
+      {
+        id: 18,
+        title: "Salary Expectations",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Negotiation"],
+        question: "What are your salary expectations and how did you arrive at that number?",
+        hint: "Research market rates, be flexible, tie it to your skills and value...",
+        keywords: ["market rate", "research", "glassdoor", "negotiable", "value", "skills", "flexible", "compensation"],
+        modelAnswer: "Based on my research on platforms like Glassdoor and LinkedIn, the market range for this role and my skill set in [city] is ₹X–₹Y LPA. Given my hands-on experience in [relevant skills] and the value I can contribute, I'm targeting around ₹X LPA, though I'm open to discussion based on the full compensation package."
+      },
+      {
+        id: 19,
+        title: "Dealing with Difficult Teammates",
+        difficulty: "Intermediate",
+        tags: ["HR Interview", "Interpersonal Skills"],
+        question: "Have you ever worked with a difficult colleague? How did you manage the working relationship?",
+        hint: "Focus on professionalism, empathy, and constructive communication...",
+        keywords: ["difficult colleague", "empathy", "professional", "one-on-one", "understanding", "compromise", "team harmony"],
+        modelAnswer: "I once worked with a teammate who was unresponsive to messages. Instead of escalating, I requested a 1:1 video call to understand their perspective. I discovered they were overwhelmed with two overlapping projects. We redistributed tasks together and established clearer response-time norms. Collaboration improved significantly."
+      },
+      {
+        id: 20,
+        title: "What Makes You Unique",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Self-Branding"],
+        question: "What makes you uniquely qualified for this position compared to other candidates?",
+        hint: "Highlight the intersection of your technical skills, soft skills, and passion...",
+        keywords: ["unique", "differentiate", "combination", "technical skills", "soft skills", "passion", "value", "results"],
+        modelAnswer: "I combine strong technical depth (ML, full-stack development, cloud deployment) with effective communication and project leadership experience. I've shipped full-stack AI products end-to-end, mentored peers, and consistently delivered under real deadlines — a combination that goes beyond textbook knowledge."
       }
     ],
+
+    // ─────────────────────────── APTITUDE (20 Qs) ───────────────────────────
     aptitude: [
       {
         id: 1,
-        title: "Quantitative Problem Solving & Speed",
+        title: "Work & Rate – Parallel Workers",
         difficulty: "Fundamental",
-        tags: ["Aptitude Test", "Logical Reasoning"],
-        question: "A training batch pipeline processes 12,000 records in 40 minutes with 2 workers. How many minutes will it take 6 workers running in parallel to process 36,000 records?",
-        hint: "Work = Rate * Time * Workers...",
-        keywords: ["work rate", "parallel processing", "40 minutes", "inverse proportionality", "linear scaling"],
-        modelAnswer: "One worker processes 12,000 / (40 * 2) = 150 records per minute. Six workers process 6 * 150 = 900 records per minute. To process 36,000 records, it will take 36,000 / 900 = 40 minutes."
+        tags: ["Aptitude", "Work & Rate"],
+        question: "A batch pipeline processes 12,000 records in 40 minutes with 2 workers. How many minutes will 6 workers take to process 36,000 records?",
+        hint: "Work = Rate × Time × Workers...",
+        keywords: ["work rate", "parallel processing", "150 records", "900 per minute", "40 minutes"],
+        modelAnswer: "One worker: 12,000 / (40 × 2) = 150 records/min. Six workers: 6 × 150 = 900 records/min. Time for 36,000 records: 36,000 / 900 = 40 minutes."
+      },
+      {
+        id: 2,
+        title: "Percentage – Profit & Loss",
+        difficulty: "Fundamental",
+        tags: ["Aptitude", "Percentages"],
+        question: "A product is bought for ₹800 and sold for ₹960. What is the profit percentage?",
+        hint: "Profit% = (Profit / Cost Price) × 100...",
+        keywords: ["profit", "cost price", "selling price", "160", "20 percent", "percentage"],
+        modelAnswer: "Profit = 960 − 800 = ₹160. Profit% = (160 / 800) × 100 = 20%."
+      },
+      {
+        id: 3,
+        title: "Speed, Distance & Time",
+        difficulty: "Fundamental",
+        tags: ["Aptitude", "Speed Distance Time"],
+        question: "A train 300m long passes a pole in 15 seconds. How long will it take to cross a 450m platform?",
+        hint: "Speed = Distance / Time; total distance = train length + platform length...",
+        keywords: ["speed", "distance", "time", "platform", "300", "450", "750", "20 m/s", "37.5 seconds"],
+        modelAnswer: "Speed = 300 / 15 = 20 m/s. Total distance to cross platform = 300 + 450 = 750m. Time = 750 / 20 = 37.5 seconds."
+      },
+      {
+        id: 4,
+        title: "Number Series",
+        difficulty: "Fundamental",
+        tags: ["Aptitude", "Logical Reasoning"],
+        question: "Find the next number in the series: 2, 6, 12, 20, 30, ?",
+        hint: "Look at the differences between consecutive terms...",
+        keywords: ["series", "pattern", "difference", "42", "consecutive", "arithmetic progression"],
+        modelAnswer: "Differences: 4, 6, 8, 10 — increasing by 2. Next difference = 12. Answer: 30 + 12 = 42."
+      },
+      {
+        id: 5,
+        title: "Probability – Coin & Dice",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Probability"],
+        question: "Two fair dice are rolled. What is the probability that the sum of the outcomes is 8?",
+        hint: "List all favourable outcomes and divide by total outcomes (36)...",
+        keywords: ["probability", "dice", "sum", "favorable outcomes", "36 total", "5 outcomes", "5/36"],
+        modelAnswer: "Total outcomes = 6 × 6 = 36. Favourable (sum = 8): (2,6), (3,5), (4,4), (5,3), (6,2) = 5 outcomes. Probability = 5/36."
+      },
+      {
+        id: 6,
+        title: "Simple & Compound Interest",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Interest"],
+        question: "What is the difference between compound interest and simple interest on ₹10,000 at 10% per annum for 2 years?",
+        hint: "SI = P×R×T/100; CI = P(1+R/100)^T − P...",
+        keywords: ["simple interest", "compound interest", "2000", "2100", "100 difference", "10000"],
+        modelAnswer: "SI = 10,000 × 10 × 2 / 100 = ₹2,000. CI = 10,000 × (1.1)² − 10,000 = 12,100 − 10,000 = ₹2,100. Difference = ₹100."
+      },
+      {
+        id: 7,
+        title: "Ratio & Proportion",
+        difficulty: "Fundamental",
+        tags: ["Aptitude", "Ratio"],
+        question: "A and B share profit in ratio 3:5. Total profit is ₹48,000. How much does B receive?",
+        hint: "B's share = (5 / (3+5)) × Total...",
+        keywords: ["ratio", "proportion", "share", "30000", "18000", "48000", "5/8"],
+        modelAnswer: "Total parts = 3 + 5 = 8. B's share = (5/8) × 48,000 = ₹30,000."
+      },
+      {
+        id: 8,
+        title: "Clocks & Angles",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Clocks"],
+        question: "What is the angle between the hour hand and minute hand of a clock at 3:30?",
+        hint: "Hour hand moves 0.5° per minute; minute hand is at 180° at 3:30...",
+        keywords: ["clock", "angle", "hour hand", "minute hand", "75 degrees", "3:30"],
+        modelAnswer: "At 3:30: Minute hand = 30 × 6 = 180°. Hour hand = (3 × 30) + (30 × 0.5) = 90 + 15 = 105°. Angle = |180 − 105| = 75°."
+      },
+      {
+        id: 9,
+        title: "Permutation vs Combination",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Combinatorics"],
+        question: "In how many ways can 3 students be selected from a group of 8 for a committee (order doesn't matter)?",
+        hint: "Use nCr = n! / (r! × (n-r)!)...",
+        keywords: ["combination", "ncr", "8c3", "56 ways", "factorial", "selection"],
+        modelAnswer: "C(8,3) = 8! / (3! × 5!) = (8 × 7 × 6) / (3 × 2 × 1) = 336 / 6 = 56 ways."
+      },
+      {
+        id: 10,
+        title: "Blood Relations",
+        difficulty: "Fundamental",
+        tags: ["Aptitude", "Logical Reasoning"],
+        question: "Pointing to a photograph, Ravi says, 'She is the daughter of my grandfather's only son.' What is the relationship of the girl to Ravi?",
+        hint: "Grandfather's only son = Ravi's father...",
+        keywords: ["blood relation", "grandfather", "father", "sister", "cousin", "daughter"],
+        modelAnswer: "Grandfather's only son = Ravi's father. The girl is the daughter of Ravi's father, so she is Ravi's sister."
+      },
+      {
+        id: 11,
+        title: "Syllogisms",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Logical Reasoning"],
+        question: "All coders are engineers. Some engineers are managers. Can we conclude: Some coders are managers?",
+        hint: "Draw Venn diagrams and check if the conclusion follows necessarily...",
+        keywords: ["syllogism", "all", "some", "valid conclusion", "venn diagram", "not necessarily"],
+        modelAnswer: "No, this conclusion does NOT necessarily follow. 'All coders are engineers' and 'some engineers are managers' doesn't guarantee any overlap between coders and managers. Some engineers who are managers may not be coders."
+      },
+      {
+        id: 12,
+        title: "Data Interpretation – Bar Chart",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Data Interpretation"],
+        question: "A company's revenue: 2020=₹40L, 2021=₹60L, 2022=₹80L, 2023=₹100L. What is the average annual growth in revenue from 2020 to 2023?",
+        hint: "Average growth = Total increase / Number of years...",
+        keywords: ["average", "growth", "revenue", "20 lakhs", "3 years", "per year"],
+        modelAnswer: "Total increase = 100 − 40 = ₹60L over 3 years. Average annual growth = 60 / 3 = ₹20 Lakhs per year."
+      },
+      {
+        id: 13,
+        title: "Pipes & Cisterns",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Work & Rate"],
+        question: "Pipe A fills a tank in 6 hours; Pipe B fills it in 4 hours. If both pipes are opened together, how long to fill the tank?",
+        hint: "Combined rate = 1/A + 1/B; Time = 1 / combined rate...",
+        keywords: ["pipe", "cistern", "combined rate", "12/5", "2.4 hours", "fill tank"],
+        modelAnswer: "Rate A = 1/6, Rate B = 1/4. Combined = 1/6 + 1/4 = 2/12 + 3/12 = 5/12 per hour. Time = 12/5 = 2.4 hours (2 hours 24 minutes)."
+      },
+      {
+        id: 14,
+        title: "Direction Sense",
+        difficulty: "Fundamental",
+        tags: ["Aptitude", "Directions"],
+        question: "Starting from point A, Meera walks 5km North, then 3km East, then 5km South. How far and in what direction is she from A?",
+        hint: "Track displacement in X and Y components...",
+        keywords: ["direction", "north", "east", "south", "displacement", "3km east", "3km"],
+        modelAnswer: "North 5km then South 5km cancel out. Net displacement: 3km East. Meera is 3km East of point A."
+      },
+      {
+        id: 15,
+        title: "Coding-Decoding",
+        difficulty: "Fundamental",
+        tags: ["Aptitude", "Logical Reasoning"],
+        question: "In a code language, APPLE is written as BQQMF. How is MANGO written in the same code?",
+        hint: "Notice each letter is shifted by 1 position in the alphabet...",
+        keywords: ["coding decoding", "shift", "alphabet", "pattern", "NBOHP", "one position"],
+        modelAnswer: "Each letter is shifted +1: A→B, P→Q, P→Q, L→M, E→F. Applying same to MANGO: M→N, A→B, N→O, G→H, O→P = NBOHP."
+      },
+      {
+        id: 16,
+        title: "Ages Problem",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Algebra"],
+        question: "The sum of ages of father and son is 50 years. Five years ago, the father was 7 times the age of the son. Find their current ages.",
+        hint: "Set up two equations with two unknowns...",
+        keywords: ["ages", "equations", "father", "son", "40", "10", "linear equations"],
+        modelAnswer: "Let son = x, father = 50−x. Five years ago: (50−x−5) = 7(x−5) → 45−x = 7x−35 → 80 = 8x → x = 10. Son = 10, Father = 40."
+      },
+      {
+        id: 17,
+        title: "LCM & HCF",
+        difficulty: "Fundamental",
+        tags: ["Aptitude", "Number Theory"],
+        question: "Find the LCM and HCF of 12 and 18. Verify that LCM × HCF = Product of numbers.",
+        hint: "Prime factorization: 12 = 2²×3, 18 = 2×3²...",
+        keywords: ["lcm", "hcf", "prime factorization", "36", "6", "product", "12 and 18"],
+        modelAnswer: "12 = 2²×3, 18 = 2×3². HCF = 2¹×3¹ = 6. LCM = 2²×3² = 36. Verification: 6 × 36 = 216 = 12 × 18 ✓."
+      },
+      {
+        id: 18,
+        title: "Seating Arrangement",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Logical Reasoning"],
+        question: "5 people (A, B, C, D, E) sit in a row. A sits at one end. B is to the immediate right of A. D is not adjacent to B. E sits at the other end. Where does C sit?",
+        hint: "Place A and E at ends first, then apply constraints...",
+        keywords: ["seating", "arrangement", "row", "adjacent", "position 3", "middle", "constraints"],
+        modelAnswer: "A is at position 1, B at position 2. E is at position 5. D is not adjacent to B (position 2), so D is not at position 3. D must be at position 4. Therefore C is at position 3 (middle)."
+      },
+      {
+        id: 19,
+        title: "Mixtures & Alligation",
+        difficulty: "Advanced",
+        tags: ["Aptitude", "Mixtures"],
+        question: "In what ratio should water (cost ₹0) be mixed with milk (cost ₹40/L) to get a mixture worth ₹32/L?",
+        hint: "Use Alligation: (Expensive − Mean) : (Mean − Cheap)...",
+        keywords: ["alligation", "mixture", "ratio", "1:4", "water", "milk", "mean price"],
+        modelAnswer: "Using Alligation: Water side = 40−32 = 8; Milk side = 32−0 = 32. Ratio Water:Milk = 8:32 = 1:4."
+      },
+      {
+        id: 20,
+        title: "Venn Diagrams – Set Theory",
+        difficulty: "Intermediate",
+        tags: ["Aptitude", "Set Theory"],
+        question: "In a class of 60 students, 40 like Maths, 35 like Science, and 25 like both. How many like neither?",
+        hint: "Use inclusion-exclusion: |M∪S| = |M| + |S| − |M∩S|...",
+        keywords: ["venn diagram", "set theory", "inclusion exclusion", "union", "intersection", "50", "10 neither"],
+        modelAnswer: "Students liking Maths or Science = 40 + 35 − 25 = 50. Students liking neither = 60 − 50 = 10."
       }
     ],
+
+    // ─────────────────────────── CODING (20 Qs) ───────────────────────────
     coding: [
       {
         id: 1,
-        title: "Two Sum & Hash Map Lookup",
-        difficulty: "Fundamental",
-        tags: ["Coding Interview", "Data Structures"],
-        question: "Given an array of integers `nums` and an integer `target`, return the indices of two numbers that add up to `target` in O(N) time complexity.",
-        hint: "Use a hash map to store complements (target - num)...",
-        keywords: ["hash map", "dictionary", "o(n) time", "o(n) space", "complement", "indices"],
-        modelAnswer: "Use a single-pass hash map: For each number `num` at index `i`, check if `target - num` exists in the hash map. If found, return `[map[target - num], i]`. Otherwise, record `map[num] = i`. This achieves O(N) linear time and O(N) auxiliary space."
+        title: "Two Sum – Hash Map",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Arrays"],
+        question: "Given an array `nums` and a `target`, return indices of two numbers that add up to `target` in O(N) time.",
+        hint: "Use a hash map to store complements (target − num)...",
+        keywords: ["hash map", "dictionary", "o(n) time", "complement", "indices", "single pass"],
+        modelAnswer: "Single-pass hash map: for each num at index i, check if (target − num) is in the map. If yes, return [map[target−num], i]. Else store map[num] = i. O(N) time, O(N) space."
+      },
+      {
+        id: 2,
+        title: "Reverse a String",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Strings"],
+        question: "Write a function to reverse a string in-place without using Python's reverse() or slice notation.",
+        hint: "Use two pointers — one at start, one at end, swap and move inward...",
+        keywords: ["two pointers", "swap", "in-place", "iteration", "left right", "while loop"],
+        modelAnswer: "Use two pointers l=0, r=len-1. While l<r: swap arr[l] and arr[r], then l++, r--. This is O(N) time, O(1) space."
+      },
+      {
+        id: 3,
+        title: "Fibonacci – Dynamic Programming",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "DP"],
+        question: "Compute the N-th Fibonacci number efficiently. What is the time complexity of the naive recursive solution vs the memoized version?",
+        hint: "Naive recursion: O(2^N). Memoization / tabulation: O(N)...",
+        keywords: ["fibonacci", "memoization", "dynamic programming", "o(2^n)", "o(n)", "cache", "bottom-up"],
+        modelAnswer: "Naive recursion recalculates subproblems exponentially → O(2^N). Memoization stores results in a dict/array → O(N) time and O(N) space. Bottom-up DP using two variables achieves O(N) time and O(1) space."
+      },
+      {
+        id: 4,
+        title: "Binary Search",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Searching"],
+        question: "Implement binary search on a sorted array. What is its time complexity and what precondition must be met?",
+        hint: "Compare mid to target; eliminate half the search space each step...",
+        keywords: ["binary search", "sorted", "o(log n)", "mid", "low high", "precondition", "divide"],
+        modelAnswer: "Binary search requires a sorted array. Set low=0, high=len-1. While low≤high: mid=(low+high)//2. If arr[mid]==target return mid. If arr[mid]<target, low=mid+1 else high=mid-1. Time: O(log N), Space: O(1)."
+      },
+      {
+        id: 5,
+        title: "Linked List – Reverse",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Linked Lists"],
+        question: "Write code to reverse a singly linked list iteratively. What are the time and space complexities?",
+        hint: "Track prev, curr, next pointers as you iterate...",
+        keywords: ["linked list", "reverse", "prev", "curr", "next", "o(n) time", "o(1) space", "iterative"],
+        modelAnswer: "Initialize prev=None, curr=head. While curr: save next=curr.next, set curr.next=prev, move prev=curr and curr=next. Return prev (new head). O(N) time, O(1) space."
+      },
+      {
+        id: 6,
+        title: "Stack – Balanced Parentheses",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Stack"],
+        question: "Given a string of brackets ({[()]}), write an algorithm to check if parentheses are balanced.",
+        hint: "Use a stack — push open brackets, pop and match on close brackets...",
+        keywords: ["stack", "balanced", "push", "pop", "match", "open brackets", "close brackets", "o(n)"],
+        modelAnswer: "Iterate characters. If open bracket, push to stack. If close bracket, check if stack top matches. If mismatch or stack empty → unbalanced. After full iteration, stack must be empty → balanced. O(N) time, O(N) space."
+      },
+      {
+        id: 7,
+        title: "Find Duplicates in Array",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Arrays"],
+        question: "Find all duplicate numbers in an array of N integers in O(N) time and O(1) extra space (integers range 1 to N).",
+        hint: "Use index as a hash — mark visited elements by negating the value at their index...",
+        keywords: ["duplicate", "index as hash", "negate", "o(n) time", "o(1) space", "mark visited"],
+        modelAnswer: "For each num, go to index |num|-1. If value is negative, num is a duplicate. Otherwise negate the value at that index. This achieves O(N) time and O(1) extra space."
+      },
+      {
+        id: 8,
+        title: "BFS – Level Order Tree Traversal",
+        difficulty: "Intermediate",
+        tags: ["Coding Interview", "Trees", "BFS"],
+        question: "Implement level order traversal (BFS) on a binary tree. Return nodes level by level.",
+        hint: "Use a queue — enqueue root, then level by level dequeue and enqueue children...",
+        keywords: ["bfs", "queue", "level order", "binary tree", "dequeue", "enqueue", "o(n)"],
+        modelAnswer: "Use a deque. Enqueue root. While queue: get current level size, process exactly that many nodes, appending left and right children. Collect each level into result. O(N) time and O(N) space."
+      },
+      {
+        id: 9,
+        title: "DFS – Detect Cycle in Graph",
+        difficulty: "Intermediate",
+        tags: ["Coding Interview", "Graphs", "DFS"],
+        question: "Using DFS, how do you detect a cycle in a directed graph?",
+        hint: "Track visited nodes and nodes currently in the recursion stack...",
+        keywords: ["dfs", "cycle detection", "directed graph", "recursion stack", "visited", "back edge"],
+        modelAnswer: "Maintain two sets: visited and rec_stack (current DFS path). During DFS, if we encounter a node already in rec_stack, a cycle exists (back edge). After returning from DFS, remove node from rec_stack. O(V+E) time."
+      },
+      {
+        id: 10,
+        title: "Dynamic Programming – Longest Common Subsequence",
+        difficulty: "Intermediate",
+        tags: ["Coding Interview", "DP", "Strings"],
+        question: "Given two strings, find the length of their Longest Common Subsequence (LCS). Explain the DP approach.",
+        hint: "Build a 2D DP table: dp[i][j] = LCS length of s1[:i] and s2[:j]...",
+        keywords: ["lcs", "dynamic programming", "2d table", "subsequence", "o(m*n)", "dp"],
+        modelAnswer: "Create dp[m+1][n+1] initialized to 0. For each i,j: if s1[i-1]==s2[j-1], dp[i][j]=dp[i-1][j-1]+1. Else dp[i][j]=max(dp[i-1][j], dp[i][j-1]). Answer is dp[m][n]. O(M×N) time and space."
+      },
+      {
+        id: 11,
+        title: "Merge Two Sorted Arrays",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Arrays"],
+        question: "Merge two sorted arrays into a single sorted array in O(M+N) time.",
+        hint: "Use two pointers — compare and pick the smaller element from each array...",
+        keywords: ["merge", "two pointers", "sorted", "o(m+n)", "compare", "append remainder"],
+        modelAnswer: "Use pointer i for arr1, j for arr2. Compare arr1[i] and arr2[j], append the smaller to result and advance that pointer. After one array is exhausted, append remaining elements of the other. O(M+N) time, O(M+N) space."
+      },
+      {
+        id: 12,
+        title: "Quick Sort – Implementation",
+        difficulty: "Intermediate",
+        tags: ["Coding Interview", "Sorting"],
+        question: "Implement Quick Sort. What is its average and worst-case time complexity and when does worst case occur?",
+        hint: "Choose a pivot, partition the array around it, recursively sort sub-arrays...",
+        keywords: ["quick sort", "pivot", "partition", "o(n log n) average", "o(n²) worst", "already sorted", "in-place"],
+        modelAnswer: "Pick pivot (e.g., last element). Partition array: smaller elements to left, larger to right. Recursively sort both halves. Average: O(N log N). Worst case: O(N²) when array is already sorted and pivot is always min/max. Use random pivot or median-of-three to avoid worst case."
+      },
+      {
+        id: 13,
+        title: "String – Anagram Check",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Strings"],
+        question: "Write a function to check if two strings are anagrams of each other in O(N) time.",
+        hint: "Compare character frequency counts...",
+        keywords: ["anagram", "frequency count", "counter", "o(n)", "character map", "sorted comparison"],
+        modelAnswer: "Method 1: Use Counter/frequency dict — count chars in s1, subtract counts for s2, check all zero. Method 2: sort both strings and compare. Counter method: O(N) time, O(1) space (26 lowercase letters)."
+      },
+      {
+        id: 14,
+        title: "Find Maximum Subarray Sum (Kadane's Algorithm)",
+        difficulty: "Intermediate",
+        tags: ["Coding Interview", "DP", "Arrays"],
+        question: "Given an integer array, find the contiguous subarray with the largest sum using Kadane's Algorithm.",
+        hint: "Track current sum and maximum sum as you scan left to right...",
+        keywords: ["kadane", "maximum subarray", "current sum", "max sum", "o(n)", "dynamic programming"],
+        modelAnswer: "Initialize max_sum = current_sum = arr[0]. For each element from index 1: current_sum = max(arr[i], current_sum + arr[i]). Update max_sum = max(max_sum, current_sum). O(N) time, O(1) space."
+      },
+      {
+        id: 15,
+        title: "Binary Tree – Height",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Trees"],
+        question: "Write a recursive function to find the height of a binary tree.",
+        hint: "Height = 1 + max(height of left subtree, height of right subtree)...",
+        keywords: ["binary tree", "height", "depth", "recursion", "base case", "o(n)", "max left right"],
+        modelAnswer: "Base case: if node is None, return 0. Recursive: return 1 + max(height(node.left), height(node.right)). O(N) time — visits every node once."
+      },
+      {
+        id: 16,
+        title: "Palindrome Check",
+        difficulty: "Easy",
+        tags: ["Coding Interview", "Strings"],
+        question: "Write an O(N) function to check if a string is a palindrome, ignoring spaces and case.",
+        hint: "Two pointers — left and right, skip non-alphanumeric chars...",
+        keywords: ["palindrome", "two pointers", "o(n)", "alphanumeric", "case insensitive", "ignore spaces"],
+        modelAnswer: "Use two pointers l=0, r=len-1. Skip non-alphanumeric chars. Compare s[l].lower() == s[r].lower(). If mismatch return False. If l≥r return True. O(N) time, O(1) space."
+      },
+      {
+        id: 17,
+        title: "Matrix – Spiral Order",
+        difficulty: "Intermediate",
+        tags: ["Coding Interview", "Matrix"],
+        question: "Given an M×N matrix, return all elements in spiral order (clockwise from top-left).",
+        hint: "Maintain four boundaries: top, bottom, left, right; shrink after each pass...",
+        keywords: ["spiral", "matrix", "top bottom left right", "boundaries", "clockwise", "o(m*n)"],
+        modelAnswer: "Use top, bottom, left, right pointers. Traverse right along top row, down along right col, left along bottom row, up along left col. Shrink boundaries after each traversal. Continue while top≤bottom and left≤right. O(M×N) time."
+      },
+      {
+        id: 18,
+        title: "Top K Frequent Elements",
+        difficulty: "Intermediate",
+        tags: ["Coding Interview", "Heap", "Arrays"],
+        question: "Given an array, return the K most frequent elements in O(N log K) time.",
+        hint: "Use a frequency map and a min-heap of size K...",
+        keywords: ["heap", "min heap", "frequency", "counter", "o(n log k)", "top k", "priority queue"],
+        modelAnswer: "Count frequencies using a dict/Counter. Use a min-heap of size K to track top K elements. For each (freq, num), push to heap; if heap size > K, pop. Final heap contains the K most frequent elements. O(N log K) time."
+      },
+      {
+        id: 19,
+        title: "Implement Queue using Stacks",
+        difficulty: "Intermediate",
+        tags: ["Coding Interview", "Stack", "Queue"],
+        question: "Implement a Queue using two stacks. What is the amortized time complexity of enqueue and dequeue?",
+        hint: "One stack for push, one for pop — transfer when second is empty...",
+        keywords: ["queue", "two stacks", "amortized o(1)", "enqueue", "dequeue", "transfer", "amortized"],
+        modelAnswer: "Stack1 for enqueue (push). Stack2 for dequeue. When dequeue is called and stack2 is empty, transfer all from stack1 to stack2 (reverses order). Pop from stack2. Enqueue: O(1). Dequeue: O(N) worst case but O(1) amortized."
+      },
+      {
+        id: 20,
+        title: "Dijkstra's Shortest Path",
+        difficulty: "Advanced",
+        tags: ["Coding Interview", "Graphs", "Algorithms"],
+        question: "Explain Dijkstra's shortest path algorithm. What data structure makes it efficient and what is its time complexity?",
+        hint: "Use a min-heap (priority queue) for greedy selection of minimum distance node...",
+        keywords: ["dijkstra", "shortest path", "priority queue", "min heap", "relaxation", "o((v+e) log v)", "greedy"],
+        modelAnswer: "Dijkstra finds the shortest path from source to all nodes in a weighted graph (non-negative edges). Initialize all distances as infinity, source as 0. Use a min-heap: repeatedly extract the node with minimum distance, relax its neighbors (update if shorter path found). Time: O((V+E) log V) with binary heap."
       }
     ],
     ml: [
@@ -800,8 +1542,11 @@ export default function App() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  // Start Interview Session
+  // Start Interview Session — shuffle bank & pick SESSION_SIZE random questions
   const handleStartInterview = (domainKey) => {
+    const bank = interviewQuestions[domainKey] || []
+    const shuffled = shuffleArray(bank).slice(0, SESSION_SIZE)
+    setSessionQuestions(shuffled)
     setInterviewDomain(domainKey)
     setInterviewActive(true)
     setCurrentQIdx(0)
@@ -816,7 +1561,7 @@ export default function App() {
 
   // Evaluate Current Question Answer
   const handleEvaluateAnswer = () => {
-    const questionsList = interviewQuestions[interviewDomain] || []
+    const questionsList = sessionQuestions.length > 0 ? sessionQuestions : (interviewQuestions[interviewDomain] || [])
     const currentQ = questionsList[currentQIdx]
     const text = (userAnswerText || savedAnswers[currentQIdx] || '').trim()
 
@@ -867,7 +1612,7 @@ export default function App() {
   // Navigate to Next Question
   const handleNextQuestion = () => {
     const nextIdx = currentQIdx + 1
-    const questionsList = interviewQuestions[interviewDomain] || []
+    const questionsList = sessionQuestions.length > 0 ? sessionQuestions : (interviewQuestions[interviewDomain] || [])
     if (nextIdx < questionsList.length) {
       if (userAnswerText.trim()) {
         setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
@@ -2214,7 +2959,7 @@ export default function App() {
 
                     {/* Progress Bar */}
                     {(() => {
-                      const questionsList = interviewQuestions[interviewDomain] || []
+                      const questionsList = sessionQuestions.length > 0 ? sessionQuestions : (interviewQuestions[interviewDomain] || [])
                       const q = questionsList[currentQIdx]
                       if (!q) return null
 
@@ -2420,7 +3165,7 @@ export default function App() {
                       <div className="white-panel" style={{ padding: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginBottom: '1rem' }}>Expert Model Answer Reference</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                          {(interviewQuestions[interviewDomain] || []).map((q, idx) => (
+                          {(sessionQuestions.length > 0 ? sessionQuestions : (interviewQuestions[interviewDomain] || [])).map((q, idx) => (
                             <div key={idx} style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
                               <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#38bdf8', marginBottom: '4px' }}>
                                 Question {idx + 1}: {q.question}
