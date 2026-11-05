@@ -109,6 +109,9 @@ class ResumeParser:
             "total_entities_extracted": sum(len(v) for v in entities.values())
         }
 
+    # Alias for test suite & backward compatibility
+    extract_entities = parse
+
 if __name__ == "__main__":
     sample_resume = """
     Aditya Sharma

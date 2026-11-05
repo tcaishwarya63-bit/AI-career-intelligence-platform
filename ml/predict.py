@@ -50,7 +50,9 @@ class CareerPredictor:
         
         return {
             "top_predicted_role": top_role,
+            "top_prediction": top_role,
             "confidence_score": f"{top_prob}%",
+            "confidence_value": top_prob,
             "extracted_entities": extracted,
             "all_ranked_probabilities": ranked_predictions
         }

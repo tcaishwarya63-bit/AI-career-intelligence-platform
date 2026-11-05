@@ -1,0 +1,57 @@
+name: CareerCast CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ml-tests-and-accuracy:
+    name: ML Model Accuracy & NLP Parser Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ml/requirements.txt
+          python -m spacy download en_core_web_sm
+
+      - name: Run Automated Test Suite (Accuracy >= 65%, SpaCy NER, FastAPI REST)
+        run: |
+          python -m pytest tests/ -v
+
+      - name: Train Baseline Model & Validate Threshold
+        run: |
+          python ml/train_baseline.py
+
+  frontend-build:
+    name: React Frontend Production Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Production Build
+        run: npm run build

@@ -30,3 +30,13 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Python & Test Artifacts
+__pycache__/
+*/__pycache__/
+**/*.pyc
+*.py[cod]
+*$py.class
+.pytest_cache/
+tmp_edge/
+tmp_*/

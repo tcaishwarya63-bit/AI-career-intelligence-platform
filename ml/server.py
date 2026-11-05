@@ -58,10 +58,14 @@ def health_check():
 @app.post("/predict")
 def predict_career(req: PredictRequest):
     """Predicts career trajectories from candidate skills or raw text profile."""
-    query = req.raw_text or f"Skills: {req.skills}. Role: {req.experience_role}. Degree: {req.degree}"
-    if not query.strip():
+    has_input = bool((req.raw_text and req.raw_text.strip()) or 
+                     (req.skills and req.skills.strip()) or 
+                     (req.experience_role and req.experience_role.strip()) or 
+                     (req.degree and req.degree.strip()))
+    if not has_input:
         raise HTTPException(status_code=400, detail="Please provide skills or raw resume text.")
         
+    query = req.raw_text if (req.raw_text and req.raw_text.strip()) else f"Skills: {req.skills or ''}. Role: {req.experience_role or ''}. Degree: {req.degree or ''}"
     result = predictor.predict_from_text(query)
     return result
 
