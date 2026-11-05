@@ -125,7 +125,10 @@ def generate_gap_report(req: GapReportRequest):
         "missing_competencies": missing
     }
 
-if __name__ == "__main__":
+def main():
     import uvicorn
-    print("Starting CareerCast FastAPI server on http://localhost:8000 ...")
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    print("Starting CareerCast AI Engine API on http://localhost:8000 ...")
+    uvicorn.run("ml.server:app" if os.path.exists("ml") else "server:app", host="0.0.0.0", port=8000, reload=True)
+
+if __name__ == "__main__":
+    main()
