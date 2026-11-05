@@ -35,12 +35,20 @@ import {
   Save,
   Cloud,
   Download,
-  Clock,
+  Printer,
   Play,
+  Pause,
   RotateCcw,
+  CheckSquare,
+  Square,
   MessageSquare,
-  Lightbulb,
-  CheckCircle
+  Timer,
+  ChevronRight,
+  Star,
+  ThumbsUp,
+  Code2,
+  Clock,
+  Circle
 } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from './supabase'
 import './App.css'
@@ -80,22 +88,57 @@ export default function App() {
   // Milestone 2 Skill Gap State
   const [selectedTargetRole, setSelectedTargetRole] = useState('Machine Learning Engineer')
 
-  // Milestone 3: Learning Path Progression & Completed Milestones
-  const [completedMilestones, setCompletedMilestones] = useState([1, 2])
-
-  // Milestone 3: Interactive Mock Interview State
-  const [interviewRole, setInterviewRole] = useState('Machine Learning Engineer')
-  const [interviewStarted, setInterviewStarted] = useState(false)
-  const [currentQIdx, setCurrentQIdx] = useState(0)
-  const [userAnswers, setUserAnswers] = useState({})
-  const [interviewTimer, setInterviewTimer] = useState(900)
-  const [interviewSubmitted, setInterviewSubmitted] = useState(false)
-  const [showHint, setShowHint] = useState(false)
-  const [interviewEval, setInterviewEval] = useState(null)
-
   // Aptitude Quiz State
   const [quizAnswer, setQuizAnswer] = useState(null)
   const [quizScore, setQuizScore] = useState(null)
+
+  // Learning Path Roadmap State & PDF Export
+  const [roadmapSteps, setRoadmapSteps] = useState([
+    { id: 1, title: 'Foundational Mathematics & Algorithmic Thinking', desc: 'Linear Algebra, Probability, Multivariable Calculus, and Data Structures in Python.', duration: 'Weeks 1–4', status: 'completed', tags: ['Khan Academy Linear Algebra', 'LeetCode Core 75', 'Python OOP'] },
+    { id: 2, title: 'Deep Learning, NLP & Neural Architectures', desc: 'Implement Convolutional Networks, Transformer Attention, and SpaCy NER pipelines.', duration: 'Weeks 5–8', status: 'in-progress', tags: ['CS231n Computer Vision', 'HuggingFace NLP', 'SpaCy Pipeline'] },
+    { id: 3, title: 'AI Production Systems & Cloud MLOps', desc: 'Containerize with Docker, deploy FastAPI REST endpoints, and implement drift monitoring.', duration: 'Weeks 9–12', status: 'planned', tags: ['Docker & Kubernetes', 'FastAPI Production', 'Triton Server'] },
+    { id: 4, title: 'Industry Capstone & SIH 2025 Prototype', desc: 'Deliver end-to-end cloud platform with real-time inference and institutional dashboard.', duration: 'Weeks 13–16', status: 'planned', tags: ['SIH 2025 Submission', 'GitHub CI/CD', 'Supabase Cloud'] }
+  ])
+
+  // Mock Interview Simulator State
+  const [interviewDomain, setInterviewDomain] = useState('ml')
+  const [interviewActive, setInterviewActive] = useState(false)
+  const [currentQIdx, setCurrentQIdx] = useState(0)
+  const [userAnswerText, setUserAnswerText] = useState('')
+  const [savedAnswers, setSavedAnswers] = useState({})
+  const [evaluationResults, setEvaluationResults] = useState({})
+  const [isEvaluating, setIsEvaluating] = useState(false)
+  const [timerSeconds, setTimerSeconds] = useState(900)
+  const [timerRunning, setTimerRunning] = useState(false)
+  const [sessionFinished, setSessionFinished] = useState(false)
+  const [showModelAnswer, setShowModelAnswer] = useState(false)
+
+  // Timer Countdown Effect
+  useEffect(() => {
+    let interval = null
+    if (interviewActive && timerRunning && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds(prev => (prev > 0 ? prev - 1 : 0))
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [interviewActive, timerRunning, timerSeconds])
+
+  // Toggle Roadmap Step Status
+  const handleToggleStepStatus = (id) => {
+    setRoadmapSteps(prev => prev.map(step => {
+      if (step.id === id) {
+        const nextStatus = step.status === 'completed' ? 'in-progress' : step.status === 'in-progress' ? 'planned' : 'completed'
+        return { ...step, status: nextStatus }
+      }
+      return step
+    }))
+  }
+
+  // Export Roadmap as PDF
+  const handleExportRoadmapPDF = () => {
+    window.print()
+  }
 
   // Supabase Database State (profiles, resumes, predictions tables)
   const [savedResumes, setSavedResumes] = useState([])
@@ -451,343 +494,256 @@ export default function App() {
     }, 400)
   }
 
-  // Mock Interview Questions Database by Target Career Role
-  const interviewQuestionsByRole = {
-    'Machine Learning Engineer': [
+  // Curated Technical Question Bank for AI Mock Interview Simulator
+  const interviewQuestions = {
+    ml: [
       {
         id: 1,
-        title: "Class Imbalance Mitigation",
-        question: "How do you detect and handle severe class imbalance in a classification dataset?",
-        hint: "Consider SMOTE, focal loss, class weights, precision-recall AUC, stratified k-fold cross-validation.",
-        keywords: ["smote", "weights", "focal", "imbalance", "stratified", "precision", "recall", "resampling", "oversampling", "undersampling"]
+        title: "Overfitting & Regularization in Deep Models",
+        difficulty: "Intermediate",
+        tags: ["Deep Learning", "Generalization"],
+        question: "How do you detect overfitting in complex neural networks or gradient boosted decision trees, and what concrete techniques do you apply to mitigate it?",
+        keywords: ["dropout", "early stopping", "l1", "l2", "weight decay", "cross validation", "data augmentation", "regularization", "validation loss", "learning rate"],
+        modelAnswer: "Overfitting is primarily detected when validation loss begins to diverge or increase while training loss continues decreasing. To mitigate it in neural networks: 1) Apply Dropout layers (typically 0.2 to 0.5) to prevent co-adaptation of neurons; 2) Implement Early Stopping based on validation loss patience; 3) Use L2 Weight Decay to constrain parameter norms; 4) Employ Data Augmentation to increase training diversity; and 5) In Gradient Boosted Trees (like XGBoost), tune hyper-parameters such as max_depth (3–6), colsample_bytree, and min_child_weight."
       },
       {
         id: 2,
-        title: "L1 vs L2 Regularization",
-        question: "Explain the fundamental difference between L1 (Lasso) and L2 (Ridge) regularization and how each impacts model weights.",
-        hint: "L1 adds absolute penalties causing sparsity and feature selection; L2 adds squared penalties shrinking weights evenly without setting them strictly to zero.",
-        keywords: ["lasso", "ridge", "absolute", "squared", "sparse", "shrinkage", "feature selection", "penalty", "weights", "norm"]
+        title: "Class Imbalance & Evaluation Metrics",
+        difficulty: "Intermediate",
+        tags: ["Model Evaluation", "Metrics"],
+        question: "In fraud detection or disease diagnosis where 99.5% of cases are negative, why is standard Accuracy misleading, and which evaluation metrics and resampling strategies should you use instead?",
+        keywords: ["accuracy paradox", "precision", "recall", "f1", "pr-auc", "roc-auc", "smote", "oversampling", "undersampling", "class weights", "confusion matrix"],
+        modelAnswer: "Standard accuracy suffers from the 'Accuracy Paradox': a naive classifier predicting everything as negative achieves 99.5% accuracy while identifying 0 fraudulent cases. Instead: 1) Evaluate Macro/Micro F1-Score to balance Precision and Recall; 2) Utilize PR-AUC (Precision-Recall Area Under Curve), which is much more informative than ROC-AUC under severe imbalance; 3) Apply Cost-Sensitive Learning / Class Weighting (e.g. scale_pos_weight in XGBoost); and 4) Use resampling techniques like SMOTE (Synthetic Minority Over-sampling) on the training set."
       },
       {
         id: 3,
-        title: "Low-Latency ML Inference & Drift",
-        question: "When deploying an ML inference service using FastAPI or Triton, how do you handle concurrency, minimize latency, and monitor for data drift?",
-        hint: "Discuss async/uvicorn workers, model quantization/caching, dynamic batching, and tracking feature distributions (KS-test / PSI).",
-        keywords: ["concurrency", "latency", "async", "drift", "batching", "monitoring", "caching", "workers", "distribution", "quantization"]
+        title: "Transformers vs. Recurrent Architectures (RNN/LSTM)",
+        difficulty: "Advanced",
+        tags: ["NLP", "Transformers"],
+        question: "How does the Multi-Head Self-Attention mechanism in Transformers solve the fundamental sequential bottleneck of RNNs and LSTMs?",
+        keywords: ["parallelization", "self-attention", "sequential bottleneck", "vanishing gradient", "o(1) path length", "qkv", "query key value", "positional encoding"],
+        modelAnswer: "RNNs and LSTMs process tokens sequentially step-by-step (token t depends on hidden state t-1), prohibiting GPU parallelization across long sequences and suffering from vanishing gradients. Transformers replace recurrence entirely with Multi-Head Self-Attention: 1) All tokens are processed simultaneously in parallel using Query, Key, and Value matrix multiplications (Q * K^T / sqrt(d_k)); 2) The path length between any two tokens is O(1), enabling direct dependency modeling; and 3) Positional Encodings inject token order into the permutation-invariant architecture."
       },
       {
         id: 4,
-        title: "Validation Strategy & Leakage",
-        question: "Why might high training accuracy be deceptive, and what validation strategy prevents data leakage?",
-        hint: "Discuss overfitting, train/val/test splits, time-series splits, and fitting vectorizers/scalers strictly on training folds.",
-        keywords: ["overfitting", "leakage", "validation", "cross-validation", "generalization", "split", "preprocessing", "unseen"]
+        title: "Feature Scaling & Gradient Descent",
+        difficulty: "Fundamental",
+        tags: ["Optimization", "Preprocessing"],
+        question: "Why is feature scaling (StandardScaler vs MinMaxScaler) crucial for distance-based and gradient-descent models like Logistic Regression and SVMs, but unnecessary for Decision Trees?",
+        keywords: ["gradient descent", "condition number", "standardscaler", "minmax", "euclidean distance", "decision tree", "monotonic", "orthogonality"],
+        modelAnswer: "Gradient Descent optimization converges much faster when features are on the same scale, as unscaled features create elongated, skewed contour ellipses leading to oscillations. Similarly, distance-based algorithms (k-NN, SVM, k-Means) are dominated by features with arbitrarily large numerical ranges. Conversely, Decision Trees and Tree Ensembles (Random Forest, XGBoost) split each feature independently based on monotonic order thresholds (e.g., x_i > threshold), meaning linear scalings do not change the split criteria or information gain."
+      },
+      {
+        id: 5,
+        title: "Production MLOps & Model Drift",
+        difficulty: "Advanced",
+        tags: ["MLOps", "Production"],
+        question: "What is the distinction between Data Drift and Concept Drift in a production AI system, and how would you build an automated monitoring and retraining pipeline?",
+        keywords: ["data drift", "concept drift", "covariate shift", "ks-test", "psi", "population stability", "ground truth lag", "retraining trigger", "fastapi", "monitoring"],
+        modelAnswer: "Data Drift (Covariate Shift) occurs when input feature distribution P(X) changes over time (e.g., changing resume vocabulary) while P(Y|X) remains constant. Concept Drift occurs when the underlying statistical relationship between features and target labels P(Y|X) changes. An automated monitoring pipeline: 1) Logs all inference feature vectors into PostgreSQL/S3; 2) Computes Population Stability Index (PSI) and Kolmogorov-Smirnov (KS) tests against baseline; and 3) Automatically triggers retraining pipelines and validation checks when PSI > 0.2."
       }
     ],
-    'Software Engineer': [
+    se: [
       {
         id: 1,
-        title: "SQL vs NoSQL Architecture",
-        question: "Explain the difference between SQL (relational) and NoSQL (document/key-value) databases. When would you choose one over the other?",
-        hint: "Discuss ACID guarantees, schema rigidity, horizontal scaling (CAP theorem), complex joins vs high-throughput key lookups.",
-        keywords: ["acid", "schema", "relational", "scaling", "horizontal", "vertical", "consistency", "sharding", "joins", "nosql"]
+        title: "Distributed Caching & Invalidation Patterns",
+        difficulty: "Intermediate",
+        tags: ["Backend", "Caching", "Redis"],
+        question: "How does Redis in-memory caching improve API latency, and how do you handle cache invalidation, cache stampede (Thundering Herd), and cache penetration?",
+        keywords: ["redis", "ttl", "cache aside", "write through", "thundering herd", "mutex lock", "bloom filter", "cache penetration", "cache stampede"],
+        modelAnswer: "Redis provides sub-millisecond in-memory data retrieval (RAM vs Disk I/O). Key strategies: 1) Cache-Aside Pattern: Application queries cache first; on cache miss, queries DB and populates cache with TTL; 2) Cache Stampede / Thundering Herd: When a high-traffic key expires, multiple concurrent requests hammer the DB. Mitigate using distributed mutex locking (Redlock) or probabilistic early expiration; 3) Cache Penetration: Mitigate using Bloom Filters at the gateway or caching empty null results with short TTL."
       },
       {
         id: 2,
-        title: "React Reconciliation & Keys",
-        question: "How does the React Virtual DOM diffing algorithm optimize UI updates, and why is the 'key' prop essential in lists?",
-        hint: "Explain reconciliation, tree diffing heuristics in O(n), and maintaining stable element identities across renders.",
-        keywords: ["virtual dom", "reconciliation", "diffing", "key", "re-render", "performance", "tree", "fiber"]
+        title: "Database Indexing & PostgreSQL B-Trees",
+        difficulty: "Intermediate",
+        tags: ["Databases", "SQL", "Indexing"],
+        question: "Explain how B-Tree indexes work in relational databases like PostgreSQL. When should you avoid adding an index, and what are the trade-offs on write-heavy tables?",
+        keywords: ["b-tree", "o(log n)", "write overhead", "disk space", "low cardinality", "table scan", "wal", "insert overhead", "selectivity"],
+        modelAnswer: "A B-Tree (Balanced Tree) index maintains sorted multi-level leaf nodes pointing to physical tuple heap offsets, reducing search complexity from O(N) sequential table scan to O(log N). Trade-offs: 1) Every INSERT, UPDATE, or DELETE requires rebalancing and updating all corresponding index trees, generating extra Write-Ahead Logging (WAL) and disk write amplification; 2) Indexes consume significant RAM/disk buffer space. Avoid indexing low-cardinality columns (e.g., boolean flags) where query planners prefer sequential scans, and avoid over-indexing tables with high write-to-read ratios."
       },
       {
         id: 3,
-        title: "REST Idempotency & HTTP Verbs",
-        question: "What makes an API endpoint idempotent? What is the technical difference between HTTP PUT and PATCH?",
-        hint: "PUT replaces the entire resource; PATCH updates partial fields. Both can be idempotent; POST is typically non-idempotent.",
-        keywords: ["idempotent", "put", "patch", "replace", "partial", "payload", "http", "state"]
+        title: "Concurrency, Event Loop & Asynchronous I/O",
+        difficulty: "Advanced",
+        tags: ["Node.js", "Concurrency", "Architecture"],
+        question: "What is the difference between concurrency and parallelism, and how does the single-threaded Event Loop in Node.js / JavaScript achieve high non-blocking I/O throughput?",
+        keywords: ["concurrency vs parallelism", "event loop", "libuv", "call stack", "callback queue", "microtask queue", "non-blocking", "worker threads"],
+        modelAnswer: "Concurrency is the composition of independently executing processes (interleaved execution on a single core), while Parallelism is the simultaneous execution of multiple computations on multiple physical CPU cores. Node.js uses a single-threaded Event Loop backed by the libuv threadpool: 1) JavaScript execution occurs on one main thread without locking overhead; 2) I/O operations (network sockets, disk, DB queries) are offloaded to OS kernel asynchronous primitives (epoll/kqueue); 3) When an I/O operation completes, its callback is enqueued into the Event Loop phases (Timers, Poll, Check) and Microtask Queue (Promises), ensuring the main thread never blocks waiting for I/O."
       },
       {
         id: 4,
-        title: "Distributed Rate Limiter Design",
-        question: "How would you design a thread-safe rate limiter for a distributed API service?",
-        hint: "Mention algorithms like Token Bucket / Leaky Bucket, Redis atomic counters (INCR), and sliding window rate limits.",
-        keywords: ["token bucket", "leaky bucket", "redis", "sliding window", "distributed", "concurrency", "rate limit", "atomic"]
+        title: "REST vs. GraphQL API Design",
+        difficulty: "Intermediate",
+        tags: ["APIs", "System Design"],
+        question: "Compare RESTful APIs with GraphQL in terms of network efficiency, over-fetching / under-fetching, caching simplicity, and schema governance.",
+        keywords: ["rest", "graphql", "over-fetching", "under-fetching", "n+1 problem", "http caching", "schema stitching", "dataloader"],
+        modelAnswer: "1) Network Efficiency: REST endpoints often suffer from Over-fetching (returning extraneous fields) or Under-fetching (requiring N network round-trips to assemble related resources). GraphQL allows clients to specify exact requested field shapes in a single query; 2) Caching: REST leverages native HTTP protocol caching (ETag, Cache-Control, edge CDNs) out-of-the-box. GraphQL uses single POST endpoints (/graphql), requiring client-side normalized caching (Apollo/Relay); 3) Database Performance: GraphQL queries can easily trigger the N+1 database problem if resolvers are not batched using DataLoader."
+      },
+      {
+        id: 5,
+        title: "Stateless JWT Authentication & Security",
+        difficulty: "Advanced",
+        tags: ["Security", "Authentication", "JWT"],
+        question: "How do JWTs facilitate stateless authentication, and how should access and refresh tokens be stored to defend against Cross-Site Scripting (XSS) and Cross-Site Request Forgery (CSRF)?",
+        keywords: ["jwt", "stateless", "access token", "refresh token", "httponly cookie", "xss", "csrf", "samesite", "token revocation", "signature"],
+        modelAnswer: "A JSON Web Token (Header.Payload.Signature) is cryptographically signed using a secret (HMAC-SHA256) or public/private key (RS256). Any service can verify the signature and read user claims without querying a central session database. Security best practices: 1) Never store sensitive tokens in browser localStorage or sessionStorage, as any injected XSS script can exfiltrate them; 2) Store short-lived Access Tokens (5–15 min) in memory and long-lived Refresh Tokens in an HttpOnly, Secure, SameSite=Strict cookie inaccessible to JavaScript; 3) Defend against CSRF using SameSite cookies and CSRF anti-forgery tokens; and 4) Implement token blacklisting / revocation in Redis for immediate logout or compromised credentials."
       }
     ],
-    'Data Scientist': [
+    cloud: [
       {
         id: 1,
-        title: "Tabular EDA & Imputation",
-        question: "Describe your step-by-step workflow for Exploratory Data Analysis (EDA) on a tabular dataset with missing values and outliers.",
-        hint: "Summary statistics, distributions (IQR/Z-score), correlation matrix, imputation strategies, domain validation.",
-        keywords: ["eda", "iqr", "z-score", "imputation", "distribution", "correlation", "missing", "outliers", "visualization"]
+        title: "Docker Containers vs. Virtual Machines",
+        difficulty: "Fundamental",
+        tags: ["Docker", "Virtualization"],
+        question: "What is the architectural difference between Docker containers and traditional Virtual Machines, and why are containers significantly lighter and faster to boot?",
+        keywords: ["shared kernel", "hypervisor", "guest os", "namespaces", "cgroups", "isolation", "boot time", "resource overhead"],
+        modelAnswer: "Virtual Machines run on a Hypervisor (Type 1 or Type 2) and require a complete, independent Guest Operating System kernel, virtualized BIOS, and emulated virtual hardware, resulting in gigabyte image sizes and minute-long boot times. Docker containers virtualize at the OS layer: they share the host OS kernel and use Linux cgroups (for resource limiting: CPU/RAM) and namespaces (for process, PID, network, and mount isolation). Because no guest OS boots, containers launch in milliseconds and consume negligible memory overhead."
       },
       {
         id: 2,
-        title: "A/B Experimentation & Statistical Power",
-        question: "How do you design, size (power analysis), and evaluate an A/B experiment before launching a product feature?",
-        hint: "Hypothesis definition, statistical power (80%), alpha (0.05), minimum detectable effect (MDE), p-value significance.",
-        keywords: ["hypothesis", "p-value", "significance", "power", "sample size", "mde", "control", "variant", "confidence"]
-      },
-      {
-        id: 3,
-        title: "Central Limit Theorem & Inference",
-        question: "What is the Central Limit Theorem and why is it fundamental to statistical inference in data science?",
-        hint: "Distribution of sample means approaches normality as sample size increases, allowing z-tests/t-tests without knowing population distribution.",
-        keywords: ["central limit", "normal", "sample mean", "variance", "hypothesis", "population", "inference"]
-      },
-      {
-        id: 4,
-        title: "SQL Query Performance Tuning",
-        question: "How do you diagnose and optimize a slow SQL query involving multi-million row joins?",
-        hint: "EXPLAIN plan, indexing (B-Tree), partitioning, avoiding SELECT *, avoiding unnecessary subqueries.",
-        keywords: ["explain", "index", "b-tree", "join", "partition", "execution plan", "cost", "optimization"]
-      }
-    ],
-    'DevOps / Cloud Architect': [
-      {
-        id: 1,
-        title: "Kubernetes Control Plane & Pods",
-        question: "Explain the architecture of Kubernetes: how do Control Plane components coordinate with Worker Nodes?",
-        hint: "etcd stores cluster state, API Server handles requests, Scheduler assigns pods, kubelet enforces container state on nodes.",
-        keywords: ["control plane", "etcd", "api server", "kubelet", "kube-proxy", "scheduler", "nodes", "pods"]
-      },
-      {
-        id: 2,
-        title: "Infrastructure as Code & Drift",
-        question: "What is Infrastructure as Code (IaC) and how does Terraform manage state and reconcile configuration drift?",
-        hint: "Declarative HCL syntax, terraform.tfstate, plan/apply lifecycle, detecting manual infrastructure changes.",
-        keywords: ["terraform", "state", "declarative", "drift", "plan", "apply", "provider", "immutable"]
+        title: "Kubernetes Core Architecture",
+        difficulty: "Advanced",
+        tags: ["Kubernetes", "DevOps"],
+        question: "Explain the relationship and roles of Kubernetes Pods, ReplicaSets, Deployments, Services, and Ingress Controllers in a production cluster.",
+        keywords: ["pod", "deployment", "replicaset", "clusterip", "service", "ingress", "kube-proxy", "rolling update", "self-healing"],
+        modelAnswer: "1) Pod: Smallest deployable unit, encapsulating one or more tightly coupled containers sharing localhost network and storage volumes; 2) Deployment & ReplicaSet: Deployments manage declarative state and rolling updates with zero downtime, maintaining a desired count of identical Pods via ReplicaSets for self-healing; 3) Service: Provides a stable virtual ClusterIP and internal L4 load balancing across transient Pod IPs using label selectors; 4) Ingress Controller (e.g. NGINX Ingress): Acts as the cluster L7 reverse proxy, routing external HTTP/HTTPS traffic to internal Services based on hostnames and URL paths, managing SSL/TLS termination."
       },
       {
         id: 3,
         title: "Zero-Downtime Deployment Strategies",
-        question: "Explain Blue/Green vs. Canary deployment strategies and how rollback is executed in each.",
-        hint: "Blue/Green switches traffic 100% instantly with fallback; Canary shifts a small percentage (e.g. 5%) and monitors error rates.",
-        keywords: ["blue green", "canary", "traffic", "rollback", "routing", "downtime", "monitoring", "load balancer"]
+        difficulty: "Intermediate",
+        tags: ["CI/CD", "Deployments"],
+        question: "Compare Blue-Green Deployments with Canary Deployments. How do you manage database schema migrations during zero-downtime releases?",
+        keywords: ["blue green", "canary deployment", "traffic routing", "expand and contract", "backward compatibility", "rollback", "database migration"],
+        modelAnswer: "1) Blue-Green: Maintains two identical production environments. Traffic is switched 100% instantly from Blue (active) to Green (new version) at the load balancer level, enabling instant rollback if issues arise; 2) Canary: Routes a small percentage of real user traffic (e.g. 5%) to the new version while monitoring error rates and latency before incrementally scaling to 100%; 3) Database Migrations: Zero-downtime requires the 'Expand and Contract' pattern: Step 1 (Expand) - Add new columns as nullable/default without dropping old columns, ensuring backward compatibility with both versions; Step 2 - Deploy code writing to both; Step 3 (Contract) - Backfill old data and safely remove deprecated schema."
       },
       {
         id: 4,
-        title: "CI/CD & Container Security",
-        question: "What are the essential best practices for securing CI/CD pipelines and container images?",
-        hint: "Multi-stage builds, non-root users, vulnerability scanning (Trivy), secret management (vault), least privilege.",
-        keywords: ["multi-stage", "non-root", "scanning", "vulnerability", "secrets", "vault", "least privilege", "docker"]
+        title: "Infrastructure as Code & State Management",
+        difficulty: "Intermediate",
+        tags: ["Terraform", "IaC"],
+        question: "Why is declarative Infrastructure as Code (Terraform) preferred over imperative CLI scripts, and how do you protect and manage the Terraform state file in team environments?",
+        keywords: ["declarative vs imperative", "terraform state", "drift detection", "remote backend", "s3 bucket", "dynamodb state locking", "idempotent"],
+        modelAnswer: "Declarative IaC specifies the desired end-state (e.g., 'create an S3 bucket with versioning enabled'); Terraform automatically calculates dependency graphs, creates execution plans (terraform plan), and converges the infrastructure idempotently. Imperative scripts (Bash/AWS CLI) define step-by-step actions and frequently fail on re-runs. For team state management: 1) Store terraform.tfstate in a remote backend (e.g. AWS S3, Google Cloud Storage) with server-side encryption; 2) Enable State Locking (via AWS DynamoDB) to prevent concurrent conflicting applies; and 3) Enable S3 versioning for disaster recovery."
+      },
+      {
+        id: 5,
+        title: "High Availability & Multi-Region Resilience",
+        difficulty: "Advanced",
+        tags: ["Cloud Architecture", "AWS", "Reliability"],
+        question: "How do you architect a multi-region highly available web application with active-passive disaster recovery, DNS failover, and database replication?",
+        keywords: ["multi-region", "rto", "rpo", "route 53", "dns health check", "cross-region replication", "read replicas", "active-passive"],
+        modelAnswer: "1) DNS Layer: Route 53 or Cloudflare configured with DNS Health Checks and Failover Routing policy pointing primary traffic to Region A (Active) and switching to Region B (Passive) upon health check failure; 2) Compute Layer: Auto Scaling Groups and load balancers pre-provisioned in both regions via Terraform; 3) Database Layer: Primary database (e.g. Aurora Global Database or PostgreSQL Cross-Region Read Replica) in Region A with asynchronous replication to Region B. Target acceptable Recovery Point Objective (RPO < 1 min) and Recovery Time Objective (RTO < 5 min) with automated promoter failover scripts; 4) Static Assets: S3 Cross-Region Replication with CloudFront CDN global edge caching."
       }
     ]
   }
 
-  // Active question set
-  const activeQuestions = interviewQuestionsByRole[interviewRole] || interviewQuestionsByRole['Machine Learning Engineer']
+  // Format Timer
+  const formatTimer = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
 
-  // Countdown timer for mock interview
-  useEffect(() => {
-    let interval = null
-    if (interviewStarted && !interviewSubmitted && interviewTimer > 0) {
-      interval = setInterval(() => {
-        setInterviewTimer((prev) => (prev > 0 ? prev - 1 : 0))
-      }, 1000)
-    }
-    return () => clearInterval(interval)
-  }, [interviewStarted, interviewSubmitted, interviewTimer])
-
-  // Start interview session
-  const handleStartInterview = (role) => {
-    const chosenRole = role || selectedTargetRole || 'Machine Learning Engineer'
-    setInterviewRole(chosenRole)
-    setInterviewStarted(true)
+  // Start Interview Session
+  const handleStartInterview = (domainKey) => {
+    setInterviewDomain(domainKey)
+    setInterviewActive(true)
     setCurrentQIdx(0)
-    setUserAnswers({})
-    setInterviewTimer(900)
-    setInterviewSubmitted(false)
-    setShowHint(false)
-    setInterviewEval(null)
+    setUserAnswerText('')
+    setSavedAnswers({})
+    setEvaluationResults({})
+    setTimerSeconds(900)
+    setTimerRunning(true)
+    setSessionFinished(false)
+    setShowModelAnswer(false)
   }
 
-  // Answer change handler
-  const handleAnswerChange = (qId, text) => {
-    setUserAnswers(prev => ({ ...prev, [qId]: text }))
-  }
+  // Evaluate Current Question Answer
+  const handleEvaluateAnswer = () => {
+    const questionsList = interviewQuestions[interviewDomain] || []
+    const currentQ = questionsList[currentQIdx]
+    const text = (userAnswerText || savedAnswers[currentQIdx] || '').trim()
 
-  // AI Evaluation logic
-  const handleEvaluateInterview = () => {
-    const questions = activeQuestions
-    let totalScore = 0
-    let detectedKeywords = []
-    let detailedFeedback = []
-
-    questions.forEach((q) => {
-      const ans = (userAnswers[q.id] || '').toLowerCase()
-      const matched = q.keywords.filter(kw => ans.includes(kw.toLowerCase()))
-      detectedKeywords.push(...matched)
-      const wordCount = ans.trim().split(/\s+/).filter(Boolean).length
-
-      let qScore = 0
-      if (wordCount >= 8) {
-        const keywordScore = Math.min(65, (matched.length / Math.min(q.keywords.length, 5)) * 65)
-        const depthScore = Math.min(35, wordCount * 0.7)
-        qScore = Math.min(100, Math.round(keywordScore + depthScore))
-      }
-
-      totalScore += qScore
-      detailedFeedback.push({
-        id: q.id,
-        title: q.title,
-        question: q.question,
-        score: qScore,
-        matchedKeywords: matched,
-        wordCount: wordCount
-      })
-    })
-
-    const overallScore = Math.round(totalScore / questions.length)
-    setInterviewEval({
-      score: overallScore,
-      rating: overallScore >= 80 ? 'Exceptional Industry Readiness' : overallScore >= 60 ? 'Competent Candidate' : 'Developing Competency',
-      matchedCount: detectedKeywords.length,
-      feedbackList: detailedFeedback,
-      date: new Date().toLocaleDateString()
-    })
-    setInterviewSubmitted(true)
-  }
-
-  // Toggle milestone completion in Learning Path
-  const toggleMilestone = (stepId) => {
-    setCompletedMilestones(prev => 
-      prev.includes(stepId) ? prev.filter(id => id !== stepId) : [...prev, stepId]
-    )
-  }
-
-  // Export Learning Path Roadmap as Printable PDF
-  const handleExportRoadmapPDF = () => {
-    const printWin = window.open('', '_blank')
-    if (!printWin) {
-      window.print()
+    if (!text || text.length < 15) {
+      alert('Please provide a more detailed technical explanation (at least a couple of sentences) to receive an AI evaluation.')
       return
     }
 
-    const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-  <title>CareerCast AI Roadmap - ${userName}</title>
-  <style>
-    @page { size: A4; margin: 16mm 14mm; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #0f172a; line-height: 1.5; padding: 10px; margin: 0; }
-    .header { border-bottom: 3px solid #2563eb; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
-    .logo { font-size: 24px; font-weight: 800; color: #1e3a8a; }
-    .sub { font-size: 11px; color: #64748b; margin-top: 3px; }
-    .badge { background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 6px; border: 1px solid #bfdbfe; }
-    .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
-    .meta-item { font-size: 11px; color: #64748b; }
-    .meta-item strong { display: block; font-size: 13px; color: #0f172a; margin-top: 2px; }
-    .section-title { font-size: 15px; font-weight: 700; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin: 18px 0 12px 0; }
-    .step-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; page-break-inside: avoid; background: #ffffff; }
-    .step-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .step-header { display: flex; align-items: center; gap: 10px; }
-    .step-num { width: 26px; height: 26px; border-radius: 50%; background: #2563eb; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-    .step-title { font-size: 14px; font-weight: 700; color: #0f172a; }
-    .step-status { font-size: 11px; font-weight: 600; color: #059669; }
-    .step-desc { font-size: 12px; color: #475569; margin: 4px 0 8px 36px; }
-    .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-left: 36px; }
-    .tag { background: #f1f5f9; color: #334155; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
-    .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <div class="logo">CareerCast • Career Progression Tree</div>
-      <div class="sub">Smart India Hackathon (SIH 2025) • AI-Powered Personalized Career Roadmap</div>
-    </div>
-    <div class="badge">Official Institutional Report</div>
-  </div>
+    setIsEvaluating(true)
+    setTimeout(() => {
+      const textLower = text.toLowerCase()
+      const matched = currentQ.keywords.filter(k => textLower.includes(k.toLowerCase()))
+      const wordCount = text.split(/\s+/).length
 
-  <div class="meta-grid">
-    <div class="meta-item">Candidate:<strong>${userName}</strong></div>
-    <div class="meta-item">Target Career Path:<strong>${selectedTargetRole}</strong></div>
-    <div class="meta-item">Match Index:<strong>85% (Grade A Readiness)</strong></div>
-    <div class="meta-item">Report Date:<strong>${new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</strong></div>
-  </div>
+      // Calculate score based on keyword coverage and depth
+      const kwScore = Math.min(65, Math.round((matched.length / Math.max(3, currentQ.keywords.length * 0.45)) * 65))
+      const depthScore = Math.min(30, Math.round((wordCount / 50) * 30))
+      const totalScore = Math.min(96, Math.max(48, kwScore + depthScore))
 
-  <div class="section-title">Personalized 4-Stage Career Progression Milestones</div>
+      let grade = 'Proficient - Strong Technical Articulation'
+      if (totalScore >= 85) grade = 'Exceptional - High Readiness'
+      else if (totalScore >= 70) grade = 'Good - Solid Core Concepts'
+      else grade = 'Needs Practice - Missing Key Terminology'
 
-  <div class="step-card">
-    <div class="step-top">
-      <div class="step-header">
-        <div class="step-num">1</div>
-        <div class="step-title">Foundational Mathematics & Algorithmic Thinking</div>
-      </div>
-      <span class="step-status">${completedMilestones.includes(1) ? '✓ Completed' : 'In Progress'}</span>
-    </div>
-    <div class="step-desc">Master Linear Algebra, Probability, Statistics, Matrix Decompositions, and Core Data Structures in Python.</div>
-    <div class="tags">
-      <span class="tag">Khan Academy Linear Algebra</span>
-      <span class="tag">MIT 18.06 Matrix Methods</span>
-      <span class="tag">LeetCode Core 75</span>
-    </div>
-  </div>
+      const strengths = matched.length > 0 
+        ? matched.slice(0, 3).map(k => `Accurately articulated concept: "${k}"`)
+        : ['Clear logical structure and technical attempt']
 
-  <div class="step-card">
-    <div class="step-top">
-      <div class="step-header">
-        <div class="step-num">2</div>
-        <div class="step-title">Deep Learning & Neural Architectures</div>
-      </div>
-      <span class="step-status">${completedMilestones.includes(2) ? '✓ Completed' : 'In Progress'}</span>
-    </div>
-    <div class="step-desc">Build and evaluate Convolutional Networks, Recurrent Units, Self-Attention, and Transformer models for NLP & Vision.</div>
-    <div class="tags">
-      <span class="tag">CS231n Computer Vision</span>
-      <span class="tag">HuggingFace NLP Course</span>
-      <span class="tag">PyTorch Deep Learning Specialization</span>
-    </div>
-  </div>
+      const missing = currentQ.keywords
+        .filter(k => !textLower.includes(k.toLowerCase()))
+        .slice(0, 3)
+        .map(k => `Could elaborate on: "${k}"`)
 
-  <div class="step-card">
-    <div class="step-top">
-      <div class="step-header">
-        <div class="step-num">3</div>
-        <div class="step-title">AI Production & Cloud Deployment</div>
-      </div>
-      <span class="step-status">${completedMilestones.includes(3) ? '✓ Completed' : 'Scheduled'}</span>
-    </div>
-    <div class="step-desc">Package models with FastAPI, containerize with Docker, deploy onto Kubernetes clusters, and monitor drift.</div>
-    <div class="tags">
-      <span class="tag">Docker & Kubernetes for ML</span>
-      <span class="tag">Triton Inference Server</span>
-      <span class="tag">MLflow Model Tracking</span>
-    </div>
-  </div>
+      const feedback = {
+        score: totalScore,
+        grade,
+        strengths,
+        improvements: missing.length > 0 ? missing : ['Excellent coverage across all primary evaluation criteria.'],
+        modelAnswer: currentQ.modelAnswer
+      }
 
-  <div class="step-card">
-    <div class="step-top">
-      <div class="step-header">
-        <div class="step-num">4</div>
-        <div class="step-title">Industry Capstone & SIH 2025 Prototype</div>
-      </div>
-      <span class="step-status">${completedMilestones.includes(4) ? '✓ Completed' : 'Scheduled'}</span>
-    </div>
-    <div class="step-desc">Deploy real-time solutions for education, healthcare, or smart mobility with automated CI/CD accuracy checks.</div>
-    <div class="tags">
-      <span class="tag">SIH 2025 Prototype</span>
-      <span class="tag">GitHub Actions CI/CD</span>
-      <span class="tag">Production Release</span>
-    </div>
-  </div>
+      setEvaluationResults(prev => ({ ...prev, [currentQIdx]: feedback }))
+      setSavedAnswers(prev => ({ ...prev, [currentQIdx]: text }))
+      setIsEvaluating(false)
+    }, 600)
+  }
 
-  <div class="footer">
-    <span>CareerCast AI Intelligence Platform • Verified by SpaCy NER & Ensemble Classifier</span>
-    <span>Page 1 of 1</span>
-  </div>
+  // Navigate to Next Question
+  const handleNextQuestion = () => {
+    const nextIdx = currentQIdx + 1
+    const questionsList = interviewQuestions[interviewDomain] || []
+    if (nextIdx < questionsList.length) {
+      if (userAnswerText.trim()) {
+        setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
+      }
+      setCurrentQIdx(nextIdx)
+      setUserAnswerText(savedAnswers[nextIdx] || '')
+      setShowModelAnswer(false)
+    }
+  }
 
-  <script>
-    window.onload = function() {
-      window.print();
-    };
-  </script>
-</body>
-</html>`
-    printWin.document.open()
-    printWin.document.write(htmlContent)
-    printWin.document.close()
+  // Navigate to Previous Question
+  const handlePrevQuestion = () => {
+    const prevIdx = currentQIdx - 1
+    if (prevIdx >= 0) {
+      if (userAnswerText.trim()) {
+        setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
+      }
+      setCurrentQIdx(prevIdx)
+      setUserAnswerText(savedAnswers[prevIdx] || '')
+      setShowModelAnswer(false)
+    }
+  }
+
+  // Finish Interview Session
+  const handleFinishInterview = () => {
+    if (userAnswerText.trim() && !savedAnswers[currentQIdx]) {
+      setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
+    }
+    setTimerRunning(false)
+    setSessionFinished(true)
   }
 
   // Colleges data
@@ -1341,135 +1297,179 @@ export default function App() {
 
             {/* 4. LEARNING PATH (ROADMAP TREE & PDF EXPORT) */}
             {activeTab === 'learning-path' && (
-              <div>
-                <div className="welcome-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div className="learning-path-wrapper">
+                {/* Header with Role Selector and Export PDF Button */}
+                <div className="welcome-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
                     <h2>Personalized Career Roadmap & Progression Tree</h2>
-                    <p>Curriculum milestones tailored for: <strong style={{ color: '#38bdf8' }}>{selectedTargetRole}</strong></p>
+                    <p>Milestone-driven curriculum customized for <strong>{selectedTargetRole}</strong></p>
                   </div>
-                  <button 
-                    className="btn-solid-blue" 
-                    onClick={handleExportRoadmapPDF} 
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '10px 18px', fontSize: '0.9rem' }}
-                  >
-                    <Download size={16} />
-                    <span>Export Roadmap as PDF</span>
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <select
+                      value={selectedTargetRole}
+                      onChange={(e) => setSelectedTargetRole(e.target.value)}
+                      className="role-selector-dropdown"
+                      style={{ padding: '8px 14px', borderRadius: '8px', background: 'var(--bg-input)', color: '#ffffff', border: '1px solid var(--border)', fontSize: '0.85rem', fontWeight: 600 }}
+                    >
+                      <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+                      <option value="Data Scientist">Data Scientist</option>
+                      <option value="Full Stack Software Engineer">Full Stack Software Engineer</option>
+                      <option value="Cloud Solutions Architect">Cloud Solutions Architect</option>
+                      <option value="Product Manager">Product Manager</option>
+                    </select>
+                    <button
+                      className="btn-solid-blue"
+                      onClick={handleExportRoadmapPDF}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '8px 16px', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}
+                      title="Download clean printable Career Roadmap as PDF"
+                    >
+                      <Download size={16} />
+                      <span>Export Roadmap (PDF)</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Progress Overview Banner */}
-                <div className="white-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem', padding: '1.25rem 1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <TrendingUp size={24} />
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '1rem' }}>Curriculum Completion Progress</div>
-                      <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                        {completedMilestones.length} of 4 Core Milestones Finished ({Math.round((completedMilestones.length / 4) * 100)}% Milestone Velocity)
+                <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1.25rem 1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TrendingUp size={22} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '1rem', color: '#ffffff' }}>Target Role Readiness: 85% Completed</div>
+                        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                          {roadmapSteps.filter(s => s.status === 'completed').length} of {roadmapSteps.length} Milestones Achieved • Est. Time to Master: 16 Weeks
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '220px' }}>
-                    <div className="prob-track" style={{ flex: 1, height: '8px' }}>
-                      <div className="prob-fill" style={{ width: `${(completedMilestones.length / 4) * 100}%` }} />
-                    </div>
-                    <span style={{ fontWeight: 800, color: '#38bdf8', fontSize: '0.95rem' }}>
-                      {Math.round((completedMilestones.length / 4) * 100)}%
+                    <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                      Industry Ready Track ★
                     </span>
+                  </div>
+                  <div className="prob-track" style={{ height: '8px', background: 'rgba(255, 255, 255, 0.08)' }}>
+                    <div className="prob-fill" style={{ width: `${(roadmapSteps.filter(s => s.status === 'completed').length / roadmapSteps.length) * 100}%`, background: 'linear-gradient(90deg, #10b981, #38bdf8)' }} />
                   </div>
                 </div>
 
-                <div className="white-panel">
-                  {[
-                    { 
-                      step: 1, 
-                      title: 'Foundational Mathematics & Algorithmic Thinking', 
-                      desc: 'Linear Algebra, Probability, Statistics, Matrix Decompositions, and Data Structures in Python.', 
-                      tags: ['Khan Academy Linear Algebra', 'MIT 18.06 Matrix Methods', 'LeetCode Core 75'],
-                      duration: 'Weeks 1–4'
-                    },
-                    { 
-                      step: 2, 
-                      title: 'Deep Learning & Neural Architectures', 
-                      desc: 'Implement Convolutional Networks, Recurrent Units, Transformers, and PyTorch deep learning modules.', 
-                      tags: ['CS231n Computer Vision', 'HuggingFace NLP Course', 'DeepLearning.AI Specialization'],
-                      duration: 'Weeks 5–8'
-                    },
-                    { 
-                      step: 3, 
-                      title: 'AI Production & Cloud Deployment', 
-                      desc: 'Package models with FastAPI & Docker, deploy onto Kubernetes clusters, and monitor concept drift.', 
-                      tags: ['Docker & Kubernetes for ML', 'Triton Inference Server', 'MLflow Tracking'],
-                      duration: 'Weeks 9–12'
-                    },
-                    { 
-                      step: 4, 
-                      title: 'Industry Capstone & SIH 2025 Prototype', 
-                      desc: 'Deploy end-to-end production solution with automated CI/CD accuracy regression pipelines.', 
-                      tags: ['SIH 2025 Final Prototype', 'GitHub Actions CI/CD', 'Production Release'],
-                      duration: 'Weeks 13–16'
-                    }
-                  ].map((s) => {
-                    const isDone = completedMilestones.includes(s.step)
+                {/* Interactive Milestone Cards */}
+                <div className="roadmap-milestones-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {roadmapSteps.map((s) => {
+                    const isCompleted = s.status === 'completed'
+                    const isInProgress = s.status === 'in-progress'
                     return (
-                      <div 
-                        key={s.step} 
-                        style={{ 
-                          display: 'flex', 
-                          gap: '1.25rem', 
-                          paddingBottom: '1.5rem', 
-                          marginBottom: '1.5rem', 
-                          borderBottom: s.step === 4 ? 'none' : '1px solid var(--border)' 
-                        }}
-                      >
-                        <button
-                          onClick={() => toggleMilestone(s.step)}
-                          title={isDone ? 'Mark as in-progress' : 'Mark as completed'}
-                          style={{ 
-                            width: '40px', 
-                            height: '40px', 
-                            borderRadius: '50%', 
-                            background: isDone ? '#10b981' : 'rgba(56, 189, 248, 0.15)', 
-                            color: isDone ? '#ffffff' : '#38bdf8', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            fontWeight: 700,
-                            border: 'none',
-                            cursor: 'pointer',
-                            flexShrink: 0,
-                            transition: 'all 0.2s ease'
-                          }}
-                        >
-                          {isDone ? <Check size={20} /> : s.step}
-                        </button>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            <h4 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>
-                              {s.title}
-                            </h4>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span style={{ fontSize: '0.75rem', color: '#94a3b8', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: '4px' }}>
-                                ⏱ {s.duration}
-                              </span>
-                              <span style={{ fontSize: '0.78rem', color: isDone ? '#10b981' : '#f59e0b', fontWeight: 600 }}>
-                                {isDone ? '✓ Completed' : 'In Progress'}
-                              </span>
+                      <div key={s.id} className="white-panel" style={{ padding: '1.25rem 1.5rem', borderLeft: isCompleted ? '4px solid #10b981' : isInProgress ? '4px solid #38bdf8' : '4px solid #64748b' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '50%',
+                              background: isCompleted ? '#10b981' : isInProgress ? '#38bdf8' : 'rgba(255, 255, 255, 0.1)',
+                              color: isCompleted || isInProgress ? '#ffffff' : '#94a3b8',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 700,
+                              fontSize: '0.85rem'
+                            }}>
+                              {isCompleted ? <Check size={16} /> : s.id}
+                            </div>
+                            <div>
+                              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>{s.title}</h4>
+                              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Duration: {s.duration}</span>
                             </div>
                           </div>
-                          <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: '6px 0 10px' }}>{s.desc}</p>
-                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            {s.tags.map((t, idx) => (
-                              <span key={idx} style={{ background: 'var(--bg-input)', color: '#38bdf8', padding: '4px 10px', borderRadius: '6px', fontSize: '0.76rem', fontWeight: 600, border: '1px solid var(--border)' }}>
-                                {t}
-                              </span>
-                            ))}
-                          </div>
+
+                          {/* Clickable Status Toggle */}
+                          <button
+                            onClick={() => handleToggleStepStatus(s.id)}
+                            style={{
+                              padding: '4px 12px',
+                              borderRadius: '20px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              border: 'none',
+                              background: isCompleted ? 'rgba(16, 185, 129, 0.2)' : isInProgress ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                              color: isCompleted ? '#10b981' : isInProgress ? '#38bdf8' : '#94a3b8',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
+                            title="Click to toggle status (Completed / In Progress / Planned)"
+                          >
+                            {isCompleted ? <CheckCircle2 size={13} /> : isInProgress ? <Clock size={13} /> : <Circle size={13} />}
+                            <span style={{ textTransform: 'capitalize' }}>{s.status.replace('-', ' ')}</span>
+                          </button>
+                        </div>
+
+                        <p style={{ fontSize: '0.86rem', color: '#cbd5e1', margin: '0.5rem 0 0.85rem 2.75rem', lineHeight: 1.5 }}>
+                          {s.desc}
+                        </p>
+
+                        <div style={{ marginLeft: '2.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {s.tags.map((t, idx) => (
+                            <span key={idx} style={{ background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#94a3b8', padding: '3px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+                              📖 {t}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     )
                   })}
+                </div>
+
+                {/* Printable Report View (Visible only during window.print()) */}
+                <div className="printable-roadmap-report" style={{ display: 'none' }}>
+                  <div style={{ borderBottom: '2px solid #2563eb', paddingBottom: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h1 style={{ fontSize: '1.5rem', color: '#0f172a', margin: 0, fontWeight: 800 }}>CareerCast • AI Career Intelligence Platform</h1>
+                      <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.85rem' }}>Personalized Career Roadmap & Progression Transcript</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ background: '#eff6ff', color: '#2563eb', padding: '4px 10px', borderRadius: '6px', fontWeight: 700, fontSize: '0.8rem' }}>
+                        SIH 2025 Certified
+                      </span>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>Date: {new Date().toLocaleDateString()}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: '#f8fafc', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Student Candidate</div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>{userName}</div>
+                      <div style={{ fontSize: '0.82rem', color: '#475569' }}>Institution: {m1University}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Target Professional Role</div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2563eb' }}>{selectedTargetRole}</div>
+                      <div style={{ fontSize: '0.82rem', color: '#16a34a', fontWeight: 600 }}>Readiness Index: 85% Match</div>
+                    </div>
+                  </div>
+
+                  <h3 style={{ fontSize: '1.1rem', color: '#0f172a', marginBottom: '1rem', fontWeight: 700 }}>Curriculum Milestones:</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {roadmapSteps.map((s) => (
+                      <div key={s.id} style={{ border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '8px', background: '#ffffff' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>Step {s.id}: {s.title}</strong>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: s.status === 'completed' ? '#16a34a' : '#2563eb', textTransform: 'capitalize' }}>
+                            {s.status.replace('-', ' ')} ({s.duration})
+                          </span>
+                        </div>
+                        <p style={{ fontSize: '0.82rem', color: '#475569', margin: '4px 0 8px' }}>{s.desc}</p>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                          Key Modules: {s.tags.join(' • ')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: '2rem', borderTop: '1px solid #e2e8f0', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#94a3b8' }}>
+                    <span>Official Document ID: CC-SIH-{Math.floor(100000 + Math.random() * 900000)}</span>
+                    <span>Digitally Authenticated by CareerCast AI System</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -1705,276 +1705,397 @@ export default function App() {
               </div>
             )}
 
-            {/* 6. MOCK INTERVIEW (AI SIMULATOR & REAL-TIME EVALUATION) */}
+            {/* 6. MOCK INTERVIEW (INTERACTIVE AI SIMULATOR) */}
             {activeTab === 'mock-interview' && (
-              <div>
-                <div className="welcome-header">
-                  <h2>AI Mock Interview Simulator</h2>
-                  <p>Real-time technical interview questions, timed sessions, and automated evaluation</p>
-                </div>
+              <div className="mock-interview-container">
+                {/* 1. Track Selection Screen (When interview not started) */}
+                {!interviewActive && (
+                  <div>
+                    <div className="welcome-header">
+                      <h2>AI Technical Mock Interview Simulator</h2>
+                      <p>Calibrate your technical readiness with timed questions and automated evaluation</p>
+                    </div>
 
-                {!interviewStarted && !interviewSubmitted && (
-                  <div className="white-panel" style={{ maxWidth: '850px', padding: '2.5rem' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                      <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(37,99,235,0.2) 0%, rgba(139,92,246,0.2) 100%)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
-                        <UserCheck size={34} />
-                      </div>
-                      <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f1f5f9' }}>
-                        Select Your Technical Track & Start Practice
-                      </h3>
-                      <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '540px', margin: '0.5rem auto 0' }}>
-                        Our AI evaluates your responses for technical terminology, conceptual depth, trade-off analysis, and clarity.
+                    <div className="white-panel" style={{ marginBottom: '1.5rem', padding: '1.5rem 2rem' }}>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.4rem', color: '#ffffff' }}>Select Your Engineering Track:</h3>
+                      <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+                        Each session features 5 curated industry questions calibrated against senior engineering benchmarks.
                       </p>
-                    </div>
 
-                    <div style={{ marginBottom: '1.75rem' }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', display: 'block', marginBottom: '0.75rem' }}>
-                        Target Career Role:
-                      </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
-                        {['Machine Learning Engineer', 'Software Engineer', 'Data Scientist', 'DevOps / Cloud Architect'].map((r) => (
-                          <button
-                            key={r}
-                            onClick={() => setInterviewRole(r)}
-                            style={{
-                              padding: '12px 14px',
-                              borderRadius: '10px',
-                              border: interviewRole === r ? '2px solid #38bdf8' : '1px solid var(--border)',
-                              background: interviewRole === r ? 'rgba(56, 189, 248, 0.15)' : 'var(--bg-input)',
-                              color: interviewRole === r ? '#ffffff' : '#94a3b8',
-                              fontWeight: 700,
-                              fontSize: '0.86rem',
-                              cursor: 'pointer',
-                              textAlign: 'left',
-                              transition: 'all 0.2s ease'
-                            }}
-                          >
-                            {r}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-                      <div style={{ padding: '12px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Questions</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8', marginTop: '3px' }}>4 Questions</div>
-                      </div>
-                      <div style={{ padding: '12px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Time Limit</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#818cf8', marginTop: '3px' }}>15 Minutes</div>
-                      </div>
-                      <div style={{ padding: '12px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Scoring</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#34d399', marginTop: '3px' }}>AI Rubric</div>
-                      </div>
-                    </div>
-
-                    <div style={{ textAlign: 'center' }}>
-                      <button 
-                        className="btn-solid-blue" 
-                        onClick={() => handleStartInterview(interviewRole)} 
-                        style={{ padding: '12px 32px', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.6rem' }}
-                      >
-                        <Play size={18} />
-                        <span>Launch 15-Minute Interview Session</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {interviewStarted && !interviewSubmitted && (
-                  <div className="interview-card" style={{ maxWidth: '900px' }}>
-                    {/* Top status bar */}
-                    <div className="interview-top-bar">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span className="match-badge">{interviewRole}</span>
-                        <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600 }}>
-                          Question {currentQIdx + 1} of {activeQuestions.length}
-                        </span>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                        {[
+                          {
+                            key: 'ml',
+                            title: 'AI & Machine Learning',
+                            desc: 'Deep Learning, Regularization, Class Imbalance, Attention Transformers & MLOps Drift.',
+                            badge: 'High Demand',
+                            icon: Brain,
+                            color: '#38bdf8'
+                          },
+                          {
+                            key: 'se',
+                            title: 'Full Stack & Software Engineering',
+                            desc: 'Distributed Caching (Redis), PostgreSQL B-Trees, Event Loop, REST vs GraphQL, JWT Security.',
+                            badge: 'Core Track',
+                            icon: Code2,
+                            color: '#818cf8'
+                          },
+                          {
+                            key: 'cloud',
+                            title: 'Cloud & DevOps Architecture',
+                            desc: 'Docker Containers, Kubernetes Deployments, Zero-Downtime Releases, Terraform IaC, Multi-Region HA.',
+                            badge: 'System Design',
+                            icon: Cloud,
+                            color: '#c084fc'
+                          }
+                        ].map((track) => {
+                          const Icon = track.icon
+                          const isSelected = interviewDomain === track.key
+                          return (
+                            <div
+                              key={track.key}
+                              onClick={() => setInterviewDomain(track.key)}
+                              style={{
+                                padding: '1.25rem',
+                                borderRadius: '12px',
+                                background: isSelected ? 'rgba(56, 189, 248, 0.08)' : 'var(--bg-card)',
+                                border: isSelected ? `2px solid ${track.color}` : '1px solid var(--border)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                position: 'relative'
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: `${track.color}22`, color: track.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Icon size={20} />
+                                </div>
+                                <span className="match-badge" style={{ background: `${track.color}22`, color: track.color, border: `1px solid ${track.color}44` }}>
+                                  {track.badge}
+                                </span>
+                              </div>
+                              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.4rem' }}>{track.title}</h4>
+                              <p style={{ fontSize: '0.8rem', color: '#94a3b8', lineHeight: 1.4, margin: 0 }}>{track.desc}</p>
+                            </div>
+                          )
+                        })}
                       </div>
 
-                      <div className="interview-timer-badge">
-                        <Clock size={16} />
-                        <span>
-                          {Math.floor(interviewTimer / 60)}:{(interviewTimer % 60).toString().padStart(2, '0')} Remaining
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="prob-track" style={{ height: '6px', marginBottom: '1.5rem' }}>
-                      <div className="prob-fill" style={{ width: `${((currentQIdx + 1) / activeQuestions.length) * 100}%` }} />
-                    </div>
-
-                    {/* Question Statement */}
-                    <div style={{ marginBottom: '1.25rem' }}>
-                      <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                        {activeQuestions[currentQIdx].title}
-                      </div>
-                      <h3 style={{ fontSize: '1.18rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1.45 }}>
-                        {activeQuestions[currentQIdx].question}
-                      </h3>
-                    </div>
-
-                    {/* Hint Accordion */}
-                    <div style={{ marginBottom: '1rem' }}>
-                      <button 
-                        onClick={() => setShowHint(!showHint)}
-                        className="btn-secondary"
-                        style={{ fontSize: '0.78rem', padding: '5px 10px', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-                      >
-                        <Lightbulb size={14} color="#f59e0b" />
-                        <span>{showHint ? 'Hide Concept Hints' : 'Need a Hint?'}</span>
-                      </button>
-
-                      {showHint && (
-                        <div className="interview-hint-box">
-                          <Lightbulb size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
-                          <div>
-                            <strong>Core Technical Concepts:</strong> {activeQuestions[currentQIdx].hint}
-                          </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.82rem', color: '#94a3b8' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <Timer size={15} color="#38bdf8" /> 15-Minute Countdown
+                          </span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <Star size={15} color="#eab308" /> Real-time Scoring
+                          </span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <Award size={15} color="#10b981" /> Expert Reference Answers
+                          </span>
                         </div>
-                      )}
-                    </div>
-
-                    {/* Answer Area */}
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                        <span>Your Technical Response:</span>
-                        <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                          {(userAnswers[activeQuestions[currentQIdx].id] || '').trim().split(/\s+/).filter(Boolean).length} words
-                        </span>
-                      </label>
-                      <textarea
-                        className="interview-textarea"
-                        placeholder="Explain your approach, architecture decisions, trade-offs, and algorithms in detail..."
-                        value={userAnswers[activeQuestions[currentQIdx].id] || ''}
-                        onChange={(e) => handleAnswerChange(activeQuestions[currentQIdx].id, e.target.value)}
-                      />
-                    </div>
-
-                    {/* Navigation Buttons */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-                      <button
-                        className="btn-secondary"
-                        disabled={currentQIdx === 0}
-                        onClick={() => { setCurrentQIdx(prev => Math.max(0, prev - 1)); setShowHint(false) }}
-                        style={{ opacity: currentQIdx === 0 ? 0.5 : 1 }}
-                      >
-                        ← Previous
-                      </button>
-
-                      <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        {currentQIdx < activeQuestions.length - 1 ? (
-                          <button
-                            className="btn-solid-blue"
-                            onClick={() => { setCurrentQIdx(prev => prev + 1); setShowHint(false) }}
-                          >
-                            Next Question →
-                          </button>
-                        ) : (
-                          <button
-                            className="btn-solid-blue"
-                            onClick={handleEvaluateInterview}
-                            style={{ background: '#10b981' }}
-                          >
-                            Submit & Calculate AI Scorecard
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Scorecard & AI Evaluation */}
-                {interviewSubmitted && interviewEval && (
-                  <div className="white-panel" style={{ maxWidth: '900px' }}>
-                    <div className="interview-score-banner">
-                      <div>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.08em' }}>
-                          AI Technical Evaluation
-                        </span>
-                        <div className="interview-score-val" style={{ margin: '6px 0' }}>
-                          {interviewEval.score}/100
-                        </div>
-                        <div style={{ color: '#38bdf8', fontWeight: 700, fontSize: '1rem' }}>
-                          {interviewEval.rating}
-                        </div>
-                        <p style={{ color: '#94a3b8', fontSize: '0.82rem', margin: '4px 0 0' }}>
-                          Role: <strong>{interviewRole}</strong> • Verified on {interviewEval.date}
-                        </p>
-                      </div>
-
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Detected Technical Terms:</div>
-                        <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#34d399', margin: '2px 0 8px' }}>
-                          {interviewEval.matchedCount} Keywords
-                        </div>
-                        <button 
-                          className="btn-solid-blue" 
-                          onClick={() => handleStartInterview(interviewRole)} 
-                          style={{ fontSize: '0.82rem', padding: '6px 14px', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                        <button
+                          className="btn-solid-blue"
+                          onClick={() => handleStartInterview(interviewDomain)}
+                          style={{ padding: '10px 24px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 15px rgba(37, 99, 235, 0.4)' }}
                         >
-                          <RotateCcw size={14} />
-                          <span>Retake Interview</span>
+                          <Play size={16} />
+                          <span>Start 15-Minute Mock Session</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Active Interview Session Screen */}
+                {interviewActive && !sessionFinished && (
+                  <div>
+                    {/* Header Bar: Track Pill, Question Progress, and Live Timer */}
+                    <div className="white-panel" style={{ marginBottom: '1rem', padding: '0.85rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span className="match-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                          {interviewDomain === 'ml' ? 'AI & Machine Learning' : interviewDomain === 'se' ? 'Software Engineering' : 'Cloud Architecture'}
+                        </span>
+                        <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#ffffff' }}>
+                          Question {currentQIdx + 1} of {(interviewQuestions[interviewDomain] || []).length}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        {/* Live Timer Countdown */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-input)', padding: '6px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                          <Timer size={16} color={timerSeconds < 120 ? '#ef4444' : '#38bdf8'} />
+                          <span style={{ fontWeight: 800, fontSize: '0.95rem', color: timerSeconds < 120 ? '#ef4444' : '#ffffff', fontVariantNumeric: 'tabular-nums' }}>
+                            {formatTimer(timerSeconds)}
+                          </span>
+                          <button
+                            onClick={() => setTimerRunning(!timerRunning)}
+                            style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
+                            title={timerRunning ? 'Pause Timer' : 'Resume Timer'}
+                          >
+                            {timerRunning ? <Pause size={14} /> : <Play size={14} />}
+                          </button>
+                        </div>
+
+                        <button
+                          className="btn-secondary"
+                          onClick={handleFinishInterview}
+                          style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+                        >
+                          Finish Session
                         </button>
                       </div>
                     </div>
 
-                    <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f1f5f9', marginBottom: '1rem' }}>
-                      Question-by-Question Breakdown
-                    </h4>
+                    {/* Active Question Box */}
+                    {(() => {
+                      const questionsList = interviewQuestions[interviewDomain] || []
+                      const q = questionsList[currentQIdx]
+                      if (!q) return null
+                      const currentFeedback = evaluationResults[currentQIdx]
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-                      {interviewEval.feedbackList.map((f, idx) => (
-                        <div key={idx} style={{ padding: '1rem 1.25rem', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                            <div style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '0.94rem' }}>
-                              {idx + 1}. {f.title}
+                      return (
+                        <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1.5rem' }}>
+                          {/* Question Tags & Difficulty */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 700, background: 'rgba(255, 255, 255, 0.08)', color: '#94a3b8', padding: '3px 8px', borderRadius: '6px' }}>
+                                #{q.id} {q.tags.join(' • ')}
+                              </span>
                             </div>
-                            <span style={{ fontWeight: 800, color: f.score >= 70 ? '#34d399' : f.score >= 40 ? '#f59e0b' : '#ef4444', fontSize: '0.92rem' }}>
-                              {f.score}/100
+                            <span className="match-badge" style={{ background: q.difficulty === 'Advanced' ? 'rgba(192, 132, 252, 0.15)' : 'rgba(56, 189, 248, 0.15)', color: q.difficulty === 'Advanced' ? '#c084fc' : '#38bdf8' }}>
+                              {q.difficulty}
                             </span>
                           </div>
-                          <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.6rem' }}>
-                            {f.question}
-                          </div>
-                          <div>
-                            <span style={{ fontSize: '0.75rem', color: '#64748b', marginRight: '0.5rem' }}>Detected Concepts:</span>
-                            {f.matchedKeywords.length > 0 ? (
-                              f.matchedKeywords.map((kw, ki) => (
-                                <span key={ki} className="interview-kw-pill" style={{ marginRight: '4px', marginBottom: '4px' }}>
-                                  ✓ {kw}
-                                </span>
-                              ))
-                            ) : (
-                              <span style={{ fontSize: '0.75rem', color: '#f87171', fontStyle: 'italic' }}>
-                                No core technical keywords detected. Expand your explanation.
+
+                          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.75rem' }}>
+                            {q.title}
+                          </h3>
+                          <p style={{ fontSize: '0.92rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '1.25rem', background: 'var(--bg-input)', padding: '1rem', borderRadius: '8px', borderLeft: '3px solid #38bdf8' }}>
+                            {q.question}
+                          </p>
+
+                          {/* Candidate Answer Textarea */}
+                          <div style={{ marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                              <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#94a3b8' }}>
+                                Your Technical Explanation / Approach:
+                              </label>
+                              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                {(userAnswerText || savedAnswers[currentQIdx] || '').split(/\s+/).filter(Boolean).length} words
                               </span>
+                            </div>
+                            <textarea
+                              rows={5}
+                              value={userAnswerText !== '' ? userAnswerText : (savedAnswers[currentQIdx] || '')}
+                              onChange={(e) => {
+                                setUserAnswerText(e.target.value)
+                                setSavedAnswers(prev => ({ ...prev, [currentQIdx]: e.target.value }))
+                              }}
+                              placeholder="Type your technical response here. Elaborate on architecture, algorithms, trade-offs, and design choices..."
+                              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#ffffff', fontSize: '0.88rem', lineHeight: 1.5, resize: 'vertical' }}
+                            />
+                          </div>
+
+                          {/* Submit for AI Evaluation Button */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                            <button
+                              className="btn-solid-blue"
+                              onClick={handleEvaluateAnswer}
+                              disabled={isEvaluating}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '8px 18px' }}
+                            >
+                              <Sparkles size={16} />
+                              <span>{isEvaluating ? 'Evaluating with AI...' : currentFeedback ? 'Re-Evaluate Answer' : 'Submit for AI Evaluation'}</span>
+                            </button>
+
+                            {currentFeedback && (
+                              <button
+                                className="btn-secondary"
+                                onClick={() => setShowModelAnswer(!showModelAnswer)}
+                                style={{ fontSize: '0.82rem', padding: '6px 14px' }}
+                              >
+                                {showModelAnswer ? 'Hide Expert Answer' : 'Reveal Expert Model Answer'}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* AI Feedback & Score Card */}
+                          {currentFeedback && (
+                            <div style={{ marginTop: '1.25rem', padding: '1.25rem', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                  <span style={{ fontSize: '1.35rem', fontWeight: 800, color: currentFeedback.score >= 80 ? '#10b981' : '#38bdf8' }}>
+                                    {currentFeedback.score}/100
+                                  </span>
+                                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff' }}>
+                                    • {currentFeedback.grade}
+                                  </span>
+                                </div>
+                                <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                                  AI Calibrated
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
+                                <div style={{ padding: '10px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                  <div style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.35rem' }}>
+                                    <ThumbsUp size={14} /> Strong Points Identified:
+                                  </div>
+                                  <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                                    {currentFeedback.strengths.map((s, idx) => (
+                                      <li key={idx} style={{ marginBottom: '2px' }}>{s}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div style={{ padding: '10px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                  <div style={{ fontSize: '0.78rem', color: '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.35rem' }}>
+                                    <Target size={14} /> Recommended Improvements:
+                                  </div>
+                                  <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                                    {currentFeedback.improvements.map((imp, idx) => (
+                                      <li key={idx} style={{ marginBottom: '2px' }}>{imp}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+
+                              {/* Expandable Model Expert Answer */}
+                              {showModelAnswer && (
+                                <div style={{ marginTop: '0.85rem', padding: '1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                  <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 700, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                                    Senior Engineering Lead Model Answer:
+                                  </div>
+                                  <p style={{ fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.5, margin: 0, fontStyle: 'italic' }}>
+                                    {currentFeedback.modelAnswer}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Question Navigation Footer */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                            <button
+                              className="btn-secondary"
+                              onClick={handlePrevQuestion}
+                              disabled={currentQIdx === 0}
+                              style={{ opacity: currentQIdx === 0 ? 0.5 : 1 }}
+                            >
+                              ← Previous Question
+                            </button>
+
+                            {currentQIdx < questionsList.length - 1 ? (
+                              <button
+                                className="btn-solid-blue"
+                                onClick={handleNextQuestion}
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '8px 16px' }}
+                              >
+                                <span>Next Question</span>
+                                <ChevronRight size={16} />
+                              </button>
+                            ) : (
+                              <button
+                                className="btn-solid-blue"
+                                onClick={handleFinishInterview}
+                                style={{ background: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '8px 18px' }}
+                              >
+                                <CheckCircle2 size={16} />
+                                <span>Complete Interview & View Scorecard</span>
+                              </button>
                             )}
                           </div>
                         </div>
-                      ))}
+                      )
+                    })()}
+                  </div>
+                )}
+
+                {/* 3. Session Summary Scorecard (When Finished) */}
+                {sessionFinished && (
+                  <div className="white-panel" style={{ padding: '2rem' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                      <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+                        <Award size={32} />
+                      </div>
+                      <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                        Mock Interview Session Complete!
+                      </h2>
+                      <p style={{ color: '#94a3b8', fontSize: '0.88rem', marginTop: '4px' }}>
+                        Performance report calibrated against <strong>{interviewDomain === 'ml' ? 'AI & Machine Learning' : interviewDomain === 'se' ? 'Software Engineering' : 'Cloud Architecture'}</strong> technical benchmarks
+                      </p>
                     </div>
 
-                    <div style={{ padding: '1rem 1.25rem', background: 'rgba(56, 189, 248, 0.08)', borderRadius: '10px', border: '1px solid rgba(56, 189, 248, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, color: '#38bdf8', fontSize: '0.92rem' }}>
-                          Next Step: Calibrate Learning Roadmap
+                    {/* Score summary cards */}
+                    {(() => {
+                      const questionsList = interviewQuestions[interviewDomain] || []
+                      const evaluatedScores = Object.values(evaluationResults).map(r => r.score)
+                      const avgScore = evaluatedScores.length > 0 
+                        ? Math.round(evaluatedScores.reduce((a, b) => a + b, 0) / evaluatedScores.length)
+                        : 82
+
+                      return (
+                        <div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                              <div style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Overall Score</div>
+                              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#38bdf8', marginTop: '2px' }}>{avgScore}%</div>
+                              <div style={{ fontSize: '0.75rem', color: '#10b981' }}>Campus Placement Ready ★</div>
+                            </div>
+                            <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                              <div style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Questions Evaluated</div>
+                              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#818cf8', marginTop: '2px' }}>
+                                {Object.keys(evaluationResults).length} / {questionsList.length}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Completed</div>
+                            </div>
+                            <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                              <div style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Time Elapsed</div>
+                              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#c084fc', marginTop: '2px' }}>
+                                {formatTimer(900 - timerSeconds)}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Session Length</div>
+                            </div>
+                          </div>
+
+                          {/* Breakdown list */}
+                          <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.75rem' }}>Question Breakdown:</h4>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                            {questionsList.map((q, idx) => {
+                              const res = evaluationResults[idx]
+                              return (
+                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                  <div>
+                                    <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#ffffff' }}>#{q.id} {q.title}</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Difficulty: {q.difficulty}</div>
+                                  </div>
+                                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: res ? (res.score >= 80 ? '#10b981' : '#38bdf8') : '#64748b' }}>
+                                    {res ? `${res.score}/100` : 'Not submitted'}
+                                  </span>
+                                </div>
+                              )
+                            })}
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                            <button
+                              className="btn-solid-blue"
+                              onClick={() => handleStartInterview(interviewDomain)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '10px 22px' }}
+                            >
+                              <RotateCcw size={16} />
+                              <span>Retake Session</span>
+                            </button>
+                            <button
+                              className="btn-secondary"
+                              onClick={() => { setInterviewActive(false); setSessionFinished(false) }}
+                              style={{ padding: '10px 22px' }}
+                            >
+                              Switch Engineering Track
+                            </button>
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                          Review the Learning Path tab to strengthen missed competencies before real placement drives.
-                        </div>
-                      </div>
-                      <button 
-                        className="btn-solid-blue" 
-                        onClick={() => setActiveTab('learning-path')}
-                        style={{ fontSize: '0.82rem', padding: '6px 14px' }}
-                      >
-                        View Learning Path →
-                      </button>
-                    </div>
+                      )
+                    })()}
                   </div>
                 )}
               </div>
