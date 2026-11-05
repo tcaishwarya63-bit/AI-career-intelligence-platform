@@ -48,7 +48,13 @@ import {
   ThumbsUp,
   Code2,
   Clock,
-  Circle
+  Circle,
+  GraduationCap,
+  Mic,
+  Users,
+  Calculator,
+  ArrowLeft,
+  Calendar
 } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from './supabase'
 import './App.css'
@@ -101,17 +107,61 @@ export default function App() {
   ])
 
   // Mock Interview Simulator State
-  const [interviewDomain, setInterviewDomain] = useState('ml')
+  const [interviewDomain, setInterviewDomain] = useState('technical')
   const [interviewActive, setInterviewActive] = useState(false)
   const [currentQIdx, setCurrentQIdx] = useState(0)
   const [userAnswerText, setUserAnswerText] = useState('')
   const [savedAnswers, setSavedAnswers] = useState({})
   const [evaluationResults, setEvaluationResults] = useState({})
   const [isEvaluating, setIsEvaluating] = useState(false)
-  const [timerSeconds, setTimerSeconds] = useState(900)
+  const [timerSeconds, setTimerSeconds] = useState(285) // 00:04:45 matching teacher reference
   const [timerRunning, setTimerRunning] = useState(false)
   const [sessionFinished, setSessionFinished] = useState(false)
   const [showModelAnswer, setShowModelAnswer] = useState(false)
+
+  // Notification Center State
+  const [notificationsList, setNotificationsList] = useState([
+    {
+      id: 1,
+      title: 'Interview Evaluation Ready',
+      desc: 'Your Python Developer Technical session was evaluated. Score: 80% (Excellent Performance). Top strength: Technical Knowledge.',
+      time: '10 minutes ago',
+      type: 'interview',
+      read: false
+    },
+    {
+      id: 2,
+      title: 'Campus Placement Drive Announcement',
+      desc: 'Google Cloud Early Career & Amazon AWS Campus Drive registration opened for B.Sc & B.Tech 2026 batches.',
+      time: '2 hours ago',
+      type: 'placement',
+      read: false
+    },
+    {
+      id: 3,
+      title: 'Learning Path Milestone Unlocked',
+      desc: 'Congratulations! You completed Week 3 of Software Engineering track. Week 4: Cloud & Distributed APIs is now active.',
+      time: 'Yesterday',
+      type: 'roadmap',
+      read: false
+    },
+    {
+      id: 4,
+      title: 'Resume Analyzed with SpaCy NER',
+      desc: 'Model parsed 14 core skills from your resume with an ATS readability score of 88%.',
+      time: '2 days ago',
+      type: 'resume',
+      read: true
+    },
+    {
+      id: 5,
+      title: 'Supabase PostgreSQL Cloud Synced',
+      desc: 'Your candidate profile and ML predictions were securely synchronized to cloud storage.',
+      time: '3 days ago',
+      type: 'system',
+      read: true
+    }
+  ])
 
   // Timer Countdown Effect
   useEffect(() => {
@@ -496,6 +546,94 @@ export default function App() {
 
   // Curated Technical Question Bank for AI Mock Interview Simulator
   const interviewQuestions = {
+    technical: [
+      {
+        id: 1,
+        title: "Python Fundamentals & Advantages",
+        difficulty: "Fundamental",
+        tags: ["Python Developer", "Technical"],
+        question: "What is Python? Name any two advantages of Python.",
+        hint: "Think about its features and popularity...",
+        keywords: ["interpreted", "high-level", "dynamic typing", "readable", "extensive libraries", "cross-platform", "syntax", "advantages"],
+        modelAnswer: "Python is a high-level, interpreted, general-purpose programming language designed with an emphasis on code readability. Two key advantages: 1) Clean, readable syntax that accelerates developer productivity and prototyping speed; 2) Vast ecosystem of standard and third-party libraries (NumPy, Pandas, PyTorch, FastAPI) supporting web development, machine learning, and automation."
+      },
+      {
+        id: 2,
+        title: "Object-Oriented Programming (OOP) Concepts",
+        difficulty: "Intermediate",
+        tags: ["OOP Concepts", "Python"],
+        question: "Explain the four core principles of Object-Oriented Programming (OOP) and give an example of inheritance in Python.",
+        hint: "Consider Encapsulation, Abstraction, Inheritance, and Polymorphism...",
+        keywords: ["encapsulation", "abstraction", "inheritance", "polymorphism", "class", "super()", "methods"],
+        modelAnswer: "The four core OOP principles are: 1) Encapsulation (bundling data and methods while restricting direct access); 2) Abstraction (hiding implementation complexity behind clear interfaces); 3) Inheritance (deriving new classes from base classes to reuse code); 4) Polymorphism (allowing different classes to be treated through a common interface). In Python, inheritance is achieved by passing the parent class in the class definition: `class Child(Parent): def __init__(self): super().__init__()`."
+      },
+      {
+        id: 3,
+        title: "Database Connectivity & Transactions",
+        difficulty: "Intermediate",
+        tags: ["Database Connectivity", "SQL"],
+        question: "How does Python connect to relational databases (e.g., PostgreSQL / SQLite), and why are database transactions (ACID properties) important?",
+        hint: "Recall psycopg2, connection pooling, commit, and rollback...",
+        keywords: ["acid", "connection pool", "commit", "rollback", "psycopg2", "sqlite3", "atomicity", "transactions"],
+        modelAnswer: "Python connects to relational databases using drivers like psycopg2, asyncpg, or sqlite3, often managed through connection pools and ORMs like SQLAlchemy. Database transactions enforce ACID properties (Atomicity, Consistency, Isolation, Durability). Atomicity ensures all operations in a transaction succeed together or are rolled back on failure with `conn.rollback()`, preventing corrupted or partial data states."
+      },
+      {
+        id: 4,
+        title: "System Design & Scalability Basics",
+        difficulty: "Intermediate",
+        tags: ["System Design", "Scalability"],
+        question: "What is the difference between horizontal and vertical scaling, and how does a Load Balancer distribute incoming web traffic?",
+        hint: "Think about adding more machines vs adding more RAM/CPU...",
+        keywords: ["horizontal scaling", "vertical scaling", "scale out", "scale up", "load balancer", "round robin", "least connections"],
+        modelAnswer: "Vertical scaling (scale up) adds more CPU, RAM, or storage to a single server, which hits hardware ceilings and creates a single point of failure. Horizontal scaling (scale out) adds more server instances to distribute load across clusters. A Load Balancer (e.g., NGINX, AWS ALB) distributes traffic across instances using algorithms like Round Robin, Least Connections, or IP Hash, while performing health checks to route around failing nodes."
+      },
+      {
+        id: 5,
+        title: "RESTful API Integration & Status Codes",
+        difficulty: "Fundamental",
+        tags: ["APIs", "FastAPI"],
+        question: "What are the common HTTP methods (GET, POST, PUT, DELETE) in RESTful APIs, and what is the difference between status codes 200, 400, 404, and 500?",
+        hint: "Review client vs server errors and idempotency...",
+        keywords: ["get", "post", "put", "delete", "200 ok", "400 bad request", "404 not found", "500 internal server error"],
+        modelAnswer: "HTTP methods: GET retrieves data without side effects; POST creates new resources; PUT replaces or updates a resource idempotently; DELETE removes a resource. Status codes: 200 OK signifies success; 400 Bad Request indicates client validation error; 404 Not Found indicates the resource doesn't exist; and 500 Internal Server Error denotes an unhandled server-side fault."
+      }
+    ],
+    hr: [
+      {
+        id: 1,
+        title: "Behavioral & Conflict Resolution",
+        difficulty: "Fundamental",
+        tags: ["HR Interview", "Behavioral"],
+        question: "Describe a situation where you had a disagreement with a team member on a project. How did you resolve it, and what was the outcome?",
+        hint: "Use the STAR framework: Situation, Task, Action, Result...",
+        keywords: ["star method", "communication", "compromise", "collaboration", "resolution", "empathy", "outcome"],
+        modelAnswer: "In a collaborative capstone project, my teammate and I disagreed on database choice (MongoDB vs PostgreSQL). I scheduled a 30-minute sync to evaluate our schema requirements objectively. We identified that our relational transactions and ACID compliance were critical, so we chose PostgreSQL while documenting our decision in an ADR. The project launched smoothly with zero schema debt."
+      }
+    ],
+    aptitude: [
+      {
+        id: 1,
+        title: "Quantitative Problem Solving & Speed",
+        difficulty: "Fundamental",
+        tags: ["Aptitude Test", "Logical Reasoning"],
+        question: "A training batch pipeline processes 12,000 records in 40 minutes with 2 workers. How many minutes will it take 6 workers running in parallel to process 36,000 records?",
+        hint: "Work = Rate * Time * Workers...",
+        keywords: ["work rate", "parallel processing", "40 minutes", "inverse proportionality", "linear scaling"],
+        modelAnswer: "One worker processes 12,000 / (40 * 2) = 150 records per minute. Six workers process 6 * 150 = 900 records per minute. To process 36,000 records, it will take 36,000 / 900 = 40 minutes."
+      }
+    ],
+    coding: [
+      {
+        id: 1,
+        title: "Two Sum & Hash Map Lookup",
+        difficulty: "Fundamental",
+        tags: ["Coding Interview", "Data Structures"],
+        question: "Given an array of integers `nums` and an integer `target`, return the indices of two numbers that add up to `target` in O(N) time complexity.",
+        hint: "Use a hash map to store complements (target - num)...",
+        keywords: ["hash map", "dictionary", "o(n) time", "o(n) space", "complement", "indices"],
+        modelAnswer: "Use a single-pass hash map: For each number `num` at index `i`, check if `target - num` exists in the hash map. If found, return `[map[target - num], i]`. Otherwise, record `map[num] = i`. This achieves O(N) linear time and O(N) auxiliary space."
+      }
+    ],
     ml: [
       {
         id: 1,
@@ -756,17 +894,17 @@ export default function App() {
   // The 12 Exact Side Headings from Teacher's Reference Picture
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'career-intelligence', label: 'Career Intelligence', icon: Target },
-    { id: 'skill-analysis', label: 'Skill Analysis', icon: Layers },
+    { id: 'my-profile', label: 'My Profile', icon: User },
+    { id: 'skill-assessment', label: 'Skill Assessment', icon: ClipboardCheck },
+    { id: 'career-recommendations', label: 'Career Recommendations', icon: Target },
+    { id: 'job-recommendations', label: 'Job Recommendations', icon: Briefcase },
     { id: 'learning-path', label: 'Learning Path', icon: BookOpen },
     { id: 'resume-analyzer', label: 'Resume Analyzer', icon: FileText },
-    { id: 'mock-interview', label: 'Mock Interview', icon: UserCheck },
-    { id: 'job-recommendations', label: 'Job Recommendations', icon: Briefcase },
-    { id: 'placement-drives', label: 'Placement Drives', icon: Building2 },
-    { id: 'assessments', label: 'Assessments', icon: ClipboardCheck },
-    { id: 'certificates', label: 'Certificates', icon: Award },
+    { id: 'interview-preparation', label: 'Interview Preparation', icon: Mic },
+    { id: 'skill-gap-analysis', label: 'Skill Gap Analysis', icon: BarChart3 },
+    { id: 'my-progress', label: 'My Progress', icon: TrendingUp },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'settings', label: 'Settings', icon: Settings },
-    { id: 'help-support', label: 'Help & Support', icon: HelpCircle }
   ]
 
   const userName = session?.user?.user_metadata?.full_name || 'Ananya'
@@ -777,12 +915,12 @@ export default function App() {
       <aside className="sidebar">
         {/* Brand Header */}
         <div className="sidebar-brand">
-          <div className="brand-brain-icon">
-            <Brain size={22} />
+          <div className="brand-icon-box">
+            <GraduationCap size={22} />
           </div>
           <div className="brand-title">
-            <span className="brand-name">CareerInfinity</span>
-            <span className="brand-sub">AI POWERED</span>
+            <span className="brand-name">AI Powered</span>
+            <span className="brand-sub">Career Intelligence Platform</span>
           </div>
         </div>
 
@@ -797,12 +935,24 @@ export default function App() {
                 className={`sidebar-item ${isActive ? 'active' : ''}`}
                 onClick={() => setActiveTab(item.id)}
               >
-                <Icon size={19} />
+                <Icon size={18} />
                 <span>{item.label}</span>
               </button>
             )
           })}
         </nav>
+
+        {/* Sidebar Footer Logout Button */}
+        <div className="sidebar-footer">
+          <button 
+            className="sidebar-logout-btn" 
+            onClick={handleSignOut}
+            title="Sign Out"
+          >
+            <LogOut size={15} />
+            <span>Logout</span>
+          </button>
+        </div>
       </aside>
 
       {/* ================= MAIN CONTENT WRAPPER ================= */}
@@ -984,7 +1134,7 @@ export default function App() {
                     <p className="score-right-text">
                       Your profile matches <strong>Software Developer</strong>, <strong>Data Analyst</strong> and <strong>2 other career paths</strong>.
                     </p>
-                    <button className="btn-pill-outline" onClick={() => setActiveTab('career-intelligence')}>
+                    <button className="btn-pill-outline" onClick={() => setActiveTab('career-recommendations')}>
                       View Details
                     </button>
                   </div>
@@ -1057,7 +1207,7 @@ export default function App() {
                         <h3>Recommended Career Paths</h3>
                         <p className="panel-sub">Based on your skills, interests & goals</p>
                       </div>
-                      <button className="btn-pill-outline" style={{ padding: '4px 12px', fontSize: '0.78rem' }} onClick={() => setActiveTab('career-intelligence')}>
+                      <button className="btn-pill-outline" style={{ padding: '4px 12px', fontSize: '0.78rem' }} onClick={() => setActiveTab('career-recommendations')}>
                         View All
                       </button>
                     </div>
@@ -1145,8 +1295,216 @@ export default function App() {
               </div>
             )}
 
-            {/* 2. CAREER INTELLIGENCE (MILESTONE 2 MULTI-MODEL COMPARISON) */}
-            {activeTab === 'career-intelligence' && (
+            {/* 2. MY PROFILE TAB */}
+            {activeTab === 'my-profile' && (
+              <div>
+                <div className="welcome-header">
+                  <h2>My Student Profile</h2>
+                  <p>Manage your academic identity, career aspirations, and cloud database synchronization</p>
+                </div>
+
+                <div className="dash-2col" style={{ marginBottom: '1.5rem' }}>
+                  {/* Student Identity Card */}
+                  <div className="white-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                      <div style={{
+                        width: '72px',
+                        height: '72px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #2563eb, #38bdf8)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        boxShadow: '0 8px 24px rgba(37, 99, 235, 0.35)'
+                      }}>
+                        {userName[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '4px' }}>
+                          <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>{userName} Sharma</h3>
+                          <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Verified Student</span>
+                        </div>
+                        <p style={{ fontSize: '0.88rem', color: '#94a3b8', margin: 0 }}>{m1Degree}</p>
+                        <p style={{ fontSize: '0.8rem', color: '#38bdf8', marginTop: '4px', fontWeight: 600 }}>🎓 {m1University} • Batch 2022–2026</p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                      <div style={{ textAlign: 'center', padding: '0.75rem', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Career Match</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8', marginTop: '2px' }}>85%</div>
+                      </div>
+                      <div style={{ textAlign: 'center', padding: '0.75rem', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Target Role</div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#10b981', marginTop: '5px' }}>ML Engineer</div>
+                      </div>
+                      <div style={{ textAlign: 'center', padding: '0.75rem', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Interviews</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#c084fc', marginTop: '2px' }}>3 Taken</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1' }}>Target Role Affinity</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                        {['Machine Learning Engineer', 'Software Developer', 'Data Analyst', 'Cloud Architect'].map((r, i) => (
+                          <span key={i} style={{ fontSize: '0.76rem', padding: '4px 10px', borderRadius: '6px', background: i === 0 ? 'rgba(37, 99, 235, 0.2)' : 'var(--bg-card)', color: i === 0 ? '#38bdf8' : '#94a3b8', border: i === 0 ? '1px solid #2563eb' : '1px solid var(--border)' }}>
+                            {r}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cloud Database Sync Status */}
+                  <div className="white-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div className="panel-header">
+                        <div>
+                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Database size={18} color="#38bdf8" />
+                            <span>Cloud Profile Synchronization</span>
+                          </h3>
+                          <p className="panel-sub">Real-time sync with Supabase PostgreSQL</p>
+                        </div>
+                        <span className="match-badge" style={{ background: isSupabaseConfigured ? 'rgba(16, 185, 129, 0.15)' : 'rgba(217, 119, 6, 0.15)', color: isSupabaseConfigured ? '#10b981' : '#d97706' }}>
+                          {isSupabaseConfigured ? 'Connected to Cloud' : 'Local Fallback'}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.82rem' }}>
+                          <span style={{ color: '#94a3b8' }}>Database Endpoint:</span>
+                          <span style={{ color: '#e2e8f0', fontFamily: 'monospace' }}>hnnmktwpdybjgwxotpvk.supabase.co</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.82rem' }}>
+                          <span style={{ color: '#94a3b8' }}>Profile Table Status:</span>
+                          <span style={{ color: '#10b981', fontWeight: 600 }}>Active (1 Record)</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.82rem' }}>
+                          <span style={{ color: '#94a3b8' }}>Row-Level Security (RLS):</span>
+                          <span style={{ color: '#38bdf8', fontWeight: 600 }}>Enabled & Enforced</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {dbStatusMsg && (
+                      <div className="alert alert-success" style={{ marginTop: '1rem', padding: '8px 12px', fontSize: '0.82rem' }}>
+                        <CheckCircle2 size={16} />
+                        <span>{dbStatusMsg}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Edit Candidate Profile Form */}
+                <div className="white-panel" style={{ marginBottom: '1.5rem' }}>
+                  <div className="panel-header" style={{ marginBottom: '1.25rem' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Edit Candidate Profile & Skills</h3>
+                      <p className="panel-sub">Update your information to recalibrate ML recommendations</p>
+                    </div>
+                    <button
+                      className="btn-solid-blue"
+                      onClick={handleSaveProfile}
+                      disabled={dbSaving}
+                      style={{ padding: '8px 18px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                      <Save size={15} />
+                      <span>{dbSaving ? 'Syncing...' : 'Save Profile to Supabase'}</span>
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '6px', display: 'block' }}>Candidate Role / Specialization</label>
+                      <input
+                        type="text"
+                        className="search-input"
+                        value={m1Role}
+                        onChange={(e) => setM1Role(e.target.value)}
+                        placeholder="e.g. Data Scientist Intern"
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: '#ffffff' }}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '6px', display: 'block' }}>Current Degree & Major</label>
+                      <input
+                        type="text"
+                        className="search-input"
+                        value={m1Degree}
+                        onChange={(e) => setM1Degree(e.target.value)}
+                        placeholder="e.g. B.S. Computer Science"
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: '#ffffff' }}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '6px', display: 'block' }}>University / Institution</label>
+                      <input
+                        type="text"
+                        className="search-input"
+                        value={m1University}
+                        onChange={(e) => setM1University(e.target.value)}
+                        placeholder="e.g. UC Berkeley"
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: '#ffffff' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '1.25rem' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '8px', display: 'block' }}>
+                      Verified Technical Skills (Comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      className="search-input"
+                      value={m1Skills}
+                      onChange={(e) => setM1Skills(e.target.value)}
+                      placeholder="e.g. Python, SQL, Machine Learning, Scikit-learn, React, FastAPI, Docker"
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: '#ffffff' }}
+                    />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+                      {m1Skills.split(',').map((skill, i) => skill.trim() && (
+                        <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '4px 10px', borderRadius: '6px', background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8', fontSize: '0.8rem', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                          <Check size={13} /> {skill.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Verified Badges & Certifications */}
+                <div className="white-panel">
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Verified Badges & Credentials</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                    {[
+                      { name: 'Python for Data Science', issuer: 'IBM Certified', date: 'August 2026', badge: 'Certified' },
+                      { name: 'Full-Stack Web Architect', issuer: 'Meta Certified', date: 'June 2026', badge: 'Certified' },
+                      { name: 'Machine Learning Specialization', issuer: 'DeepLearning.AI', date: 'October 2026', badge: 'Honors' }
+                    ].map((cert, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                        <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Award size={22} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>{cert.name}</h4>
+                          <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0' }}>{cert.issuer} • Issued {cert.date}</p>
+                        </div>
+                        <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontSize: '0.72rem' }}>{cert.badge}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 4. CAREER RECOMMENDATIONS (MILESTONE 2 MULTI-MODEL COMPARISON) */}
+            {activeTab === 'career-recommendations' && (
               <div>
                 <div className="welcome-header">
                   <h2>Career Intelligence & Multi-Model Engine</h2>
@@ -1222,8 +1580,8 @@ export default function App() {
               </div>
             )}
 
-            {/* 3. SKILL ANALYSIS (PAGE 6 SKILL GAP REPORT) */}
-            {activeTab === 'skill-analysis' && (
+            {/* 9. SKILL GAP ANALYSIS */}
+            {activeTab === 'skill-gap-analysis' && (
               <div>
                 <div className="welcome-header">
                   <h2>Skill Gap Analysis Report</h2>
@@ -1705,304 +2063,224 @@ export default function App() {
               </div>
             )}
 
-            {/* 6. MOCK INTERVIEW (INTERACTIVE AI SIMULATOR) */}
-            {activeTab === 'mock-interview' && (
+            {/* 8. INTERVIEW PREPARATION (EXACT RECREATION OF TEACHER'S PANELS 1, 2 & 3) */}
+            {activeTab === 'interview-preparation' && (
               <div className="mock-interview-container">
-                {/* 1. Track Selection Screen (When interview not started) */}
+                {/* 1. Track Selection Screen (When interview not started) - Panel 1 */}
                 {!interviewActive && (
                   <div>
                     <div className="welcome-header">
-                      <h2>AI Technical Mock Interview Simulator</h2>
-                      <p>Calibrate your technical readiness with timed questions and automated evaluation</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <Home size={22} color="#3b82f6" />
+                        <h2 style={{ margin: 0 }}>Interview Preparation</h2>
+                      </div>
+                      <p>Practice with AI-powered questions, real-time evaluation, and personalized feedback</p>
                     </div>
 
-                    <div className="white-panel" style={{ marginBottom: '1.5rem', padding: '1.5rem 2rem' }}>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.4rem', color: '#ffffff' }}>Select Your Engineering Track:</h3>
-                      <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-                        Each session features 5 curated industry questions calibrated against senior engineering benchmarks.
-                      </p>
+                    {/* Blue Hero Banner */}
+                    <div className="interview-hero-banner">
+                      <div className="interview-hero-left">
+                        <h2>Ace Your Interview with AI Guidance!</h2>
+                        <p>Practice • Evaluate • Improve</p>
+                      </div>
+                      <div className="interview-hero-badges">
+                        <div className="interview-hero-mic-badge">
+                          <Mic size={28} />
+                        </div>
+                        <div className="ready-pill-badge">You're Ready!</div>
+                      </div>
+                    </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                    {/* 4 Quick Stat Tiles */}
+                    <div className="interview-stats-grid">
+                      <div className="interview-stat-tile">
+                        <div className="interview-stat-icon-wrap" style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc' }}>
+                          <Award size={22} />
+                        </div>
+                        <div>
+                          <div className="interview-stat-tile-val">3</div>
+                          <div className="interview-stat-tile-lbl">Interviews Taken</div>
+                        </div>
+                      </div>
+
+                      <div className="interview-stat-tile">
+                        <div className="interview-stat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                          <Star size={22} />
+                        </div>
+                        <div>
+                          <div className="interview-stat-tile-val">78%</div>
+                          <div className="interview-stat-tile-lbl">Avg Score</div>
+                        </div>
+                      </div>
+
+                      <div className="interview-stat-tile">
+                        <div className="interview-stat-icon-wrap" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+                          <BarChart3 size={22} />
+                        </div>
+                        <div>
+                          <div className="interview-stat-tile-val" style={{ fontSize: '1.05rem', color: '#38bdf8' }}>Technical</div>
+                          <div className="interview-stat-tile-lbl">Top Skill</div>
+                        </div>
+                      </div>
+
+                      <div className="interview-stat-tile">
+                        <div className="interview-stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+                          <Target size={22} />
+                        </div>
+                        <div>
+                          <div className="interview-stat-tile-val" style={{ fontSize: '0.95rem', color: '#f59e0b' }}>OOP Concepts</div>
+                          <div className="interview-stat-tile-lbl">Improve</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Start a New Interview Domain Grid */}
+                    <div className="white-panel" style={{ marginBottom: '1.5rem', padding: '1.5rem' }}>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: '#ffffff' }}>Start a New Interview</h3>
+                      <div className="interview-domain-grid">
                         {[
-                          {
-                            key: 'ml',
-                            title: 'AI & Machine Learning',
-                            desc: 'Deep Learning, Regularization, Class Imbalance, Attention Transformers & MLOps Drift.',
-                            badge: 'High Demand',
-                            icon: Brain,
-                            color: '#38bdf8'
-                          },
-                          {
-                            key: 'se',
-                            title: 'Full Stack & Software Engineering',
-                            desc: 'Distributed Caching (Redis), PostgreSQL B-Trees, Event Loop, REST vs GraphQL, JWT Security.',
-                            badge: 'Core Track',
-                            icon: Code2,
-                            color: '#818cf8'
-                          },
-                          {
-                            key: 'cloud',
-                            title: 'Cloud & DevOps Architecture',
-                            desc: 'Docker Containers, Kubernetes Deployments, Zero-Downtime Releases, Terraform IaC, Multi-Region HA.',
-                            badge: 'System Design',
-                            icon: Cloud,
-                            color: '#c084fc'
-                          }
+                          { key: 'technical', title: 'Technical Interview', icon: Code2, desc: 'Python, OOP & Architecture' },
+                          { key: 'hr', title: 'HR Interview', icon: Users, desc: 'Behavioral & Situational' },
+                          { key: 'aptitude', title: 'Aptitude Test', icon: Calculator, desc: 'Logical Reasoning & Math' },
+                          { key: 'coding', title: 'Coding Interview', icon: Code2, desc: 'Data Structures & Algorithms' }
                         ].map((track) => {
                           const Icon = track.icon
                           const isSelected = interviewDomain === track.key
                           return (
                             <div
                               key={track.key}
+                              className={`interview-domain-card ${isSelected ? 'active' : ''}`}
                               onClick={() => setInterviewDomain(track.key)}
-                              style={{
-                                padding: '1.25rem',
-                                borderRadius: '12px',
-                                background: isSelected ? 'rgba(56, 189, 248, 0.08)' : 'var(--bg-card)',
-                                border: isSelected ? `2px solid ${track.color}` : '1px solid var(--border)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                position: 'relative'
-                              }}
                             >
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: `${track.color}22`, color: track.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <Icon size={20} />
-                                </div>
-                                <span className="match-badge" style={{ background: `${track.color}22`, color: track.color, border: `1px solid ${track.color}44` }}>
-                                  {track.badge}
-                                </span>
+                              <div className="interview-domain-icon-circle">
+                                <Icon size={24} />
                               </div>
-                              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.4rem' }}>{track.title}</h4>
-                              <p style={{ fontSize: '0.8rem', color: '#94a3b8', lineHeight: 1.4, margin: 0 }}>{track.desc}</p>
+                              <div className="interview-domain-title">{track.title}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{track.desc}</div>
                             </div>
                           )
                         })}
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.82rem', color: '#94a3b8' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <Timer size={15} color="#38bdf8" /> 15-Minute Countdown
-                          </span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <Star size={15} color="#eab308" /> Real-time Scoring
-                          </span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <Award size={15} color="#10b981" /> Expert Reference Answers
-                          </span>
-                        </div>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
                         <button
                           className="btn-solid-blue"
                           onClick={() => handleStartInterview(interviewDomain)}
-                          style={{ padding: '10px 24px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 15px rgba(37, 99, 235, 0.4)' }}
+                          style={{ padding: '12px 36px', fontSize: '1rem', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 6px 20px rgba(37, 99, 235, 0.45)' }}
                         >
-                          <Play size={16} />
-                          <span>Start 15-Minute Mock Session</span>
+                          <span>Start Practice</span>
+                          <ArrowRight size={18} />
                         </button>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 2. Active Interview Session Screen */}
+                {/* 2. Active Interview Practice Screen - Panel 2 */}
                 {interviewActive && !sessionFinished && (
                   <div>
-                    {/* Header Bar: Track Pill, Question Progress, and Live Timer */}
-                    <div className="white-panel" style={{ marginBottom: '1rem', padding: '0.85rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span className="match-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                          {interviewDomain === 'ml' ? 'AI & Machine Learning' : interviewDomain === 'se' ? 'Software Engineering' : 'Cloud Architecture'}
-                        </span>
-                        <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#ffffff' }}>
-                          Question {currentQIdx + 1} of {(interviewQuestions[interviewDomain] || []).length}
-                        </span>
-                      </div>
+                    {/* Top Bar with Back Arrow, Track Tag, and Countdown Timer */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                      <button
+                        onClick={() => { setInterviewActive(false); setSessionFinished(false) }}
+                        style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', fontWeight: 700 }}
+                      >
+                        <ArrowLeft size={18} />
+                        <span>Interview Practice – {interviewDomain === 'technical' ? 'Technical' : interviewDomain === 'hr' ? 'HR' : interviewDomain === 'aptitude' ? 'Aptitude' : 'Coding'}</span>
+                      </button>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        {/* Live Timer Countdown */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-input)', padding: '6px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                          <Timer size={16} color={timerSeconds < 120 ? '#ef4444' : '#38bdf8'} />
-                          <span style={{ fontWeight: 800, fontSize: '0.95rem', color: timerSeconds < 120 ? '#ef4444' : '#ffffff', fontVariantNumeric: 'tabular-nums' }}>
-                            {formatTimer(timerSeconds)}
-                          </span>
-                          <button
-                            onClick={() => setTimerRunning(!timerRunning)}
-                            style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
-                            title={timerRunning ? 'Pause Timer' : 'Resume Timer'}
-                          >
-                            {timerRunning ? <Pause size={14} /> : <Play size={14} />}
-                          </button>
-                        </div>
-
-                        <button
-                          className="btn-secondary"
-                          onClick={handleFinishInterview}
-                          style={{ padding: '6px 14px', fontSize: '0.82rem' }}
-                        >
-                          Finish Session
-                        </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '6px 14px', borderRadius: '9999px', fontSize: '0.9rem', fontWeight: 700 }}>
+                        <Clock size={16} />
+                        <span>{formatTimer(timerSeconds)}</span>
                       </div>
                     </div>
 
-                    {/* Active Question Box */}
+                    {/* Progress Bar */}
                     {(() => {
                       const questionsList = interviewQuestions[interviewDomain] || []
                       const q = questionsList[currentQIdx]
                       if (!q) return null
-                      const currentFeedback = evaluationResults[currentQIdx]
 
                       return (
-                        <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1.5rem' }}>
-                          {/* Question Tags & Difficulty */}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                              <span style={{ fontSize: '0.75rem', fontWeight: 700, background: 'rgba(255, 255, 255, 0.08)', color: '#94a3b8', padding: '3px 8px', borderRadius: '6px' }}>
-                                #{q.id} {q.tags.join(' • ')}
-                              </span>
+                        <div>
+                          <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1rem 1.25rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#e2e8f0' }}>Question {currentQIdx + 1} of {questionsList.length}</span>
+                              <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{Math.round(((currentQIdx + 1) / questionsList.length) * 100)}% Completed</span>
                             </div>
-                            <span className="match-badge" style={{ background: q.difficulty === 'Advanced' ? 'rgba(192, 132, 252, 0.15)' : 'rgba(56, 189, 248, 0.15)', color: q.difficulty === 'Advanced' ? '#c084fc' : '#38bdf8' }}>
-                              {q.difficulty}
-                            </span>
-                          </div>
-
-                          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.75rem' }}>
-                            {q.title}
-                          </h3>
-                          <p style={{ fontSize: '0.92rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '1.25rem', background: 'var(--bg-input)', padding: '1rem', borderRadius: '8px', borderLeft: '3px solid #38bdf8' }}>
-                            {q.question}
-                          </p>
-
-                          {/* Candidate Answer Textarea */}
-                          <div style={{ marginBottom: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                              <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#94a3b8' }}>
-                                Your Technical Explanation / Approach:
-                              </label>
-                              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                {(userAnswerText || savedAnswers[currentQIdx] || '').split(/\s+/).filter(Boolean).length} words
-                              </span>
+                            <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '9999px', overflow: 'hidden' }}>
+                              <div style={{ width: `${((currentQIdx + 1) / questionsList.length) * 100}%`, height: '100%', background: 'linear-gradient(90deg, #2563eb, #38bdf8)', transition: 'width 0.3s ease' }} />
                             </div>
-                            <textarea
-                              rows={5}
-                              value={userAnswerText !== '' ? userAnswerText : (savedAnswers[currentQIdx] || '')}
-                              onChange={(e) => {
-                                setUserAnswerText(e.target.value)
-                                setSavedAnswers(prev => ({ ...prev, [currentQIdx]: e.target.value }))
-                              }}
-                              placeholder="Type your technical response here. Elaborate on architecture, algorithms, trade-offs, and design choices..."
-                              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#ffffff', fontSize: '0.88rem', lineHeight: 1.5, resize: 'vertical' }}
-                            />
                           </div>
 
-                          {/* Submit for AI Evaluation Button */}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-                            <button
-                              className="btn-solid-blue"
-                              onClick={handleEvaluateAnswer}
-                              disabled={isEvaluating}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '8px 18px' }}
-                            >
-                              <Sparkles size={16} />
-                              <span>{isEvaluating ? 'Evaluating with AI...' : currentFeedback ? 'Re-Evaluate Answer' : 'Submit for AI Evaluation'}</span>
-                            </button>
-
-                            {currentFeedback && (
-                              <button
-                                className="btn-secondary"
-                                onClick={() => setShowModelAnswer(!showModelAnswer)}
-                                style={{ fontSize: '0.82rem', padding: '6px 14px' }}
-                              >
-                                {showModelAnswer ? 'Hide Expert Answer' : 'Reveal Expert Model Answer'}
-                              </button>
-                            )}
-                          </div>
-
-                          {/* AI Feedback & Score Card */}
-                          {currentFeedback && (
-                            <div style={{ marginTop: '1.25rem', padding: '1.25rem', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                  <span style={{ fontSize: '1.35rem', fontWeight: 800, color: currentFeedback.score >= 80 ? '#10b981' : '#38bdf8' }}>
-                                    {currentFeedback.score}/100
-                                  </span>
-                                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff' }}>
-                                    • {currentFeedback.grade}
-                                  </span>
-                                </div>
-                                <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-                                  AI Calibrated
+                          {/* Question Content Panel */}
+                          <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1.5rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                              <div style={{ flex: 1 }}>
+                                <span className="match-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', marginBottom: '0.6rem', display: 'inline-block' }}>
+                                  {q.tags ? q.tags.join(' - ') : 'Python Developer - Technical'}
                                 </span>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.5rem' }}>
+                                  {q.question}
+                                </h3>
                               </div>
-
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
-                                <div style={{ padding: '10px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                                  <div style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.35rem' }}>
-                                    <ThumbsUp size={14} /> Strong Points Identified:
-                                  </div>
-                                  <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.8rem', color: '#cbd5e1' }}>
-                                    {currentFeedback.strengths.map((s, idx) => (
-                                      <li key={idx} style={{ marginBottom: '2px' }}>{s}</li>
-                                    ))}
-                                  </ul>
+                              <div className="hint-callout" style={{ maxWidth: '320px' }}>
+                                <div style={{ fontWeight: 700, marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <span>💡 Hint</span>
                                 </div>
-
-                                <div style={{ padding: '10px 12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                                  <div style={{ fontSize: '0.78rem', color: '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.35rem' }}>
-                                    <Target size={14} /> Recommended Improvements:
-                                  </div>
-                                  <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.8rem', color: '#cbd5e1' }}>
-                                    {currentFeedback.improvements.map((imp, idx) => (
-                                      <li key={idx} style={{ marginBottom: '2px' }}>{imp}</li>
-                                    ))}
-                                  </ul>
-                                </div>
+                                <div>{q.hint || 'Think about its features and popularity...'}</div>
                               </div>
+                            </div>
 
-                              {/* Expandable Model Expert Answer */}
-                              {showModelAnswer && (
-                                <div style={{ marginTop: '0.85rem', padding: '1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                                  <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 700, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
-                                    Senior Engineering Lead Model Answer:
-                                  </div>
-                                  <p style={{ fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.5, margin: 0, fontStyle: 'italic' }}>
-                                    {currentFeedback.modelAnswer}
-                                  </p>
-                                </div>
+                            <div style={{ marginBottom: '1.25rem' }}>
+                              <textarea
+                                rows={6}
+                                value={userAnswerText !== '' ? userAnswerText : (savedAnswers[currentQIdx] || '')}
+                                onChange={(e) => {
+                                  setUserAnswerText(e.target.value)
+                                  setSavedAnswers(prev => ({ ...prev, [currentQIdx]: e.target.value }))
+                                }}
+                                placeholder="Type your answer here..."
+                                style={{ width: '100%', padding: '14px', borderRadius: '10px', background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#ffffff', fontSize: '0.9rem', lineHeight: 1.6, resize: 'vertical' }}
+                              />
+                            </div>
+
+                            {/* Navigation Buttons */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <button
+                                className="sidebar-logout-btn"
+                                onClick={handlePrevQuestion}
+                                disabled={currentQIdx === 0}
+                                style={{ width: 'auto', padding: '8px 20px', opacity: currentQIdx === 0 ? 0.4 : 1 }}
+                              >
+                                ← Previous
+                              </button>
+
+                              {currentQIdx < questionsList.length - 1 ? (
+                                <button
+                                  className="btn-solid-blue"
+                                  onClick={() => {
+                                    if (userAnswerText.trim()) {
+                                      setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
+                                    }
+                                    handleNextQuestion()
+                                  }}
+                                  style={{ padding: '9px 24px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                                >
+                                  <span>Submit Answer</span>
+                                  <ArrowRight size={16} />
+                                </button>
+                              ) : (
+                                <button
+                                  className="btn-solid-blue"
+                                  onClick={handleFinishInterview}
+                                  style={{ background: '#2563eb', padding: '9px 28px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)' }}
+                                >
+                                  <span>Submit Answer</span>
+                                  <ArrowRight size={16} />
+                                </button>
                               )}
                             </div>
-                          )}
-
-                          {/* Question Navigation Footer */}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-                            <button
-                              className="btn-secondary"
-                              onClick={handlePrevQuestion}
-                              disabled={currentQIdx === 0}
-                              style={{ opacity: currentQIdx === 0 ? 0.5 : 1 }}
-                            >
-                              ← Previous Question
-                            </button>
-
-                            {currentQIdx < questionsList.length - 1 ? (
-                              <button
-                                className="btn-solid-blue"
-                                onClick={handleNextQuestion}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '8px 16px' }}
-                              >
-                                <span>Next Question</span>
-                                <ChevronRight size={16} />
-                              </button>
-                            ) : (
-                              <button
-                                className="btn-solid-blue"
-                                onClick={handleFinishInterview}
-                                style={{ background: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '8px 18px' }}
-                              >
-                                <CheckCircle2 size={16} />
-                                <span>Complete Interview & View Scorecard</span>
-                              </button>
-                            )}
                           </div>
                         </div>
                       )
@@ -2010,117 +2288,159 @@ export default function App() {
                   </div>
                 )}
 
-                {/* 3. Session Summary Scorecard (When Finished) */}
+                {/* 3. Evaluation Results Screen - Panel 3 */}
                 {sessionFinished && (
-                  <div className="white-panel" style={{ padding: '2rem' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                      <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-                        <Award size={32} />
+                  <div>
+                    <div className="welcome-header">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <Award size={22} color="#10b981" />
+                        <h2 style={{ margin: 0 }}>Evaluation Results</h2>
                       </div>
-                      <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
-                        Mock Interview Session Complete!
-                      </h2>
-                      <p style={{ color: '#94a3b8', fontSize: '0.88rem', marginTop: '4px' }}>
-                        Performance report calibrated against <strong>{interviewDomain === 'ml' ? 'AI & Machine Learning' : interviewDomain === 'se' ? 'Software Engineering' : 'Cloud Architecture'}</strong> technical benchmarks
-                      </p>
+                      <p>Comprehensive AI evaluation of your interview articulation and technical depth</p>
                     </div>
 
-                    {/* Score summary cards */}
-                    {(() => {
-                      const questionsList = interviewQuestions[interviewDomain] || []
-                      const evaluatedScores = Object.values(evaluationResults).map(r => r.score)
-                      const avgScore = evaluatedScores.length > 0 
-                        ? Math.round(evaluatedScores.reduce((a, b) => a + b, 0) / evaluatedScores.length)
-                        : 82
+                    <div className="dash-2col" style={{ marginBottom: '1.5rem' }}>
+                      {/* Left: Overall Score Circle */}
+                      <div className="white-panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem 1.5rem' }}>
+                        <div className="radial-score-circle">
+                          <span className="radial-score-num">80%</span>
+                          <span className="radial-score-label">Overall Score</span>
+                        </div>
+                        <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '6px 16px', fontSize: '0.82rem' }}>
+                          ✔ Excellent Performance!
+                        </span>
+                      </div>
 
-                      return (
-                        <div>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-                            <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                              <div style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Overall Score</div>
-                              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#38bdf8', marginTop: '2px' }}>{avgScore}%</div>
-                              <div style={{ fontSize: '0.75rem', color: '#10b981' }}>Campus Placement Ready ★</div>
-                            </div>
-                            <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                              <div style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Questions Evaluated</div>
-                              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#818cf8', marginTop: '2px' }}>
-                                {Object.keys(evaluationResults).length} / {questionsList.length}
+                      {/* Right: Detailed Analysis Breakdown */}
+                      <div className="white-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem', padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.5rem', color: '#ffffff' }}>Detailed Analysis</h3>
+                        {[
+                          { label: 'Technical Knowledge', pct: 85, color: '#10b981', icon: Settings },
+                          { label: 'Answer Accuracy', pct: 80, color: '#38bdf8', icon: CheckCircle2 },
+                          { label: 'Communication', pct: 75, color: '#818cf8', icon: MessageSquare },
+                          { label: 'Concept Understanding', pct: 80, color: '#f59e0b', icon: Sparkles }
+                        ].map((item, idx) => {
+                          const Icon = item.icon
+                          return (
+                            <div key={idx}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', fontSize: '0.85rem' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#e2e8f0', fontWeight: 500 }}>
+                                  <Icon size={14} color={item.color} />
+                                  <span>{item.label}</span>
+                                </span>
+                                <span style={{ fontWeight: 700, color: '#ffffff' }}>{item.pct}%</span>
                               </div>
-                              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Completed</div>
-                            </div>
-                            <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                              <div style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Time Elapsed</div>
-                              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#c084fc', marginTop: '2px' }}>
-                                {formatTimer(900 - timerSeconds)}
+                              <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '9999px', overflow: 'hidden' }}>
+                                <div style={{ width: `${item.pct}%`, height: '100%', background: item.color, borderRadius: '9999px' }} />
                               </div>
-                              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Session Length</div>
                             </div>
-                          </div>
+                          )
+                        })}
+                      </div>
+                    </div>
 
-                          {/* Breakdown list */}
-                          <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.75rem' }}>Question Breakdown:</h4>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
-                            {questionsList.map((q, idx) => {
-                              const res = evaluationResults[idx]
-                              return (
-                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                                  <div>
-                                    <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#ffffff' }}>#{q.id} {q.title}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Difficulty: {q.difficulty}</div>
-                                  </div>
-                                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: res ? (res.score >= 80 ? '#10b981' : '#38bdf8') : '#64748b' }}>
-                                    {res ? `${res.score}/100` : 'Not submitted'}
-                                  </span>
-                                </div>
-                              )
-                            })}
+                    {/* Strengths and Areas to Improve Boxes */}
+                    <div className="dash-2col" style={{ marginBottom: '1.5rem' }}>
+                      <div className="analysis-box-green">
+                        <div style={{ fontWeight: 700, color: '#10b981', marginBottom: '0.5rem', fontSize: '0.92rem' }}>Strengths</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <Check size={14} color="#10b981" />
+                            <span>Good understanding of core concepts</span>
                           </div>
-
-                          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                            <button
-                              className="btn-solid-blue"
-                              onClick={() => handleStartInterview(interviewDomain)}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '10px 22px' }}
-                            >
-                              <RotateCcw size={16} />
-                              <span>Retake Session</span>
-                            </button>
-                            <button
-                              className="btn-secondary"
-                              onClick={() => { setInterviewActive(false); setSessionFinished(false) }}
-                              style={{ padding: '10px 22px' }}
-                            >
-                              Switch Engineering Track
-                            </button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <Check size={14} color="#10b981" />
+                            <span>Clear and confident answers</span>
                           </div>
                         </div>
-                      )
-                    })()}
+                      </div>
+
+                      <div className="analysis-box-red">
+                        <div style={{ fontWeight: 700, color: '#ef4444', marginBottom: '0.5rem', fontSize: '0.92rem' }}>Areas to Improve</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <AlertCircle size={14} color="#ef4444" />
+                            <span>Deepen OOP concepts</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <AlertCircle size={14} color="#ef4444" />
+                            <span>Learn more about databases</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+                      <button
+                        className="btn-solid-blue"
+                        onClick={() => setShowModelAnswer(!showModelAnswer)}
+                        style={{ padding: '10px 24px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      >
+                        <FileText size={16} />
+                        <span>{showModelAnswer ? 'Hide Detailed Report' : 'View Detailed Report'}</span>
+                      </button>
+                      <button
+                        className="btn-secondary"
+                        onClick={() => handleStartInterview(interviewDomain)}
+                        style={{ padding: '10px 24px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      >
+                        <RotateCcw size={16} />
+                        <span>Try Again</span>
+                      </button>
+                      <button
+                        className="btn-pill-outline"
+                        onClick={() => setActiveTab('my-progress')}
+                        style={{ padding: '10px 24px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      >
+                        <TrendingUp size={16} />
+                        <span>View Progress Dashboard</span>
+                      </button>
+                    </div>
+
+                    {/* Detailed Expert Model Answer Report */}
+                    {showModelAnswer && (
+                      <div className="white-panel" style={{ padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginBottom: '1rem' }}>Expert Model Answer Reference</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                          {(interviewQuestions[interviewDomain] || []).map((q, idx) => (
+                            <div key={idx} style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                              <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#38bdf8', marginBottom: '4px' }}>
+                                Question {idx + 1}: {q.question}
+                              </div>
+                              <div style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                                <strong>Model Solution: </strong>{q.modelAnswer}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             )}
 
-            {/* 7 & 8. JOB RECOMMENDATIONS & PLACEMENT DRIVES */}
-            {(activeTab === 'job-recommendations' || activeTab === 'placement-drives') && (
+            {/* 5. JOB RECOMMENDATIONS */}
+            {activeTab === 'job-recommendations' && (
               <div>
                 <div className="welcome-header">
-                  <h2>{activeTab === 'placement-drives' ? 'Active Placement Drives' : 'AI Job Recommendations'}</h2>
-                  <p>Curated opportunities matching your 85% career readiness index</p>
+                  <h2>AI Job Recommendations & Placement Drives</h2>
+                  <p>Curated campus opportunities matching your 85% career readiness index</p>
                 </div>
                 <div className="dash-2col">
                   {colleges.map((c, i) => (
                     <div key={i} className="white-panel">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                         <div>
-                          <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>{c.name}</h4>
-                          <p style={{ fontSize: '0.85rem', color: '#2563eb', fontWeight: 600 }}>{c.program}</p>
-                          <p style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>📍 {c.location}</p>
+                          <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>{c.name}</h4>
+                          <p style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 600 }}>{c.program}</p>
+                          <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>📍 {c.location}</p>
                         </div>
                         <span className="match-badge">{c.rating}</span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '0.85rem', marginTop: '0.85rem' }}>
-                        <span style={{ fontSize: '0.78rem', color: '#d97706', fontWeight: 700 }}>{c.nirf}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.85rem', marginTop: '0.85rem' }}>
+                        <span style={{ fontSize: '0.78rem', color: '#f59e0b', fontWeight: 700 }}>{c.nirf}</span>
                         <button className="btn-pill-outline" style={{ padding: '4px 12px', fontSize: '0.78rem' }}>View Details</button>
                       </div>
                     </div>
@@ -2129,16 +2449,16 @@ export default function App() {
               </div>
             )}
 
-            {/* 9. ASSESSMENTS */}
-            {activeTab === 'assessments' && (
+            {/* 3. SKILL ASSESSMENT */}
+            {activeTab === 'skill-assessment' && (
               <div>
                 <div className="welcome-header">
                   <h2>Career Readiness Aptitude Assessments</h2>
                   <p>Interactive problem solving to calibrate your Career Match score</p>
                 </div>
                 <div className="white-panel" style={{ maxWidth: '800px' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Diagnostic Problem Solving Question</h3>
-                  <p style={{ color: '#475569', fontSize: '0.92rem', margin: '0.75rem 0 1.25rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>Diagnostic Problem Solving Question</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: '0.75rem 0 1.25rem' }}>
                     When tackling a new system architecture problem, which task energizes you most?
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -2154,9 +2474,9 @@ export default function App() {
                         style={{
                           justifyContent: 'flex-start',
                           padding: '12px 16px',
-                          borderColor: quizAnswer === idx ? '#2563eb' : '#e2e8f0',
-                          background: quizAnswer === idx ? '#eff6ff' : '#ffffff',
-                          color: quizAnswer === idx ? '#1d4ed8' : '#1e293b'
+                          borderColor: quizAnswer === idx ? '#2563eb' : 'var(--border)',
+                          background: quizAnswer === idx ? 'rgba(37, 99, 235, 0.15)' : 'var(--bg-card)',
+                          color: quizAnswer === idx ? '#38bdf8' : '#e2e8f0'
                         }}
                         onClick={() => { setQuizAnswer(idx); setQuizScore(92) }}
                       >
@@ -2176,44 +2496,284 @@ export default function App() {
               </div>
             )}
 
-            {/* 10. CERTIFICATES */}
-            {activeTab === 'certificates' && (
+            {/* 10. MY PROGRESS (EXACT RECREATION OF TEACHER'S PANEL 4) */}
+            {activeTab === 'my-progress' && (
               <div>
                 <div className="welcome-header">
-                  <h2>Student Certifications & Badges</h2>
-                  <p>Verified competencies and credentials for campus recruitment</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <BarChart3 size={22} color="#3b82f6" />
+                    <h2 style={{ margin: 0 }}>Interview Performance Dashboard</h2>
+                  </div>
+                  <p>Historical trends, competency growth, and recommended learning pathways</p>
                 </div>
-                <div className="dash-2col">
-                  {[
-                    { name: 'Python for Data Science', issuer: 'IBM Certified', date: 'August 2026' },
-                    { name: 'Full-Stack Web Architect', issuer: 'Meta Certified', date: 'June 2026' },
-                    { name: 'Machine Learning Specialization', issuer: 'DeepLearning.AI', date: 'October 2026' }
-                  ].map((cert, idx) => (
-                    <div key={idx} className="white-panel" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f3e8ff', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Award size={24} />
+
+                {/* Top 4 Performance Cards */}
+                <div className="interview-stats-grid">
+                  <div className="interview-stat-tile">
+                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc' }}>
+                      <Calendar size={22} />
+                    </div>
+                    <div>
+                      <div className="interview-stat-tile-val">3</div>
+                      <div className="interview-stat-tile-lbl">Total Interviews</div>
+                    </div>
+                  </div>
+
+                  <div className="interview-stat-tile">
+                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                      <Star size={22} />
+                    </div>
+                    <div>
+                      <div className="interview-stat-tile-val">78%</div>
+                      <div className="interview-stat-tile-lbl">Average Score</div>
+                    </div>
+                  </div>
+
+                  <div className="interview-stat-tile">
+                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+                      <TrendingUp size={22} />
+                    </div>
+                    <div>
+                      <div className="interview-stat-tile-val" style={{ color: '#38bdf8' }}>+12%</div>
+                      <div className="interview-stat-tile-lbl">Improvement</div>
+                    </div>
+                  </div>
+
+                  <div className="interview-stat-tile">
+                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+                      <Award size={22} />
+                    </div>
+                    <div>
+                      <div className="interview-stat-tile-val" style={{ color: '#f59e0b' }}>90%</div>
+                      <div className="interview-stat-tile-lbl">Best Score</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Middle 2-Col: Performance Trend Graph + Recommended Topics */}
+                <div className="dash-2col" style={{ marginBottom: '1.5rem' }}>
+                  {/* Performance Trend SVG Line Chart */}
+                  <div className="white-panel" style={{ padding: '1.5rem' }}>
+                    <div className="panel-header" style={{ marginBottom: '1rem' }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>Performance Trend</h3>
+                      <span className="match-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>Upward Trajectory</span>
+                    </div>
+
+                    <div style={{ position: 'relative', height: '180px', width: '100%', marginTop: '1rem' }}>
+                      <svg viewBox="0 0 400 160" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                        {/* Grid lines */}
+                        <line x1="40" y1="20" x2="380" y2="20" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4" />
+                        <text x="5" y="24" fill="#64748b" fontSize="10">100%</text>
+
+                        <line x1="40" y1="55" x2="380" y2="55" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4" />
+                        <text x="12" y="59" fill="#64748b" fontSize="10">75%</text>
+
+                        <line x1="40" y1="90" x2="380" y2="90" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4" />
+                        <text x="12" y="94" fill="#64748b" fontSize="10">50%</text>
+
+                        <line x1="40" y1="125" x2="380" y2="125" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4" />
+                        <text x="12" y="129" fill="#64748b" fontSize="10">25%</text>
+
+                        <line x1="40" y1="150" x2="380" y2="150" stroke="rgba(255, 255, 255, 0.1)" />
+                        <text x="20" y="154" fill="#64748b" fontSize="10">0%</text>
+
+                        {/* Trend Area Gradient */}
+                        <defs>
+                          <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
+                          </linearGradient>
+                        </defs>
+                        <polygon points="80,150 80,105 220,70 350,50 350,150" fill="url(#trendGradient)" />
+
+                        {/* Trend Line */}
+                        <polyline
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          points="80,105 220,70 350,50"
+                        />
+
+                        {/* Points */}
+                        {/* Point 1: 60% */}
+                        <circle cx="80" cy="105" r="5" fill="#3b82f6" stroke="#070e28" strokeWidth="2" />
+                        <rect x="62" y="80" width="36" height="18" rx="4" fill="#1e293b" />
+                        <text x="80" y="93" fill="#ffffff" fontSize="10" fontWeight="700" textAnchor="middle">60%</text>
+                        <text x="80" y="165" fill="#94a3b8" fontSize="10" textAnchor="middle">Attempt 1</text>
+
+                        {/* Point 2: 70% */}
+                        <circle cx="220" cy="70" r="5" fill="#3b82f6" stroke="#070e28" strokeWidth="2" />
+                        <rect x="202" y="45" width="36" height="18" rx="4" fill="#1e293b" />
+                        <text x="220" y="58" fill="#ffffff" fontSize="10" fontWeight="700" textAnchor="middle">70%</text>
+                        <text x="220" y="165" fill="#94a3b8" fontSize="10" textAnchor="middle">Attempt 2</text>
+
+                        {/* Point 3: 80% */}
+                        <circle cx="350" cy="50" r="6" fill="#10b981" stroke="#070e28" strokeWidth="2" />
+                        <rect x="332" y="25" width="36" height="18" rx="4" fill="#2563eb" />
+                        <text x="350" y="38" fill="#ffffff" fontSize="10" fontWeight="700" textAnchor="middle">80%</text>
+                        <text x="350" y="165" fill="#94a3b8" fontSize="10" textAnchor="middle">Attempt 3</text>
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Recommended Topics */}
+                  <div className="white-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div className="panel-header" style={{ marginBottom: '1rem' }}>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Target size={18} color="#f59e0b" />
+                          <span>Recommended Topics</span>
+                        </h3>
                       </div>
-                      <div>
-                        <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0f172a' }}>{cert.name}</h4>
-                        <p style={{ fontSize: '0.8rem', color: '#64748b' }}>{cert.issuer} • Issued {cert.date}</p>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                        {[
+                          { title: 'OOP Concepts', desc: 'Encapsulation, inheritance, polymorphism patterns' },
+                          { title: 'Database Connectivity', desc: 'PostgreSQL connection pools and transaction isolation' },
+                          { title: 'System Design', desc: 'Load balancing, vertical vs horizontal scalability' }
+                        ].map((top, idx) => (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Check size={14} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#ffffff' }}>{top.title}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{top.desc}</div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
+
+                    <button
+                      className="btn-solid-blue"
+                      onClick={() => setActiveTab('learning-path')}
+                      style={{ padding: '10px 20px', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', background: 'linear-gradient(135deg, #2563eb, #6366f1)' }}
+                    >
+                      <BookOpen size={16} />
+                      <span>Start Learning Path →</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Previous Interviews Table */}
+                <div className="white-panel" style={{ padding: '1.5rem' }}>
+                  <div className="panel-header" style={{ marginBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Clock size={18} color="#38bdf8" />
+                      <span>Previous Interviews</span>
+                    </h3>
+                    <button className="btn-pill-outline" style={{ padding: '4px 12px', fontSize: '0.78rem' }}>
+                      View All →
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                    {[
+                      { date: 'Nov 02, 2026', role: 'Python Developer', score: 80, color: '#10b981', status: 'Excellent' },
+                      { date: 'Oct 25, 2026', role: 'Data Analyst', score: 72, color: '#38bdf8', status: 'Good' },
+                      { date: 'Oct 18, 2026', role: 'Web Developer', score: 68, color: '#f59e0b', status: 'Proficient' }
+                    ].map((row, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8', minWidth: '95px' }}>{row.date}</span>
+                          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#ffffff' }}>{row.role}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <span className="match-badge" style={{ background: `${row.color}22`, color: row.color, border: `1px solid ${row.color}44`, fontWeight: 700 }}>
+                            {row.score}%
+                          </span>
+                          <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }} onClick={() => setActiveTab('interview-preparation')}>
+                            Review
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* 11 & 12. SETTINGS & HELP */}
-            {(activeTab === 'settings' || activeTab === 'help-support') && (
+            {/* 11. NOTIFICATIONS */}
+            {activeTab === 'notifications' && (
               <div>
                 <div className="welcome-header">
-                  <h2>{activeTab === 'settings' ? 'Account & System Settings' : 'Help & Support'}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <h2>Notification Center</h2>
+                      <p>Stay updated on placement drives, interview results, and AI feedback</p>
+                    </div>
+                    <button
+                      className="btn-secondary"
+                      onClick={() => setNotificationsList(prev => prev.map(n => ({ ...n, read: true })))}
+                      style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+                    >
+                      Mark All as Read
+                    </button>
+                  </div>
+                </div>
+
+                <div className="white-panel" style={{ maxWidth: '850px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                    {notificationsList.map((notif) => (
+                      <div
+                        key={notif.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '1rem',
+                          padding: '1rem 1.25rem',
+                          borderRadius: '10px',
+                          background: notif.read ? 'var(--bg-card)' : 'rgba(37, 99, 235, 0.08)',
+                          border: notif.read ? '1px solid var(--border)' : '1px solid rgba(37, 99, 235, 0.3)',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '10px',
+                          background: notif.type === 'interview' ? 'rgba(16, 185, 129, 0.15)' : notif.type === 'placement' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(192, 132, 252, 0.15)',
+                          color: notif.type === 'interview' ? '#10b981' : notif.type === 'placement' ? '#38bdf8' : '#c084fc',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          {notif.type === 'interview' ? <Award size={20} /> : notif.type === 'placement' ? <Briefcase size={20} /> : <Bell size={20} />}
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>{notif.title}</h4>
+                            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{notif.time}</span>
+                          </div>
+                          <p style={{ fontSize: '0.84rem', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>{notif.desc}</p>
+                        </div>
+
+                        {!notif.read && (
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', marginTop: '6px' }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 12. SETTINGS */}
+            {activeTab === 'settings' && (
+              <div>
+                <div className="welcome-header">
+                  <h2>Account & System Settings</h2>
                   <p>Configuration status, cloud backend connectivity, and user preferences</p>
                 </div>
                 <div className="white-panel" style={{ maxWidth: '780px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.85rem' }}>
                     <div>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff' }}>
                         <Database size={20} color="#38bdf8" />
                         <span>Connected Cloud & AI Services</span>
                       </h3>
@@ -2225,7 +2785,7 @@ export default function App() {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)' }}>
                       <div>
                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Supabase PostgreSQL Database</div>
                         <div style={{ fontSize: '0.78rem', color: '#64748b' }}>https://hnnmktwpdybjgwxotpvk.supabase.co</div>
@@ -2253,7 +2813,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)' }}>
                       <div>
                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>FastAPI Python ML Inference Server</div>
                         <div style={{ fontSize: '0.78rem', color: '#64748b' }}>http://127.0.0.1:8000 (Swagger docs available at /docs)</div>
@@ -2261,10 +2821,10 @@ export default function App() {
                       <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>🟢 Online</span>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-input)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)' }}>
                       <div>
                         <div style={{ fontWeight: 600, color: '#e2e8f0' }}>Active Student Session</div>
-                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{session.user?.email || 'Student Explorer'} (ID: {session.user?.id?.slice(0, 12)}...)</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{session?.user?.email || 'Student Explorer'} (ID: {session?.user?.id?.slice(0, 12) || 'demo'}...)</div>
                       </div>
                       <span className="match-badge">Authenticated</span>
                     </div>
