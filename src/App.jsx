@@ -563,8 +563,8 @@ export default function App() {
   }
 
   // Curated Technical Question Bank for AI Mock Interview Simulator
-  // SESSION_SIZE: number of questions shown per interview session (randomly sampled from the 20-question bank)
-  const SESSION_SIZE = 5
+  // SESSION_SIZE: show all 20 questions per session, shuffled into a different random order each time
+  const SESSION_SIZE = 20
 
   // Fisher-Yates shuffle utility
   const shuffleArray = (arr) => {
