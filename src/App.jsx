@@ -120,6 +120,13 @@ export default function App() {
   const [showModelAnswer, setShowModelAnswer] = useState(false)
   const [sessionQuestions, setSessionQuestions] = useState([]) // shuffled 5-question subset per session
 
+  // Interview history — grows each time a session is finished
+  const [interviewHistory, setInterviewHistory] = useState([
+    { date: 'Oct 18, 2026', domain: 'Technical Interview', score: 68, color: '#f59e0b', status: 'Proficient' },
+    { date: 'Oct 25, 2026', domain: 'HR Interview',        score: 72, color: '#38bdf8', status: 'Good' },
+    { date: 'Nov 02, 2026', domain: 'Technical Interview', score: 80, color: '#10b981', status: 'Excellent' }
+  ])
+
   // Notification Center State
   const [notificationsList, setNotificationsList] = useState([
     {
@@ -1638,12 +1645,41 @@ export default function App() {
 
   // Finish Interview Session
   const handleFinishInterview = () => {
+    const finalAnswers = { ...savedAnswers }
     if (userAnswerText.trim() && !savedAnswers[currentQIdx]) {
-      setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
+      finalAnswers[currentQIdx] = userAnswerText
+      setSavedAnswers(finalAnswers)
     }
     setTimerRunning(false)
     setInterviewActive(false)
     setSessionFinished(true)
+
+    // ── Save this session to interview history for My Progress ──
+    const domainLabels = {
+      technical: 'Technical Interview',
+      hr: 'HR Interview',
+      aptitude: 'Aptitude Test',
+      coding: 'Coding Interview',
+      ml: 'ML Interview',
+      se: 'SE Interview',
+      cloud: 'Cloud Interview'
+    }
+    // Compute average score from all evaluated questions in this session
+    const allResults = Object.values(evaluationResults)
+    const avgScore = allResults.length > 0
+      ? Math.round(allResults.reduce((sum, r) => sum + r.score, 0) / allResults.length)
+      : 70 // default if no answers evaluated
+
+    const scoreColor = avgScore >= 85 ? '#10b981' : avgScore >= 70 ? '#38bdf8' : '#f59e0b'
+    const scoreStatus = avgScore >= 85 ? 'Excellent' : avgScore >= 70 ? 'Good' : 'Proficient'
+
+    const today = new Date()
+    const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' })
+
+    setInterviewHistory(prev => [
+      ...prev,
+      { date: dateStr, domain: domainLabels[interviewDomain] || 'Interview', score: avgScore, color: scoreColor, status: scoreStatus }
+    ])
   }
 
   // Colleges data
@@ -3259,7 +3295,32 @@ export default function App() {
             )}
 
             {/* 10. MY PROGRESS (EXACT RECREATION OF TEACHER'S PANEL 4) */}
-            {activeTab === 'my-progress' && (
+            {activeTab === 'my-progress' && (() => {
+              // ── Compute live stats from interviewHistory ──
+              const hist = interviewHistory
+              const totalInterviews = hist.length
+              const avgScore = totalInterviews > 0
+                ? Math.round(hist.reduce((s, h) => s + h.score, 0) / totalInterviews)
+                : 0
+              const bestScore = totalInterviews > 0 ? Math.max(...hist.map(h => h.score)) : 0
+              const improvement = totalInterviews >= 2
+                ? hist[hist.length - 1].score - hist[0].score
+                : 0
+
+              // ── SVG chart: map each session to an x point ──
+              const chartW = 400, chartH = 150, padL = 40, padR = 20, padT = 20, padB = 30
+              const innerW = chartW - padL - padR
+              const innerH = chartH - padT - padB
+              // y: score 0–100 maps to innerH→0 (top=100%)
+              const toY = (score) => padT + innerH - (score / 100) * innerH
+              const toX = (idx) => padL + (hist.length <= 1 ? innerW / 2 : (idx / (hist.length - 1)) * innerW)
+
+              const pts = hist.map((h, i) => `${toX(i)},${toY(h.score)}`).join(' ')
+              const areaFirst = `${toX(0)},${chartH - padB}`
+              const areaLast  = `${toX(hist.length - 1)},${chartH - padB}`
+              const areaPoints = `${areaFirst} ${pts} ${areaLast}`
+
+              return (
               <div>
                 <div className="welcome-header">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -3269,115 +3330,120 @@ export default function App() {
                   <p>Historical trends, competency growth, and recommended learning pathways</p>
                 </div>
 
-                {/* Top 4 Performance Cards */}
+                {/* ── Top 4 Live Stat Tiles ── */}
                 <div className="interview-stats-grid">
                   <div className="interview-stat-tile">
-                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc' }}>
+                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(192,132,252,0.15)', color: '#c084fc' }}>
                       <Calendar size={22} />
                     </div>
                     <div>
-                      <div className="interview-stat-tile-val">3</div>
+                      <div className="interview-stat-tile-val">{totalInterviews}</div>
                       <div className="interview-stat-tile-lbl">Total Interviews</div>
                     </div>
                   </div>
 
                   <div className="interview-stat-tile">
-                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
                       <Star size={22} />
                     </div>
                     <div>
-                      <div className="interview-stat-tile-val">78%</div>
+                      <div className="interview-stat-tile-val">{avgScore}%</div>
                       <div className="interview-stat-tile-lbl">Average Score</div>
                     </div>
                   </div>
 
                   <div className="interview-stat-tile">
-                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8' }}>
                       <TrendingUp size={22} />
                     </div>
                     <div>
-                      <div className="interview-stat-tile-val" style={{ color: '#38bdf8' }}>+12%</div>
+                      <div className="interview-stat-tile-val" style={{ color: improvement >= 0 ? '#38bdf8' : '#f87171' }}>
+                        {improvement >= 0 ? '+' : ''}{improvement}%
+                      </div>
                       <div className="interview-stat-tile-lbl">Improvement</div>
                     </div>
                   </div>
 
                   <div className="interview-stat-tile">
-                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+                    <div className="interview-stat-icon-wrap" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}>
                       <Award size={22} />
                     </div>
                     <div>
-                      <div className="interview-stat-tile-val" style={{ color: '#f59e0b' }}>90%</div>
+                      <div className="interview-stat-tile-val" style={{ color: '#f59e0b' }}>{bestScore}%</div>
                       <div className="interview-stat-tile-lbl">Best Score</div>
                     </div>
                   </div>
                 </div>
 
-                {/* Middle 2-Col: Performance Trend Graph + Recommended Topics */}
+                {/* ── Middle: Dynamic SVG Chart + Recommended Topics ── */}
                 <div className="dash-2col" style={{ marginBottom: '1.5rem' }}>
-                  {/* Performance Trend SVG Line Chart */}
                   <div className="white-panel" style={{ padding: '1.5rem' }}>
                     <div className="panel-header" style={{ marginBottom: '1rem' }}>
                       <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>Performance Trend</h3>
-                      <span className="match-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>Upward Trajectory</span>
+                      <span className="match-badge" style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8' }}>
+                        {improvement >= 0 ? '↑ Upward Trajectory' : '↓ Needs Focus'}
+                      </span>
                     </div>
 
-                    <div style={{ position: 'relative', height: '180px', width: '100%', marginTop: '1rem' }}>
-                      <svg viewBox="0 0 400 160" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                        {/* Grid lines */}
-                        <line x1="40" y1="20" x2="380" y2="20" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4" />
-                        <text x="5" y="24" fill="#64748b" fontSize="10">100%</text>
+                    {totalInterviews === 0 ? (
+                      <div style={{ textAlign: 'center', color: '#64748b', padding: '2rem', fontSize: '0.9rem' }}>
+                        Complete your first interview session to see your trend chart here!
+                      </div>
+                    ) : (
+                      <div style={{ position: 'relative', height: '200px', width: '100%', marginTop: '0.5rem' }}>
+                        <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                          <defs>
+                            <linearGradient id="trendGradient2" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.4" />
+                              <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
+                            </linearGradient>
+                          </defs>
 
-                        <line x1="40" y1="55" x2="380" y2="55" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4" />
-                        <text x="12" y="59" fill="#64748b" fontSize="10">75%</text>
+                          {/* Grid lines */}
+                          {[100, 75, 50, 25, 0].map(pct => (
+                            <g key={pct}>
+                              <line x1={padL} y1={toY(pct)} x2={chartW - padR} y2={toY(pct)}
+                                stroke="rgba(255,255,255,0.06)" strokeDasharray="4" />
+                              <text x={padL - 6} y={toY(pct) + 4} fill="#64748b" fontSize="9" textAnchor="end">{pct}%</text>
+                            </g>
+                          ))}
 
-                        <line x1="40" y1="90" x2="380" y2="90" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4" />
-                        <text x="12" y="94" fill="#64748b" fontSize="10">50%</text>
+                          {/* Baseline */}
+                          <line x1={padL} y1={chartH - padB} x2={chartW - padR} y2={chartH - padB}
+                            stroke="rgba(255,255,255,0.1)" />
 
-                        <line x1="40" y1="125" x2="380" y2="125" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4" />
-                        <text x="12" y="129" fill="#64748b" fontSize="10">25%</text>
+                          {/* Area fill */}
+                          {hist.length > 1 && (
+                            <polygon points={areaPoints} fill="url(#trendGradient2)" />
+                          )}
 
-                        <line x1="40" y1="150" x2="380" y2="150" stroke="rgba(255, 255, 255, 0.1)" />
-                        <text x="20" y="154" fill="#64748b" fontSize="10">0%</text>
+                          {/* Trend line */}
+                          {hist.length > 1 && (
+                            <polyline fill="none" stroke="#3b82f6" strokeWidth="3"
+                              strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                          )}
 
-                        {/* Trend Area Gradient */}
-                        <defs>
-                          <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.4" />
-                            <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
-                          </linearGradient>
-                        </defs>
-                        <polygon points="80,150 80,105 220,70 350,50 350,150" fill="url(#trendGradient)" />
-
-                        {/* Trend Line */}
-                        <polyline
-                          fill="none"
-                          stroke="#3b82f6"
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          points="80,105 220,70 350,50"
-                        />
-
-                        {/* Points */}
-                        {/* Point 1: 60% */}
-                        <circle cx="80" cy="105" r="5" fill="#3b82f6" stroke="#070e28" strokeWidth="2" />
-                        <rect x="62" y="80" width="36" height="18" rx="4" fill="#1e293b" />
-                        <text x="80" y="93" fill="#ffffff" fontSize="10" fontWeight="700" textAnchor="middle">60%</text>
-                        <text x="80" y="165" fill="#94a3b8" fontSize="10" textAnchor="middle">Attempt 1</text>
-
-                        {/* Point 2: 70% */}
-                        <circle cx="220" cy="70" r="5" fill="#3b82f6" stroke="#070e28" strokeWidth="2" />
-                        <rect x="202" y="45" width="36" height="18" rx="4" fill="#1e293b" />
-                        <text x="220" y="58" fill="#ffffff" fontSize="10" fontWeight="700" textAnchor="middle">70%</text>
-                        <text x="220" y="165" fill="#94a3b8" fontSize="10" textAnchor="middle">Attempt 2</text>
-
-                        {/* Point 3: 80% */}
-                        <circle cx="350" cy="50" r="6" fill="#10b981" stroke="#070e28" strokeWidth="2" />
-                        <rect x="332" y="25" width="36" height="18" rx="4" fill="#2563eb" />
-                        <text x="350" y="38" fill="#ffffff" fontSize="10" fontWeight="700" textAnchor="middle">80%</text>
-                        <text x="350" y="165" fill="#94a3b8" fontSize="10" textAnchor="middle">Attempt 3</text>
-                      </svg>
-                    </div>
+                          {/* Data points + labels */}
+                          {hist.map((h, i) => {
+                            const cx = toX(i), cy = toY(h.score)
+                            const isLast = i === hist.length - 1
+                            const labelY = cy - 14
+                            return (
+                              <g key={i}>
+                                <circle cx={cx} cy={cy} r={isLast ? 6 : 5}
+                                  fill={isLast ? '#10b981' : '#3b82f6'} stroke="#070e28" strokeWidth="2" />
+                                <rect x={cx - 18} y={labelY - 10} width="36" height="16" rx="4"
+                                  fill={isLast ? '#2563eb' : '#1e293b'} />
+                                <text x={cx} y={labelY + 2} fill="#ffffff" fontSize="9"
+                                  fontWeight="700" textAnchor="middle">{h.score}%</text>
+                                <text x={cx} y={chartH - padB + 14} fill="#94a3b8" fontSize="9"
+                                  textAnchor="middle">#{i + 1}</text>
+                              </g>
+                            )
+                          })}
+                        </svg>
+                      </div>
+                    )}
                   </div>
 
                   {/* Recommended Topics */}
@@ -3389,7 +3455,6 @@ export default function App() {
                           <span>Recommended Topics</span>
                         </h3>
                       </div>
-
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
                         {[
                           { title: 'OOP Concepts', desc: 'Encapsulation, inheritance, polymorphism patterns' },
@@ -3397,7 +3462,7 @@ export default function App() {
                           { title: 'System Design', desc: 'Load balancing, vertical vs horizontal scalability' }
                         ].map((top, idx) => (
                           <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16,185,129,0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Check size={14} />
                             </div>
                             <div style={{ flex: 1 }}>
@@ -3408,55 +3473,54 @@ export default function App() {
                         ))}
                       </div>
                     </div>
-
-                    <button
-                      className="btn-solid-blue"
-                      onClick={() => setActiveTab('learning-path')}
-                      style={{ padding: '10px 20px', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', background: 'linear-gradient(135deg, #2563eb, #6366f1)' }}
-                    >
+                    <button className="btn-solid-blue" onClick={() => setActiveTab('learning-path')}
+                      style={{ padding: '10px 20px', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', background: 'linear-gradient(135deg,#2563eb,#6366f1)' }}>
                       <BookOpen size={16} />
                       <span>Start Learning Path →</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Previous Interviews Table */}
+                {/* ── Previous Interviews — live from interviewHistory ── */}
                 <div className="white-panel" style={{ padding: '1.5rem' }}>
                   <div className="panel-header" style={{ marginBottom: '1rem' }}>
                     <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <Clock size={18} color="#38bdf8" />
-                      <span>Previous Interviews</span>
+                      <span>All Interview Sessions ({totalInterviews})</span>
                     </h3>
-                    <button className="btn-pill-outline" style={{ padding: '4px 12px', fontSize: '0.78rem' }}>
-                      View All →
-                    </button>
+                    <span className="match-badge" style={{ background: 'rgba(56,189,248,0.1)', color: '#38bdf8' }}>Live Data</span>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                    {[
-                      { date: 'Nov 02, 2026', role: 'Python Developer', score: 80, color: '#10b981', status: 'Excellent' },
-                      { date: 'Oct 25, 2026', role: 'Data Analyst', score: 72, color: '#38bdf8', status: 'Good' },
-                      { date: 'Oct 18, 2026', role: 'Web Developer', score: 68, color: '#f59e0b', status: 'Proficient' }
-                    ].map((row, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)', flexWrap: 'wrap', gap: '0.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <span style={{ fontSize: '0.8rem', color: '#94a3b8', minWidth: '95px' }}>{row.date}</span>
-                          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#ffffff' }}>{row.role}</span>
+                  {totalInterviews === 0 ? (
+                    <div style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                      No sessions yet — complete an interview to see results here!
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      {[...interviewHistory].reverse().map((row, idx) => (
+                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', minWidth: '95px' }}>{row.date}</span>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#ffffff' }}>{row.domain}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <span className="match-badge" style={{ background: `${row.color}22`, color: row.color, border: `1px solid ${row.color}44`, fontWeight: 700 }}>
+                              {row.score}%
+                            </span>
+                            <span style={{ fontSize: '0.78rem', color: row.color, fontWeight: 600 }}>{row.status}</span>
+                            <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                              onClick={() => setActiveTab('interview-preparation')}>
+                              Practice Again
+                            </button>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <span className="match-badge" style={{ background: `${row.color}22`, color: row.color, border: `1px solid ${row.color}44`, fontWeight: 700 }}>
-                            {row.score}%
-                          </span>
-                          <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }} onClick={() => setActiveTab('interview-preparation')}>
-                            Review
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+              )
+            })()}
 
             {/* 11. NOTIFICATIONS */}
             {activeTab === 'notifications' && (
