@@ -119,6 +119,7 @@ export default function App() {
   const [sessionFinished, setSessionFinished] = useState(false)
   const [showModelAnswer, setShowModelAnswer] = useState(false)
   const [sessionQuestions, setSessionQuestions] = useState([]) // shuffled 5-question subset per session
+  const [showReviewPanel, setShowReviewPanel] = useState(false) // pre-submit review overview
 
   // Interview history — grows each time a session is finished
   const [interviewHistory, setInterviewHistory] = useState([
@@ -1927,6 +1928,7 @@ export default function App() {
     setTimerRunning(true)
     setSessionFinished(false)
     setShowModelAnswer(false)
+    setShowReviewPanel(false)
   }
 
   // Evaluate Current Question Answer (Supports MCQ, Fill-up, Problem Solving & Subjective)
@@ -3645,7 +3647,7 @@ export default function App() {
                 )}
 
                 {/* 2. Active Interview Practice Screen - Panel 2 */}
-                {interviewActive && !sessionFinished && (
+                {interviewActive && !sessionFinished && !showReviewPanel && (
                   <div>
                     {/* Top Bar with Back Arrow, Track Tag, and Countdown Timer */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -3662,6 +3664,59 @@ export default function App() {
                         <span>{formatTimer(timerSeconds)}</span>
                       </div>
                     </div>
+
+                    {/* Question Navigator Strip */}
+                    {(() => {
+                      const qList = sessionQuestions.length > 0 ? sessionQuestions : (interviewQuestions[interviewDomain] || [])
+                      return (
+                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.9rem' }}>
+                          {qList.map((_, idx) => {
+                            const isAnswered = !!(savedAnswers[idx] && String(savedAnswers[idx]).trim())
+                            const isCurrent = idx === currentQIdx
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => {
+                                  if (userAnswerText.trim()) setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
+                                  setCurrentQIdx(idx)
+                                  const nextQ = qList[idx]
+                                  setUserAnswerText(savedAnswers[idx] || (nextQ?.type === 'problem' ? (nextQ.starterCode || '') : ''))
+                                }}
+                                title={isAnswered ? 'Answered' : 'Not answered yet'}
+                                style={{
+                                  width: '34px',
+                                  height: '34px',
+                                  borderRadius: '8px',
+                                  border: isCurrent ? '2px solid #38bdf8' : isAnswered ? '2px solid #10b981' : '2px solid rgba(255,255,255,0.15)',
+                                  background: isCurrent ? 'rgba(56,189,248,0.2)' : isAnswered ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)',
+                                  color: isCurrent ? '#38bdf8' : isAnswered ? '#10b981' : '#94a3b8',
+                                  cursor: 'pointer',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 700,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  position: 'relative'
+                                }}
+                              >
+                                {isAnswered && !isCurrent ? '✓' : idx + 1}
+                              </button>
+                            )
+                          })}
+                          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginLeft: 'auto', fontSize: '0.75rem', color: '#94a3b8' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: 'rgba(16,185,129,0.4)', border: '1.5px solid #10b981', display: 'inline-block' }} />
+                              Answered ({Object.values(savedAnswers).filter(v => String(v).trim()).length}/{qList.length})
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.15)', display: 'inline-block' }} />
+                              Unanswered ({qList.length - Object.values(savedAnswers).filter(v => String(v).trim()).length}/{qList.length})
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })()}
 
                     {/* Progress Bar */}
                     {(() => {
@@ -3880,14 +3935,167 @@ export default function App() {
                               ) : (
                                 <button
                                   className="btn-solid-blue"
-                                  onClick={handleFinishInterview}
-                                  style={{ background: '#2563eb', padding: '9px 28px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)' }}
+                                  onClick={() => {
+                                    if (userAnswerText.trim()) {
+                                      setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
+                                    }
+                                    setShowReviewPanel(true)
+                                  }}
+                                  style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', padding: '9px 28px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)' }}
                                 >
-                                  <span>Submit Answer</span>
+                                  <span>📋 Review & Submit</span>
                                   <ArrowRight size={16} />
                                 </button>
                               )}
                             </div>
+                          </div>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                )}
+
+                {/* 2.5 Pre-Submit Review Panel */}
+                {interviewActive && showReviewPanel && !sessionFinished && (
+                  <div>
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                      <button
+                        onClick={() => setShowReviewPanel(false)}
+                        style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', fontWeight: 700 }}
+                      >
+                        <ArrowLeft size={18} />
+                        <span>Back to Questions</span>
+                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '6px 14px', borderRadius: '9999px', fontSize: '0.9rem', fontWeight: 700 }}>
+                        <Clock size={16} />
+                        <span>{formatTimer(timerSeconds)}</span>
+                      </div>
+                    </div>
+
+                    {/* Review Summary Card */}
+                    {(() => {
+                      const qList = sessionQuestions.length > 0 ? sessionQuestions : (interviewQuestions[interviewDomain] || [])
+                      const answeredCount = Object.values(savedAnswers).filter(v => String(v).trim()).length
+                      const unansweredCount = qList.length - answeredCount
+                      return (
+                        <div>
+                          {/* Stats Row */}
+                          <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1.25rem' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              📋 Quiz Overview — Ready to Submit?
+                            </h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+                              <div style={{ padding: '1rem', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#10b981' }}>{answeredCount}</div>
+                                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>✅ Answered</div>
+                              </div>
+                              <div style={{ padding: '1rem', borderRadius: '10px', background: unansweredCount > 0 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.05)', border: unansweredCount > 0 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: unansweredCount > 0 ? '#f59e0b' : '#10b981' }}>{unansweredCount}</div>
+                                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>{unansweredCount > 0 ? '⚠️ Not Answered' : '🎉 All Answered!'}</div>
+                              </div>
+                              <div style={{ padding: '1rem', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#38bdf8' }}>{qList.length}</div>
+                                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>📝 Total Questions</div>
+                              </div>
+                              <div style={{ padding: '1rem', borderRadius: '10px', background: 'rgba(192, 132, 252, 0.1)', border: '1px solid rgba(192, 132, 252, 0.3)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#c084fc' }}>{Math.round((answeredCount / qList.length) * 100)}%</div>
+                                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>⏱️ Completion</div>
+                              </div>
+                            </div>
+
+                            {unansweredCount > 0 && (
+                              <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', fontSize: '0.84rem', color: '#fbbf24', marginBottom: '0.5rem' }}>
+                                ⚠️ You have <strong>{unansweredCount} unanswered question{unansweredCount > 1 ? 's' : ''}</strong>. You can go back and answer them, or submit now.
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Per-Question Status Grid */}
+                          <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1.25rem' }}>
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '0.9rem' }}>Question-by-Question Status</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              {qList.map((q, idx) => {
+                                const ans = savedAnswers[idx]
+                                const isAnswered = !!(ans && String(ans).trim())
+                                const typeLabel = q.type === 'mcq' ? '🎯 MCQ' : q.type === 'fillup' ? '✏️ Fill-up' : q.type === 'problem' ? '💻 Problem' : '📝 Conceptual'
+                                const preview = isAnswered ? String(ans).slice(0, 60) + (String(ans).length > 60 ? '...' : '') : null
+                                return (
+                                  <div
+                                    key={idx}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.75rem',
+                                      padding: '0.65rem 0.9rem',
+                                      borderRadius: '8px',
+                                      background: isAnswered ? 'rgba(16, 185, 129, 0.07)' : 'rgba(245, 158, 11, 0.06)',
+                                      border: isAnswered ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(245, 158, 11, 0.2)',
+                                      cursor: 'pointer'
+                                    }}
+                                    onClick={() => {
+                                      setCurrentQIdx(idx)
+                                      setUserAnswerText(savedAnswers[idx] || (q?.type === 'problem' ? (q.starterCode || '') : ''))
+                                      setShowReviewPanel(false)
+                                    }}
+                                  >
+                                    {/* Number bubble */}
+                                    <div style={{
+                                      width: '28px', height: '28px', borderRadius: '7px', flexShrink: 0,
+                                      background: isAnswered ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.15)',
+                                      color: isAnswered ? '#10b981' : '#f59e0b',
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.82rem'
+                                    }}>
+                                      {isAnswered ? '✓' : idx + 1}
+                                    </div>
+
+                                    {/* Question info */}
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        Q{idx + 1}: {q.question?.slice(0, 70)}{q.question?.length > 70 ? '...' : ''}
+                                      </div>
+                                      {preview && (
+                                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                          Your answer: "{preview}"
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Type + status badge */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px', flexShrink: 0 }}>
+                                      <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600 }}>{typeLabel}</span>
+                                      <span style={{
+                                        fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px',
+                                        background: isAnswered ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                                        color: isAnswered ? '#10b981' : '#f59e0b'
+                                      }}>
+                                        {isAnswered ? 'Answered' : 'Not Answered'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Final Action Buttons */}
+                          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <button
+                              className="btn-secondary"
+                              onClick={() => setShowReviewPanel(false)}
+                              style={{ padding: '10px 24px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                              <ArrowLeft size={16} />
+                              <span>Back — Answer More</span>
+                            </button>
+                            <button
+                              className="btn-solid-blue"
+                              onClick={handleFinishInterview}
+                              style={{ padding: '12px 32px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', boxShadow: '0 6px 20px rgba(37, 99, 235, 0.45)' }}
+                            >
+                              <span>✅ Confirm & Submit Quiz</span>
+                              <ArrowRight size={16} />
+                            </button>
                           </div>
                         </div>
                       )
