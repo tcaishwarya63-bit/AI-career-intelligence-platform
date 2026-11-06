@@ -40,3 +40,5 @@ __pycache__/
 .pytest_cache/
 tmp_edge/
 tmp_*/
+
+.vercel

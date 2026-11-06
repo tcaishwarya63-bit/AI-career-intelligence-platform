@@ -215,6 +215,38 @@ export default function App() {
     window.print()
   }
 
+  // Career Comparison State (PDF Page 6)
+  const [compareRoleA, setCompareRoleA] = useState('Data Scientist')
+  const [compareRoleB, setCompareRoleB] = useState('Product Manager')
+
+  // Export Career Insights as CSV (PDF Page 2, 3, 6)
+  const handleExportCSV = () => {
+    const csvRows = [
+      ['CareerCast AI Recommendations Report', 'Generated on: ' + new Date().toLocaleDateString()],
+      ['Rank', 'Target Role', 'Predicted Confidence', 'Macro F1 Benchmark', 'Market Demand Signal', 'Skill Alignment'],
+      ['1', 'Machine Learning Engineer', '94%', '0.82', 'High Demand', '78%'],
+      ['2', 'Data Scientist', '89%', '0.80', 'High Demand', '85%'],
+      ['3', 'Backend Developer', '85%', '0.78', 'Moderate', '82%'],
+      ['4', 'Product Manager', '81%', '0.76', 'Moderate', '70%'],
+      ['5', 'AI Researcher', '78%', '0.75', 'High Demand', '74%'],
+      [],
+      ['Comparative Metrics (Data Scientist vs Product Manager)'],
+      ['Dimension', 'Data Scientist', 'Product Manager'],
+      ['Coding & Algorithms', '85%', '40%'],
+      ['Statistics & Math', '92%', '50%'],
+      ['Business Acumen', '55%', '90%'],
+      ['Communication & Stakeholder', '65%', '95%']
+    ]
+    const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(r => r.join(',')).join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement('a')
+    link.setAttribute('href', encodedUri)
+    link.setAttribute('download', 'careercast_career_report.csv')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   // Supabase Database State (profiles, resumes, predictions tables)
   const [savedResumes, setSavedResumes] = useState([])
   const [savedPredictions, setSavedPredictions] = useState([])
@@ -2301,12 +2333,26 @@ export default function App() {
               </div>
             )}
 
-            {/* 4. CAREER RECOMMENDATIONS (MILESTONE 2 MULTI-MODEL COMPARISON) */}
+            {/* 4. CAREER RECOMMENDATIONS (MILESTONE 2 & MILESTONE 4 BENCHMARKS) */}
             {activeTab === 'career-recommendations' && (
               <div>
                 <div className="welcome-header">
-                  <h2>Career Intelligence & Multi-Model Engine</h2>
-                  <p>Benchmarked across Logistic Regression, Random Forest, and XGBoost Ensembles</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <h2>Career Intelligence & Multi-Model Engine</h2>
+                      <p>Benchmarked across Logistic Regression, Random Forest, and XGBoost Ensembles (PDF Page 5 & 6)</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.6rem' }}>
+                      <button className="btn-pill-outline" onClick={handleExportCSV} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '6px 14px', fontSize: '0.8rem' }}>
+                        <Download size={14} />
+                        <span>Export to CSV</span>
+                      </button>
+                      <button className="btn-solid-blue" onClick={handleExportRoadmapPDF} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '6px 14px', fontSize: '0.8rem' }}>
+                        <Printer size={14} />
+                        <span>Export to PDF</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Model Comparison Bar Chart (Page 5) */}
@@ -2314,7 +2360,7 @@ export default function App() {
                   <div className="panel-header">
                     <div>
                       <h3>Model Comparison — Macro F1-Score</h3>
-                      <p className="panel-sub">Benchmarked on multi-class career transition validation split</p>
+                      <p className="panel-sub">Benchmarked on multi-class career transition validation split (PDF Page 5)</p>
                     </div>
                     <span className="match-badge">Threshold Met (F1 ≥ 0.80)</span>
                   </div>
@@ -2344,36 +2390,303 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Top-5 Career Recommendations */}
-                <div className="white-panel">
-                  <div className="panel-header">
-                    <h3>Top-5 Career Recommendations (Ranked by XGBoost)</h3>
+                {/* Milestone 2 2-Column: Top-5 Rankings + t-SNE Scatter Plot (Exact match of PDF Page 5) */}
+                <div className="dash-2col" style={{ marginBottom: '1.75rem' }}>
+                  {/* Top-5 Career Recommendations */}
+                  <div className="white-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div className="panel-header" style={{ marginBottom: '1rem' }}>
+                        <div>
+                          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>Top-5 Career Recommendations</h3>
+                          <p className="panel-sub">Ranked by XGBoost Ensemble with market signals</p>
+                        </div>
+                      </div>
+
+                      <table className="top5-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Target Role</th>
+                            <th style={{ textAlign: 'right' }}>Confidence</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            { rank: 1, role: 'ML Engineer', conf: '94%', color: '#10b981' },
+                            { rank: 2, role: 'Data Scientist', conf: '89%', color: '#2563eb' },
+                            { rank: 3, role: 'Backend Developer', conf: '85%', color: '#6366f1' },
+                            { rank: 4, role: 'Product Manager', conf: '81%', color: '#a855f7' },
+                            { rank: 5, role: 'AI Researcher', conf: '78%', color: '#ec4899' }
+                          ].map((item) => (
+                            <tr key={item.rank}>
+                              <td style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{item.rank}</td>
+                              <td style={{ fontWeight: 600 }}>{item.role}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 700, color: item.color }}>{item.conf}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div style={{ marginTop: '1.25rem', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Top-5 Recommendation Accuracy</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>Top-5 Recall: 94% (Target ≥90% Passed ✅)</span>
+                    </div>
                   </div>
 
-                  <table className="top5-table">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Target Role</th>
-                        <th style={{ textAlign: 'right' }}>Confidence</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[
-                        { rank: 1, role: 'ML Engineer', conf: '94%', color: '#10b981' },
-                        { rank: 2, role: 'Data Scientist', conf: '89%', color: '#2563eb' },
-                        { rank: 3, role: 'Backend Developer', conf: '85%', color: '#6366f1' },
-                        { rank: 4, role: 'Product Manager', conf: '81%', color: '#a855f7' },
-                        { rank: 5, role: 'AI Researcher', conf: '78%', color: '#ec4899' }
-                      ].map((item) => (
-                        <tr key={item.rank}>
-                          <td style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{item.rank}</td>
-                          <td style={{ fontWeight: 600 }}>{item.role}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 700, color: item.color }}>{item.conf}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  {/* t-SNE Visualization: Skill Embeddings (SBERT) (PDF Page 5) */}
+                  <div className="white-panel">
+                    <div className="panel-header" style={{ marginBottom: '0.5rem' }}>
+                      <div>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>t-SNE Visualization: Skill Embeddings (SBERT)</h3>
+                        <p className="panel-sub">2D projection of canonical skill clusters & interdisciplinary overlap</p>
+                      </div>
+                    </div>
+
+                    <div style={{ position: 'relative', width: '100%', height: '240px' }}>
+                      <svg viewBox="0 0 380 230" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                        {/* Axes */}
+                        <line x1="45" y1="20" x2="45" y2="200" stroke="rgba(255, 255, 255, 0.12)" />
+                        <line x1="45" y1="200" x2="360" y2="200" stroke="rgba(255, 255, 255, 0.12)" />
+
+                        {/* Ticks and Labels */}
+                        <text x="10" y="30" fill="#64748b" fontSize="8">30</text>
+                        <text x="10" y="85" fill="#64748b" fontSize="8">20</text>
+                        <text x="10" y="140" fill="#64748b" fontSize="8">10</text>
+                        <text x="15" y="195" fill="#64748b" fontSize="8">0</text>
+                        <text x="5" y="115" fill="#94a3b8" fontSize="8" transform="rotate(-90 20 115)">t-SNE Component 2</text>
+
+                        <text x="50" y="215" fill="#64748b" fontSize="8">-30</text>
+                        <text x="120" y="215" fill="#64748b" fontSize="8">-20</text>
+                        <text x="190" y="215" fill="#64748b" fontSize="8">-10</text>
+                        <text x="260" y="215" fill="#64748b" fontSize="8">10</text>
+                        <text x="330" y="215" fill="#64748b" fontSize="8">30</text>
+                        <text x="190" y="228" fill="#94a3b8" fontSize="8" textAnchor="middle">t-SNE Component 1</text>
+
+                        {/* Interdisciplinary Skillset Overlap region (Dotted ellipse from Page 5) */}
+                        <ellipse cx="160" cy="110" rx="42" ry="32" fill="rgba(37, 99, 235, 0.08)" stroke="#38bdf8" strokeWidth="1" strokeDasharray="3" />
+                        <text x="160" y="108" fill="#38bdf8" fontSize="7.5" textAnchor="middle" fontWeight="600">Interdisciplinary</text>
+                        <text x="160" y="118" fill="#38bdf8" fontSize="7.5" textAnchor="middle" fontWeight="600">Skillset Overlap</text>
+
+                        {/* Scatter Points: Clustered by Domain */}
+                        {/* Software Engineering (Blue: #3b82f6) */}
+                        {[
+                          [75, 45, 'Docker'], [85, 60, 'K8s'], [100, 52, 'CI/CD'], [70, 75, 'Java'],
+                          [95, 80, 'APIs'], [110, 65, 'Linux'], [120, 85, 'Git'], [90, 95, 'SQL']
+                        ].map(([x, y, label], i) => (
+                          <g key={`se-${i}`}>
+                            <circle cx={x} cy={y} r="3.5" fill="#3b82f6" opacity="0.85" />
+                          </g>
+                        ))}
+
+                        {/* Data Science (Green: #10b981) */}
+                        {[
+                          [180, 50, 'Pandas'], [195, 65, 'NumPy'], [210, 45, 'Stats'], [225, 60, 'SQL'],
+                          [200, 80, 'EDA'], [185, 90, 'Tableau'], [215, 95, 'Math'], [170, 70, 'Python']
+                        ].map(([x, y, label], i) => (
+                          <g key={`ds-${i}`}>
+                            <circle cx={x} cy={y} r="3.5" fill="#10b981" opacity="0.85" />
+                          </g>
+                        ))}
+
+                        {/* AI / ML (Pink: #ec4899) */}
+                        {[
+                          [150, 95, 'PyTorch'], [165, 85, 'DL'], [145, 125, 'XGBoost'], [175, 120, 'NLP'],
+                          [160, 135, 'TF'], [155, 105, 'CV'], [140, 110, 'MLOps']
+                        ].map(([x, y, label], i) => (
+                          <g key={`ml-${i}`}>
+                            <circle cx={x} cy={y} r="3.5" fill="#ec4899" opacity="0.9" />
+                          </g>
+                        ))}
+
+                        {/* Product Management (Orange: #f59e0b) */}
+                        {[
+                          [230, 140, 'Agile'], [245, 130, 'Strategy'], [260, 150, 'Roadmap'], [275, 135, 'UX'],
+                          [250, 165, 'A/B Test'], [265, 175, 'KPIs']
+                        ].map(([x, y, label], i) => (
+                          <g key={`pm-${i}`}>
+                            <circle cx={x} cy={y} r="3.5" fill="#f59e0b" opacity="0.85" />
+                          </g>
+                        ))}
+
+                        {/* Research (Purple: #8b5cf6) */}
+                        {[
+                          [105, 150, 'Papers'], [90, 165, 'Algos'], [115, 175, 'Proofs'], [100, 185, 'Opt']
+                        ].map(([x, y, label], i) => (
+                          <g key={`res-${i}`}>
+                            <circle cx={x} cy={y} r="3.5" fill="#8b5cf6" opacity="0.85" />
+                          </g>
+                        ))}
+
+                        {/* Finance (Cyan: #06b6d4) */}
+                        {[
+                          [210, 175, 'Risk'], [225, 185, 'Valuation'], [240, 180, 'Forecasting']
+                        ].map(([x, y, label], i) => (
+                          <g key={`fin-${i}`}>
+                            <circle cx={x} cy={y} r="3.5" fill="#06b6d4" opacity="0.85" />
+                          </g>
+                        ))}
+                      </svg>
+                    </div>
+
+                    {/* Legend from PDF Page 5 */}
+                    <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.5rem', fontSize: '0.72rem' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#cbd5e1' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }}></span> Software Engineering</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#cbd5e1' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></span> Data Science</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#cbd5e1' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b' }}></span> Product Management</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#cbd5e1' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ec4899' }}></span> AI / ML</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#cbd5e1' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#8b5cf6' }}></span> Research</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#cbd5e1' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#06b6d4' }}></span> Finance</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* MLflow Model Registry UI Card (PDF Page 6) */}
+                <div className="white-panel" style={{ marginBottom: '1.75rem' }}>
+                  <div className="panel-header" style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <Brain size={20} color="#38bdf8" />
+                      <div>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>MLflow Model Registry</h3>
+                        <p className="panel-sub">Versioned artifacts, A/B model tracking & promotion status (PDF Page 6)</p>
+                      </div>
+                    </div>
+                    <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                      v2 Active in Production
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                    <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border)', opacity: 0.75 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <span style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.9rem' }}>v1 (Logistic Regression)</span>
+                        <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(148, 163, 184, 0.2)', color: '#94a3b8' }}>Archived</span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '4px' }}>Created: 2023-07-02, 20:34</div>
+                      <div style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>Macro F1-Score: <strong>0.65</strong> • Top-1: <strong>66%</strong></div>
+                    </div>
+
+                    <div style={{ padding: '1rem', background: 'rgba(37, 99, 235, 0.08)', borderRadius: '8px', border: '1px solid rgba(37, 99, 235, 0.4)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <span style={{ fontWeight: 700, color: '#38bdf8', fontSize: '0.9rem' }}>v2 (XGBoost Ensemble)</span>
+                        <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', fontWeight: 700 }}>Production ★</span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '4px' }}>Created: 2023-07-23, 16:38</div>
+                      <div style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>Macro F1-Score: <strong style={{ color: '#d97706' }}>0.82 ★</strong> • Top-5 Recall: <strong style={{ color: '#10b981' }}>94%</strong></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Career Comparison & 4-Axis Radar Chart (Exact match of PDF Page 6) */}
+                <div className="white-panel" style={{ marginBottom: '1.5rem' }}>
+                  <div className="panel-header" style={{ marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+                        Career Comparison: Data Scientist vs Product Manager
+                      </h3>
+                      <p className="panel-sub">Multi-dimensional competency benchmark & role requirements (PDF Page 6)</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn-pill-outline" onClick={handleExportCSV} style={{ padding: '4px 12px', fontSize: '0.78rem' }}>
+                        Export to CSV
+                      </button>
+                      <button className="btn-pill-outline" onClick={handleExportRoadmapPDF} style={{ padding: '4px 12px', fontSize: '0.78rem' }}>
+                        Export to PDF
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="dash-2col" style={{ alignItems: 'center' }}>
+                    {/* Left: Responsibilities comparison */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.08)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.25)' }}>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#38bdf8', marginBottom: '6px' }}>Data Scientist</h4>
+                        <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '6px' }}>
+                          <strong>Key responsibilities:</strong> Performance modeling and predictive analytics, content categorization, statistical inference, and proactive interpreted datasets.
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                          <strong>Example roles:</strong> Data Scientist, Quantitative Analyst, Data Scientist Lead
+                        </p>
+                      </div>
+
+                      <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f59e0b', marginBottom: '6px' }}>Product Manager</h4>
+                        <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '6px' }}>
+                          <strong>Key responsibilities:</strong> Prioritization and roadmap execution, team alignment, stakeholder communication, customer interviews, and user analytics.
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                          <strong>Example roles:</strong> Product Manager, Scrum Product Owner, Growth Lead
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right: 4-Axis Radar Chart (PDF Page 6) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ position: 'relative', width: '280px', height: '240px' }}>
+                        <svg viewBox="0 0 300 260" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                          {/* Radial background grids (25%, 50%, 75%, 100%) */}
+                          {[25, 50, 75, 100].map((level) => {
+                            const r = (level / 100) * 85
+                            return (
+                              <polygon
+                                key={level}
+                                points={`150,${130 - r} ${150 + r},130 150,${130 + r} ${150 - r},130`}
+                                fill="transparent"
+                                stroke="rgba(255, 255, 255, 0.08)"
+                                strokeWidth="1"
+                              />
+                            )
+                          })}
+
+                          {/* 4 Axes */}
+                          <line x1="150" y1="45" x2="150" y2="215" stroke="rgba(255, 255, 255, 0.15)" />
+                          <line x1="65" y1="130" x2="235" y2="130" stroke="rgba(255, 255, 255, 0.15)" />
+
+                          {/* Axis Labels */}
+                          <text x="150" y="35" fill="#e2e8f0" fontSize="10" fontWeight="700" textAnchor="middle">Coding (85% vs 40%)</text>
+                          <text x="245" y="134" fill="#e2e8f0" fontSize="10" fontWeight="700">Statistics</text>
+                          <text x="150" y="235" fill="#e2e8f0" fontSize="10" fontWeight="700" textAnchor="middle">Business Acumen</text>
+                          <text x="55" y="134" fill="#e2e8f0" fontSize="10" fontWeight="700" textAnchor="end">Communication</text>
+
+                          {/* Data Scientist Polygon (Cyan/Blue #38bdf8) */}
+                          {/* Coding: 85 -> 130 - 0.85*85 = 57.75 */}
+                          {/* Statistics: 92 -> 150 + 0.92*85 = 228.2 */}
+                          {/* Business: 55 -> 130 + 0.55*85 = 176.75 */}
+                          {/* Communication: 65 -> 150 - 0.65*85 = 94.75 */}
+                          <polygon
+                            points="150,58 228,130 150,177 95,130"
+                            fill="rgba(56, 189, 248, 0.25)"
+                            stroke="#38bdf8"
+                            strokeWidth="2.5"
+                          />
+
+                          {/* Product Manager Polygon (Orange #f59e0b) */}
+                          {/* Coding: 40 -> 130 - 0.40*85 = 96 */}
+                          {/* Statistics: 50 -> 150 + 0.50*85 = 192.5 */}
+                          {/* Business: 90 -> 130 + 0.90*85 = 206.5 */}
+                          {/* Communication: 95 -> 150 - 0.95*85 = 69.25 */}
+                          <polygon
+                            points="150,96 193,130 150,207 69,130"
+                            fill="rgba(245, 158, 11, 0.25)"
+                            stroke="#f59e0b"
+                            strokeWidth="2.5"
+                          />
+                        </svg>
+                      </div>
+
+                      {/* Radar Legend */}
+                      <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.25rem', fontSize: '0.8rem' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#38bdf8', fontWeight: 600 }}>
+                          <span style={{ width: '12px', height: '3px', background: '#38bdf8', borderRadius: '2px' }}></span>
+                          Data Scientist
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f59e0b', fontWeight: 600 }}>
+                          <span style={{ width: '12px', height: '3px', background: '#f59e0b', borderRadius: '2px' }}></span>
+                          Product Manager
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -3220,32 +3533,160 @@ export default function App() {
             )}
 
             {/* 5. JOB RECOMMENDATIONS */}
-            {activeTab === 'job-recommendations' && (
-              <div>
-                <div className="welcome-header">
-                  <h2>AI Job Recommendations & Placement Drives</h2>
-                  <p>Curated campus opportunities matching your 85% career readiness index</p>
-                </div>
-                <div className="dash-2col">
-                  {colleges.map((c, i) => (
-                    <div key={i} className="white-panel">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                        <div>
-                          <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>{c.name}</h4>
-                          <p style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 600 }}>{c.program}</p>
-                          <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>📍 {c.location}</p>
-                        </div>
-                        <span className="match-badge">{c.rating}</span>
+            {activeTab === 'job-recommendations' && (() => {
+              const jobPostings = [
+                {
+                  id: 1,
+                  title: "Machine Learning Engineer",
+                  company: "Google",
+                  logoText: "G",
+                  logoBg: "#ea4335",
+                  location: "Bangalore, India (Hybrid)",
+                  salary: "₹28,00,000 - ₹38,00,000 / yr",
+                  fitScore: 94,
+                  fitColor: "#10b981",
+                  type: "Full-time • Campus & Lateral",
+                  skills: ["Python", "PyTorch", "Kubernetes", "MLOps", "TensorFlow"],
+                  description: "Build scalable ML models and real-time distributed inference pipelines for Search & Assistant."
+                },
+                {
+                  id: 2,
+                  title: "Senior Backend Developer",
+                  company: "Microsoft",
+                  logoText: "M",
+                  logoBg: "#00a4ef",
+                  location: "Hyderabad, India (On-site)",
+                  salary: "₹24,00,000 - ₹34,00,000 / yr",
+                  fitScore: 89,
+                  fitColor: "#2563eb",
+                  type: "Full-time • Tech Lead Track",
+                  skills: ["Python", "Distributed Systems", "SQL", "Docker", "Azure"],
+                  description: "Design high-throughput microservices and resilient cloud APIs handling 100M+ requests daily."
+                },
+                {
+                  id: 3,
+                  title: "Cloud Solutions Architect",
+                  company: "Amazon AWS",
+                  logoText: "A",
+                  logoBg: "#ff9900",
+                  location: "Mumbai, India (Hybrid)",
+                  salary: "₹22,00,000 - ₹30,00,000 / yr",
+                  fitScore: 85,
+                  fitColor: "#6366f1",
+                  type: "Full-time • Cloud Infrastructure",
+                  skills: ["AWS", "Terraform", "Kubernetes", "Linux", "CI/CD"],
+                  description: "Architect multi-region, zero-downtime cloud infrastructure and disaster recovery pipelines."
+                },
+                {
+                  id: 4,
+                  title: "AI Research Associate",
+                  company: "Meta",
+                  logoText: "M",
+                  logoBg: "#0668e1",
+                  location: "Remote (India)",
+                  salary: "₹20,00,000 - ₹28,00,000 / yr",
+                  fitScore: 82,
+                  fitColor: "#ec4899",
+                  type: "Full-time • Applied Research",
+                  skills: ["Python", "Transformers", "NLP", "PyTorch", "Research"],
+                  description: "Investigate frontier LLM attention architectures, parameter efficiency, and multimodal reasoning."
+                },
+                {
+                  id: 5,
+                  title: "Lead Data Analyst",
+                  company: "Flipkart",
+                  logoText: "F",
+                  logoBg: "#2874f0",
+                  location: "Bangalore, India (On-site)",
+                  salary: "₹18,00,000 - ₹25,00,000 / yr",
+                  fitScore: 88,
+                  fitColor: "#10b981",
+                  type: "Full-time • E-Commerce Analytics",
+                  skills: ["SQL", "Power BI", "Tableau", "Python", "A/B Testing"],
+                  description: "Model customer purchase funnels, pricing elasticity, and inventory forecasting using big data."
+                },
+                {
+                  id: 6,
+                  title: "Technical Product Manager",
+                  company: "Zomato",
+                  logoText: "Z",
+                  logoBg: "#cb202d",
+                  location: "Gurgaon, India (Hybrid)",
+                  salary: "₹22,00,000 - ₹32,00,000 / yr",
+                  fitScore: 81,
+                  fitColor: "#f59e0b",
+                  type: "Full-time • Logistics Tech",
+                  skills: ["Product Strategy", "Roadmapping", "Agile", "SQL", "User Research"],
+                  description: "Lead driver routing algorithms and customer ETA prediction features end-to-end with engineering."
+                }
+              ]
+
+              return (
+                <div>
+                  <div className="welcome-header">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                      <div>
+                        <h2>AI Job Recommendations & Placement Drives</h2>
+                        <p>Curated tech opportunities ranked by skill match & employer database schema (PDF Page 8)</p>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.85rem', marginTop: '0.85rem' }}>
-                        <span style={{ fontSize: '0.78rem', color: '#f59e0b', fontWeight: 700 }}>{c.nirf}</span>
-                        <button className="btn-pill-outline" style={{ padding: '4px 12px', fontSize: '0.78rem' }}>View Details</button>
-                      </div>
+                      <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                        6 Matching Openings
+                      </span>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="dash-2col">
+                    {jobPostings.map((job) => (
+                      <div key={job.id} className="white-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem' }}>
+                            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: job.logoBg, color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.15rem' }}>
+                                {job.logoText}
+                              </div>
+                              <div>
+                                <h4 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>{job.title}</h4>
+                                <span style={{ fontSize: '0.84rem', color: '#38bdf8', fontWeight: 600 }}>{job.company}</span>
+                              </div>
+                            </div>
+                            <span className="match-badge" style={{ background: `${job.fitColor}22`, color: job.fitColor, border: `1px solid ${job.fitColor}44`, fontWeight: 700 }}>
+                              {job.fitScore}% Fit
+                            </span>
+                          </div>
+
+                          <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '0.85rem' }}>
+                            {job.description}
+                          </p>
+
+                          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                            {job.skills.map((skill, sIdx) => (
+                              <span key={sIdx} style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-card)', border: '1px solid var(--border)', color: '#cbd5e1' }}>
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.85rem', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div>
+                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>📍 {job.location}</div>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#10b981' }}>{job.salary}</div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.78rem' }} onClick={() => setActiveTab('skill-gap-analysis')}>
+                              Check Fit
+                            </button>
+                            <button className="btn-solid-blue" style={{ padding: '6px 14px', fontSize: '0.78rem' }} onClick={() => alert(`Application submitted for ${job.title} at ${job.company}! Your verified skills were forwarded.`)}>
+                              Apply Now
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
 
             {/* 3. SKILL ASSESSMENT */}
             {activeTab === 'skill-assessment' && (

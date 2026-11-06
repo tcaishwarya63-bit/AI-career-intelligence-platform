@@ -28,7 +28,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "careercast=ml.server:main"
+            "careercast=ml.cli:main",
+            "careercast-server=ml.server:main"
         ]
     },
     classifiers=[

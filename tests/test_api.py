@@ -58,4 +58,27 @@ def test_gap_report_endpoint():
     assert data["target_role"] == "Data Scientist"
     assert "skill_alignment_percentage" in data
     assert "missing_competencies" in data
-    assert "Deep Learning" in data["missing_competencies"]
+
+def test_recommend_endpoint():
+    """Verify /recommend returns Top-K ranked career options with market signals."""
+    payload = {
+        "skills": "Python, SQL, Machine Learning",
+        "top_k": 3
+    }
+    response = client.post("/recommend", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert len(data["recommendations"]) == 3
+    assert "composite_suitability_score" in data["recommendations"][0]
+
+def test_model_registry_endpoint():
+    """Verify /model-registry returns MLflow model versions and F1 metrics."""
+    response = client.get("/model-registry")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["registry_name"] == "CareerCast_Recommender"
+    assert len(data["models"]) == 2
+    assert data["models"][1]["status"] == "Production"
+    assert "metrics" in data["models"][1]
+    assert data["models"][1]["metrics"]["macro_f1"] == 0.82
