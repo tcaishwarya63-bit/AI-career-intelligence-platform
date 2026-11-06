@@ -127,46 +127,84 @@ export default function App() {
     { date: 'Nov 02, 2026', domain: 'Technical Interview', score: 80, color: '#10b981', status: 'Excellent' }
   ])
 
-  // Notification Center State
+  // Notification Center State: Curated Job Recommendations & Placements
   const [notificationsList, setNotificationsList] = useState([
     {
       id: 1,
-      title: 'Interview Evaluation Ready',
-      desc: 'Your Python Developer Technical session was evaluated. Score: 80% (Excellent Performance). Top strength: Technical Knowledge.',
-      time: '10 minutes ago',
-      type: 'interview',
+      title: 'Job Match Alert (94% Fit): Google',
+      role: 'Machine Learning Engineer',
+      company: 'Google',
+      desc: 'Based on your verified skills in Python, PyTorch & MLOps, your profile ranks in the top 5% of candidates. Package: ₹28,00,000 - ₹38,00,000 / yr.',
+      location: 'Bangalore, India (Hybrid)',
+      fit: '94% Match',
+      fitColor: '#10b981',
+      time: '15 minutes ago',
+      type: 'job',
       read: false
     },
     {
       id: 2,
-      title: 'Campus Placement Drive Announcement',
-      desc: 'Google Cloud Early Career & Amazon AWS Campus Drive registration opened for B.Sc & B.Tech 2026 batches.',
+      title: 'Campus Hiring Drive (89% Fit): Microsoft',
+      role: 'Senior Backend Developer',
+      company: 'Microsoft',
+      desc: 'Microsoft Azure Core engineering team opened campus applications for 2025/2026 Batch. Matches your Distributed Systems and Docker profile. Package: ₹24–34 LPA.',
+      location: 'Hyderabad, India (On-site)',
+      fit: '89% Match',
+      fitColor: '#2563eb',
       time: '2 hours ago',
-      type: 'placement',
+      type: 'job',
       read: false
     },
     {
       id: 3,
-      title: 'Learning Path Milestone Unlocked',
-      desc: 'Congratulations! You completed Week 3 of Software Engineering track. Week 4: Cloud & Distributed APIs is now active.',
-      time: 'Yesterday',
-      type: 'roadmap',
+      title: 'New Opportunity (85% Fit): Amazon AWS',
+      role: 'Cloud Solutions Architect',
+      company: 'Amazon AWS',
+      desc: 'High-priority recommendation: Multi-region cloud infrastructure & zero-downtime deployment team in Mumbai. Package: ₹22,00,000 - ₹30,00,000 / yr.',
+      location: 'Mumbai, India (Hybrid)',
+      fit: '85% Match',
+      fitColor: '#6366f1',
+      time: '5 hours ago',
+      type: 'job',
       read: false
     },
     {
       id: 4,
-      title: 'Resume Analyzed with SpaCy NER',
-      desc: 'Model parsed 14 core skills from your resume with an ATS readability score of 88%.',
-      time: '2 days ago',
-      type: 'resume',
-      read: true
+      title: 'Shortlist Invitation (88% Fit): Flipkart',
+      role: 'Lead Data Analyst',
+      company: 'Flipkart',
+      desc: 'E-commerce logistics & customer analytics group shortlisted your profile based on SQL, Statistics & Tableau diagnostic marks. Package: ₹18–25 LPA.',
+      location: 'Bangalore, India (On-site)',
+      fit: '88% Match',
+      fitColor: '#10b981',
+      time: 'Yesterday',
+      type: 'job',
+      read: false
     },
     {
       id: 5,
-      title: 'Supabase PostgreSQL Cloud Synced',
-      desc: 'Your candidate profile and ML predictions were securely synchronized to cloud storage.',
+      title: 'Frontier AI Role (82% Fit): Meta',
+      role: 'AI Research Associate',
+      company: 'Meta',
+      desc: 'Applied AI research opening for multimodal LLMs & PyTorch architecture optimization. Direct referral link available. Package: ₹20–28 LPA.',
+      location: 'Remote (India)',
+      fit: '82% Match',
+      fitColor: '#ec4899',
+      time: '2 days ago',
+      type: 'job',
+      read: true
+    },
+    {
+      id: 6,
+      title: 'Urgent Referral (81% Fit): Zomato',
+      role: 'Technical Product Manager',
+      company: 'Zomato',
+      desc: 'Logistics technology & routing algorithm squad is hiring PMs with algorithmic problem-solving background. Package: ₹22–32 LPA.',
+      location: 'Gurgaon, India (Hybrid)',
+      fit: '81% Match',
+      fitColor: '#f59e0b',
       time: '3 days ago',
-      type: 'system',
+      type: 'job',
       read: true
     }
   ])
@@ -625,6 +663,7 @@ export default function App() {
         tags: ["Python Developer", "Technical"],
         question: "What is Python? Name any two advantages of Python over other programming languages.",
         hint: "Think about its features, readability, and ecosystem...",
+        type: 'subjective',
         keywords: ["interpreted", "high-level", "dynamic typing", "readable", "extensive libraries", "cross-platform", "syntax", "advantages"],
         modelAnswer: "Python is a high-level, interpreted, general-purpose programming language designed with an emphasis on code readability. Two key advantages: 1) Clean, readable syntax that accelerates developer productivity and prototyping speed; 2) Vast ecosystem of standard and third-party libraries (NumPy, Pandas, PyTorch, FastAPI) supporting web development, machine learning, and automation."
       },
@@ -635,6 +674,9 @@ export default function App() {
         tags: ["OOP Concepts", "Python"],
         question: "Explain the four core principles of Object-Oriented Programming (OOP) and give an example of inheritance in Python.",
         hint: "Consider Encapsulation, Abstraction, Inheritance, and Polymorphism...",
+        type: 'mcq',
+        options: ["A) Encapsulation, Abstraction, Inheritance, and Polymorphism", "B) Compilation, Execution, Linking, and Loading", "C) Aggregation, Association, Composition, and Coupling", "D) Recursion, Iteration, Memoization, and Backtracking"],
+        correctAnswer: "A) Encapsulation, Abstraction, Inheritance, and Polymorphism",
         keywords: ["encapsulation", "abstraction", "inheritance", "polymorphism", "class", "super()", "methods"],
         modelAnswer: "The four OOP principles: 1) Encapsulation – bundling data and methods while restricting direct access; 2) Abstraction – hiding implementation details; 3) Inheritance – deriving classes from base classes to reuse code; 4) Polymorphism – objects of different classes responding to the same interface. In Python: `class Child(Parent): def __init__(self): super().__init__()`."
       },
@@ -645,6 +687,9 @@ export default function App() {
         tags: ["Database", "SQL"],
         question: "How does Python connect to relational databases, and why are ACID properties important for database transactions?",
         hint: "Recall psycopg2, connection pooling, commit, and rollback...",
+        type: 'fillup',
+        correctAnswer: "Atomicity, Consistency, Isolation, Durability",
+        blankPlaceholder: "Enter the 4 ACID transaction properties (e.g. Atomicity, Consistency...)",
         keywords: ["acid", "connection pool", "commit", "rollback", "psycopg2", "sqlite3", "atomicity", "transactions"],
         modelAnswer: "Python connects using drivers like psycopg2 (PostgreSQL) or sqlite3, managed via connection pools and ORMs like SQLAlchemy. ACID properties (Atomicity, Consistency, Isolation, Durability) guarantee that transactions either fully succeed or are fully rolled back, preventing partial data corruption."
       },
@@ -655,6 +700,11 @@ export default function App() {
         tags: ["System Design", "Scalability"],
         question: "What is the difference between horizontal and vertical scaling, and how does a Load Balancer distribute traffic?",
         hint: "Think about adding more machines vs upgrading one machine...",
+        type: 'problem',
+        starterCode: "class RoundRobinLoadBalancer:\n    def __init__(self, servers):\n        self.servers = servers\n        self.index = 0\n\n    def get_server(self):\n        # Return next server in round robin rotation\n        if not self.servers: return None\n        server = self.servers[self.index % len(self.servers)]\n        self.index += 1\n        return server",
+        sampleInput: "servers = ['srv1', 'srv2', 'srv3']",
+        sampleOutput: "srv1, srv2, srv3, srv1 (round robin cycle)",
+        constraints: "Time: O(1) per route dispatch",
         keywords: ["horizontal scaling", "vertical scaling", "scale out", "scale up", "load balancer", "round robin", "least connections"],
         modelAnswer: "Vertical scaling adds more CPU/RAM to one server (limited by hardware ceiling). Horizontal scaling adds more server instances. A Load Balancer distributes requests using Round Robin, Least Connections, or IP Hash, performing health checks to route away from failing nodes."
       },
@@ -665,6 +715,9 @@ export default function App() {
         tags: ["APIs", "HTTP"],
         question: "What are GET, POST, PUT, DELETE in RESTful APIs, and what do status codes 200, 201, 400, 404, 500 mean?",
         hint: "Review client vs server errors and idempotency...",
+        type: 'mcq',
+        options: ["A) 200 OK, 201 Created, 400 Bad Request, 404 Not Found, 500 Internal Server Error", "B) 200 OK, 201 Redirect, 400 Access Denied, 404 Gateway Timeout, 500 OK", "C) 200 Success, 201 Moved, 400 Unauthorized, 404 Missing, 500 Memory Limit", "D) 200 Found, 201 Created, 400 Server Error, 404 Forbidden, 500 Bad Request"],
+        correctAnswer: "A) 200 OK, 201 Created, 400 Bad Request, 404 Not Found, 500 Internal Server Error",
         keywords: ["get", "post", "put", "delete", "200 ok", "201 created", "400 bad request", "404 not found", "500 internal server error"],
         modelAnswer: "GET retrieves data, POST creates resources, PUT updates idempotently, DELETE removes resources. Status codes: 200 OK (success), 201 Created (resource created), 400 Bad Request (client error), 404 Not Found (resource missing), 500 Internal Server Error (unhandled server fault)."
       },
@@ -675,6 +728,9 @@ export default function App() {
         tags: ["Data Structures", "CS Fundamentals"],
         question: "Compare arrays and linked lists in terms of time complexity for access, insertion, and deletion operations.",
         hint: "Think about memory layout, indexing, and pointer overhead...",
+        type: 'fillup',
+        correctAnswer: "O(1) vs O(N)",
+        blankPlaceholder: "Enter random index access time for Array vs Linked List (e.g. O(1) vs O(N))",
         keywords: ["o(1) access", "o(n) insertion", "linked list", "pointer", "dynamic size", "cache locality", "contiguous memory"],
         modelAnswer: "Arrays: O(1) random access (index arithmetic), O(N) insertion/deletion (shifting). Linked Lists: O(N) access (pointer traversal), O(1) insertion/deletion at known node. Arrays have better cache locality due to contiguous memory; linked lists have dynamic size without reallocation."
       },
@@ -685,6 +741,9 @@ export default function App() {
         tags: ["SQL", "Database"],
         question: "Explain INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN with practical examples.",
         hint: "Think in terms of matching and unmatched rows between two tables...",
+        type: 'mcq',
+        options: ["A) INNER JOIN matches both tables; LEFT JOIN includes all left rows plus matching right rows", "B) LEFT JOIN returns only rows that are completely NULL in left table", "C) FULL OUTER JOIN drops all unmatched records from both tables", "D) RIGHT JOIN excludes any matching keys from left table"],
+        correctAnswer: "A) INNER JOIN matches both tables; LEFT JOIN includes all left rows plus matching right rows",
         keywords: ["inner join", "left join", "right join", "full outer join", "matching rows", "null", "set intersection"],
         modelAnswer: "INNER JOIN returns only matching rows from both tables. LEFT JOIN returns all rows from the left table plus matches from the right (NULLs for no match). RIGHT JOIN is the mirror image. FULL OUTER JOIN returns all rows from both tables, with NULLs where there is no match on either side."
       },
@@ -695,6 +754,11 @@ export default function App() {
         tags: ["Algorithms", "CS Fundamentals"],
         question: "What is recursion, how does the call stack work, and what causes a stack overflow in recursive functions?",
         hint: "Think about base case, stack frames, and depth...",
+        type: 'problem',
+        starterCode: "def factorial_recursive(n):\n    # Implement recursive factorial with guard against negative input\n    if n < 0: raise ValueError('Must be >= 0')\n    if n <= 1: return 1\n    return n * factorial_recursive(n - 1)",
+        sampleInput: "factorial_recursive(5)",
+        sampleOutput: "120",
+        constraints: "Time: O(N), Space: O(N) call stack",
         keywords: ["base case", "recursive case", "call stack", "stack frame", "stack overflow", "depth", "tail recursion"],
         modelAnswer: "Recursion is a function calling itself with a smaller sub-problem. Each call pushes a stack frame (local variables, return address) onto the call stack. A stack overflow occurs when there is no base case or depth exceeds the system stack limit. Tail recursion optimization (TCO) can eliminate stack growth in languages that support it."
       },
@@ -705,6 +769,9 @@ export default function App() {
         tags: ["Git", "DevTools"],
         question: "What is the difference between `git merge` and `git rebase`, and when should you use each?",
         hint: "Think about linear history vs merge commits...",
+        type: 'fillup',
+        correctAnswer: "git rebase",
+        blankPlaceholder: "Enter git command that replays commits for linear history (e.g. git rebase)",
         keywords: ["merge commit", "fast-forward", "rebase", "linear history", "conflict", "git log", "feature branch"],
         modelAnswer: "git merge creates a merge commit preserving the full history of both branches (non-destructive). git rebase rewrites commits on top of the target branch, producing a linear clean history. Use merge for public/shared branches; use rebase for local feature cleanup before merging to avoid noisy merge commits."
       },
@@ -715,6 +782,9 @@ export default function App() {
         tags: ["Algorithms", "CS Fundamentals"],
         question: "Compare Quick Sort, Merge Sort, and Bubble Sort in terms of time and space complexity and stability.",
         hint: "Think about average/worst case and divide-and-conquer...",
+        type: 'mcq',
+        options: ["A) QuickSort: O(N log N) avg, MergeSort: O(N log N) always, BubbleSort: O(N²)", "B) QuickSort: O(N²) always, MergeSort: O(1) space, BubbleSort: O(N log N)", "C) MergeSort: O(N²) worst, QuickSort: O(N) space, BubbleSort: O(1)", "D) BubbleSort: O(N log N) avg, MergeSort: O(N²), QuickSort: O(N³)"],
+        correctAnswer: "A) QuickSort: O(N log N) avg, MergeSort: O(N log N) always, BubbleSort: O(N²)",
         keywords: ["quick sort", "merge sort", "bubble sort", "o(n log n)", "o(n²)", "stable sort", "in-place", "divide and conquer"],
         modelAnswer: "Quick Sort: O(N log N) average, O(N²) worst, in-place, unstable. Merge Sort: O(N log N) always, O(N) space, stable (preserves relative order of equal elements). Bubble Sort: O(N²) average and worst, in-place, stable — only suitable for nearly-sorted small datasets."
       },
@@ -725,6 +795,9 @@ export default function App() {
         tags: ["Concurrency", "Python"],
         question: "In Python, what is the difference between multithreading and multiprocessing, and what is the GIL?",
         hint: "Think about CPU-bound vs I/O-bound tasks and the Global Interpreter Lock...",
+        type: 'fillup',
+        correctAnswer: "Global Interpreter Lock (GIL)",
+        blankPlaceholder: "Enter lock acronym in CPython preventing simultaneous bytecode threads",
         keywords: ["gil", "global interpreter lock", "threading", "multiprocessing", "cpu-bound", "i/o-bound", "shared memory", "processes"],
         modelAnswer: "Python's Global Interpreter Lock (GIL) prevents multiple native threads from executing Python bytecode simultaneously. Threading is effective for I/O-bound tasks (network, disk) where threads release the GIL during I/O waits. Multiprocessing spawns separate OS processes each with their own Python interpreter and memory, bypassing the GIL — ideal for CPU-bound computation."
       },
@@ -735,6 +808,11 @@ export default function App() {
         tags: ["Design Patterns", "Software Engineering"],
         question: "Explain the Singleton and Factory design patterns with use cases in software development.",
         hint: "Think about class instantiation control and object creation abstraction...",
+        type: 'problem',
+        starterCode: "class DatabaseConnectionPool:\n    _instance = None\n    def __new__(cls, *args, **kwargs):\n        # Return singleton connection pool instance\n        if cls._instance is None:\n            cls._instance = super().__new__(cls)\n        return cls._instance",
+        sampleInput: "p1 = DatabaseConnectionPool(); p2 = DatabaseConnectionPool()",
+        sampleOutput: "p1 is p2 => True",
+        constraints: "Single memory allocation across entire runtime",
         keywords: ["singleton", "factory", "instance", "creational pattern", "thread-safe", "abstract factory", "dependency injection"],
         modelAnswer: "Singleton ensures only one instance of a class exists (e.g., database connection pool, config manager) — implemented with a class-level `_instance` check. Factory Pattern abstracts object creation, returning different subclass instances based on input without exposing concrete classes to the caller, promoting loose coupling."
       },
@@ -745,6 +823,9 @@ export default function App() {
         tags: ["Data Structures", "Algorithms"],
         question: "How do hash tables work, and what techniques are used to handle hash collisions?",
         hint: "Think about hash functions, chaining, and open addressing...",
+        type: 'mcq',
+        options: ["A) Separate Chaining (linked lists) and Open Addressing (linear/quadratic probing)", "B) QuickSort partitioning and binary search tree rebalancing", "C) Round robin queueing and Dijkstra priority heaps", "D) In-memory LRU caching and bloom filters only"],
+        correctAnswer: "A) Separate Chaining (linked lists) and Open Addressing (linear/quadratic probing)",
         keywords: ["hash function", "collision", "chaining", "open addressing", "linear probing", "load factor", "o(1) average"],
         modelAnswer: "Hash tables map keys to indices via a hash function, achieving O(1) average-case lookup. Collisions occur when two keys hash to the same index. Resolution techniques: 1) Chaining – store a linked list at each bucket; 2) Open Addressing – probe the next available slot (linear probing, quadratic probing, double hashing). Load factor (entries/buckets) is maintained below 0.75 by resizing."
       },
@@ -755,6 +836,9 @@ export default function App() {
         tags: ["Python Internals", "Memory"],
         question: "How does Python manage memory, and how does its garbage collector handle reference cycles?",
         hint: "Think about reference counting and cyclic garbage collector...",
+        type: 'fillup',
+        correctAnswer: "reference counting",
+        blankPlaceholder: "Enter Python's primary memory management counting mechanism",
         keywords: ["reference counting", "garbage collector", "cyclic reference", "gc module", "heap", "memory leak", "refcount"],
         modelAnswer: "Python primarily uses reference counting: each object tracks how many references point to it; when refcount hits 0, memory is freed immediately. However, reference cycles (A→B→A) prevent refcount from reaching 0, so Python's cyclic garbage collector (gc module) uses generational collection to detect and collect these cycles."
       },
@@ -765,6 +849,11 @@ export default function App() {
         tags: ["Python", "Functional Programming"],
         question: "What is a decorator in Python and how does it work internally? Give a practical example.",
         hint: "Think about higher-order functions and function wrapping...",
+        type: 'problem',
+        starterCode: "from functools import wraps\n\ndef performance_logger(func):\n    @wraps(func)\n    def wrapper(*args, **kwargs):\n        # Execute function while preserving original docstring and name\n        return func(*args, **kwargs)\n    return wrapper",
+        sampleInput: "@performance_logger\ndef calculate(x): return x ** 2",
+        sampleOutput: "calculate(4) => 16",
+        constraints: "Must preserve __name__ and __doc__ via @wraps",
         keywords: ["decorator", "wrapper", "higher-order function", "functools.wraps", "closure", "@ syntax", "metadata"],
         modelAnswer: "A decorator is a higher-order function that takes a function and returns a modified version. Using @decorator syntax, Python calls `original_func = decorator(original_func)` automatically. Internally it uses closures. Best practice: use `@functools.wraps(func)` to preserve the original function's `__name__` and `__doc__` metadata."
       },
@@ -775,6 +864,9 @@ export default function App() {
         tags: ["Networking", "CS Fundamentals"],
         question: "What is the difference between TCP and UDP protocols? Give two use cases for each.",
         hint: "Think about reliability, ordering, and handshake overhead...",
+        type: 'mcq',
+        options: ["A) TCP is connection-oriented reliable with 3-way handshake; UDP is connectionless low-latency", "B) UDP provides guaranteed delivery and packet ordering; TCP drops packets", "C) TCP is stateless; UDP is stateful with sequence numbers", "D) TCP has zero overhead; UDP requires 4-way acknowledgement handshakes"],
+        correctAnswer: "A) TCP is connection-oriented reliable with 3-way handshake; UDP is connectionless low-latency",
         keywords: ["tcp", "udp", "three-way handshake", "reliable", "ordered", "connectionless", "latency", "streaming"],
         modelAnswer: "TCP (Transmission Control Protocol) is connection-oriented with guaranteed delivery, ordering, and error correction via three-way handshake — used for HTTP/HTTPS, emails, file transfers. UDP (User Datagram Protocol) is connectionless with no delivery guarantee but minimal latency — used for live video streaming, online gaming, VoIP, DNS queries."
       },
@@ -785,6 +877,9 @@ export default function App() {
         tags: ["Algorithms", "CS Fundamentals"],
         question: "Explain O(1), O(log N), O(N), O(N log N), and O(N²) with one real-world algorithm example for each.",
         hint: "Think about how operations scale with input size...",
+        type: 'fillup',
+        correctAnswer: "O(log N)",
+        blankPlaceholder: "Enter time complexity of binary search on sorted array (e.g. O(log N))",
         keywords: ["o(1)", "o(log n)", "o(n)", "o(n log n)", "o(n²)", "constant time", "binary search", "bubble sort", "merge sort"],
         modelAnswer: "O(1): hash table lookup (constant). O(log N): binary search (halving each step). O(N): linear scan. O(N log N): Merge Sort (divide and conquer). O(N²): Bubble Sort (nested loops). Big O describes worst-case growth rate — independent of hardware or constant factors."
       },
@@ -795,6 +890,7 @@ export default function App() {
         tags: ["System Design", "Architecture"],
         question: "What is a microservices architecture, and how does it differ from a monolithic application in terms of deployment, fault isolation, and team scaling?",
         hint: "Think about service boundaries, independent deployments, and inter-service communication...",
+        type: 'subjective',
         keywords: ["microservices", "monolith", "independent deployment", "fault isolation", "service mesh", "api gateway", "bounded context"],
         modelAnswer: "Monolithic apps bundle all features in one deployable unit — simple to develop initially but hard to scale parts independently and risky to deploy. Microservices decompose the app into independently deployable services each owning its data store. Benefits: independent scaling, fault isolation (one service failing doesn't crash others), team autonomy. Drawbacks: network latency, distributed tracing complexity, eventual consistency challenges."
       },
@@ -805,6 +901,9 @@ export default function App() {
         tags: ["Performance", "System Design"],
         question: "What is caching and explain the differences between Cache-Aside, Write-Through, and Write-Back strategies.",
         hint: "Think about when data is written to cache vs database...",
+        type: 'mcq',
+        options: ["A) Cache-Aside (lazy load on miss), Write-Through (write cache & DB), Write-Back (async DB write)", "B) Cache-Aside (write DB first), Write-Through (drop cache), Write-Back (read only)", "C) Cache-Aside (client-side), Write-Through (CDN only), Write-Back (never expires)", "D) Cache-Aside (stateless), Write-Through (filesystem only), Write-Back (memory leak)"],
+        correctAnswer: "A) Cache-Aside (lazy load on miss), Write-Through (write cache & DB), Write-Back (async DB write)",
         keywords: ["cache aside", "write through", "write back", "cache miss", "ttl", "consistency", "stale data", "redis"],
         modelAnswer: "Cache-Aside: app checks cache first; on miss, fetches from DB and writes to cache (lazy loading). Write-Through: every write goes to cache and DB simultaneously (consistent, higher write latency). Write-Back (Write-Behind): writes go to cache first, DB updated asynchronously (fast writes, risk of data loss on cache failure)."
       },
@@ -815,6 +914,9 @@ export default function App() {
         tags: ["Security", "Web Development"],
         question: "What is SQL Injection, how does it work, and what are the best practices to prevent it?",
         hint: "Think about parameterized queries, ORM, and input sanitization...",
+        type: 'fillup',
+        correctAnswer: "parameterized queries",
+        blankPlaceholder: "Enter primary technique to prevent SQL injection in queries",
         keywords: ["sql injection", "parameterized query", "prepared statement", "orm", "input validation", "sanitization", "whitelist", "escaping"],
         modelAnswer: "SQL Injection occurs when user input is concatenated directly into SQL queries, allowing attackers to manipulate the query (e.g., `' OR 1=1 --`). Prevention: 1) Always use parameterized queries / prepared statements; 2) Use ORMs (SQLAlchemy, Hibernate) that handle escaping; 3) Validate and whitelist user input; 4) Apply least-privilege database permissions."
       }
@@ -829,6 +931,9 @@ export default function App() {
         tags: ["HR Interview", "Behavioral"],
         question: "Describe a situation where you had a disagreement with a team member. How did you resolve it and what was the outcome?",
         hint: "Use the STAR framework: Situation, Task, Action, Result...",
+        type: 'mcq',
+        options: ["A) Schedule an objective sync, evaluate trade-offs with data, and find collaborative alignment", "B) Immediately escalate to the department manager to overrule the colleague", "C) Avoid communication and implement your preferred design independently", "D) Concede immediately without sharing engineering reasoning"],
+        correctAnswer: "A) Schedule an objective sync, evaluate trade-offs with data, and find collaborative alignment",
         keywords: ["star method", "communication", "compromise", "collaboration", "resolution", "empathy", "outcome"],
         modelAnswer: "In a capstone project, my teammate and I disagreed on database choice. I scheduled a sync to objectively evaluate requirements. We chose PostgreSQL based on ACID compliance needs, documented the decision, and the project launched successfully."
       },
@@ -839,6 +944,9 @@ export default function App() {
         tags: ["HR Interview", "Introduction"],
         question: "Tell me about yourself and why you are interested in this role.",
         hint: "Structure: Background → Skills → Motivation for this role...",
+        type: 'fillup',
+        correctAnswer: "STAR",
+        blankPlaceholder: "Enter 4-part behavioral interview answering framework (Situation, Task, Action, Result)",
         keywords: ["background", "skills", "motivation", "goal", "strength", "experience", "relevant"],
         modelAnswer: "Start with your educational background, highlight 2-3 relevant technical skills, mention a key project achievement, then connect your interests and career goals to the specific role. Keep it under 2 minutes and end with why this company excites you."
       },
@@ -849,6 +957,9 @@ export default function App() {
         tags: ["HR Interview", "Self-Awareness"],
         question: "What is your greatest strength and your biggest weakness? How are you working on the weakness?",
         hint: "Be honest; show self-awareness and a growth mindset...",
+        type: 'fillup',
+        correctAnswer: "YAGNI",
+        blankPlaceholder: "Enter agile software engineering acronym for 'You Aren't Gonna Need It'",
         keywords: ["strength", "weakness", "self-awareness", "improvement", "growth mindset", "genuine", "working on"],
         modelAnswer: "Strength: Problem-solving — I enjoy breaking down complex technical challenges into manageable parts. Weakness: I sometimes over-engineer solutions. I'm actively addressing this by setting time-boxed design sessions and reviewing YAGNI ('You Aren't Gonna Need It') principles."
       },
@@ -859,6 +970,9 @@ export default function App() {
         tags: ["HR Interview", "Stress Management"],
         question: "Describe a time you worked under tight deadlines. How did you manage stress and deliver results?",
         hint: "Use STAR: prioritization, delegation, focus strategies...",
+        type: 'mcq',
+        options: ["A) Prioritize tasks by impact vs urgency, time-box work sprints, and communicate status proactively", "B) Work 20 hours continuously without communicating with the team", "C) Drop secondary project requirements silently to hit deadlines", "D) Request immediate deadline extensions for all pending items"],
+        correctAnswer: "A) Prioritize tasks by impact vs urgency, time-box work sprints, and communicate status proactively",
         keywords: ["deadline", "prioritize", "time management", "stress", "deliver", "focus", "break down tasks"],
         modelAnswer: "During our final semester project, I had three deliverables due in one week. I created a priority matrix (impact vs urgency), time-blocked each task into 2-hour deep work sessions, and communicated daily progress updates to my team. We delivered all three on time with positive feedback."
       },
@@ -869,6 +983,7 @@ export default function App() {
         tags: ["HR Interview", "Leadership"],
         question: "Give an example of a time you took initiative or showed leadership without being asked to.",
         hint: "Think about proactively identifying a problem and solving it...",
+        type: 'subjective',
         keywords: ["initiative", "proactive", "leadership", "identify problem", "volunteered", "outcome", "impact"],
         modelAnswer: "During a hackathon, I noticed our team had no clear task assignment, causing duplicate work. Without being asked, I created a Trello board, broke down the project into 4-hour sprints, and assigned tasks by skill set. We finished 2 hours early and won second place."
       },
@@ -879,6 +994,9 @@ export default function App() {
         tags: ["HR Interview", "Career Planning"],
         question: "Where do you see yourself in 5 years professionally?",
         hint: "Be realistic and align your answer with the company's growth...",
+        type: 'fillup',
+        correctAnswer: "SMART",
+        blankPlaceholder: "Enter goal-setting framework acronym (Specific, Measurable, Achievable, Relevant, Time-bound)",
         keywords: ["career growth", "technical lead", "skills", "contribute", "learning", "long-term", "promotion"],
         modelAnswer: "In 5 years I aim to grow from a software engineer into a technical lead or solutions architect. I want to master distributed systems design, contribute to open-source projects, and mentor junior engineers. I see this role as a critical step in building that expertise."
       },
@@ -889,6 +1007,9 @@ export default function App() {
         tags: ["HR Interview", "Resilience"],
         question: "Tell me about a time you failed at something. What did you learn from it?",
         hint: "Show accountability, what you learned, and how you improved...",
+        type: 'mcq',
+        options: ["A) Take accountability, conduct a blameless post-mortem, and implement preventative measures", "B) Attribute failure to third-party dependencies and move on", "C) Conceal the missed deadline until discovered by leadership", "D) Avoid volunteering for high-visibility projects in the future"],
+        correctAnswer: "A) Take accountability, conduct a blameless post-mortem, and implement preventative measures",
         keywords: ["failure", "accountable", "lesson learned", "improvement", "resilience", "bounce back", "reflection"],
         modelAnswer: "In my first internship, I underestimated the time required for API integration testing, missing a sprint deadline. I took accountability, communicated the delay early, and completed the work in overtime. I learned to add 30% buffer to time estimates and started using test-driven development to catch issues earlier."
       },
@@ -899,6 +1020,9 @@ export default function App() {
         tags: ["HR Interview", "Teamwork"],
         question: "Describe a successful team project. What was your role and contribution?",
         hint: "Highlight collaboration, communication, and your specific impact...",
+        type: 'fillup',
+        correctAnswer: "active listening",
+        blankPlaceholder: "Enter key communication technique: paying full attention and reflecting back understanding",
         keywords: ["team", "role", "collaboration", "contribution", "communication", "shared goal", "outcome"],
         modelAnswer: "In a 4-member team project building an e-commerce platform, I led the backend API development. I held daily standups, used GitHub for code reviews, and paired with the frontend team to align on API contracts. The project received the highest marks in our cohort."
       },
@@ -909,6 +1033,7 @@ export default function App() {
         tags: ["HR Interview", "Adaptability"],
         question: "Describe a time when plans changed suddenly. How did you adapt?",
         hint: "Show flexibility, quick thinking, and positive attitude...",
+        type: 'subjective',
         keywords: ["adaptability", "change", "flexible", "pivot", "positive attitude", "adjust", "unexpected"],
         modelAnswer: "Mid-project, our client changed the core technology stack from React to Vue.js. I spent two evenings self-studying Vue fundamentals, then ran a team knowledge-sharing session. We adapted within 3 days with minimal timeline disruption, demonstrating our team's technical flexibility."
       },
@@ -919,6 +1044,9 @@ export default function App() {
         tags: ["HR Interview", "Motivation"],
         question: "Why do you want to work for our company specifically over our competitors?",
         hint: "Show you've researched the company, its products, culture, and values...",
+        type: 'mcq',
+        options: ["A) Align company mission, technical stack innovations, and engineering culture with personal career aspirations", "B) Focus solely on compensation packages and remote work flexibility", "C) Mention you applied to many companies and this one responded first", "D) State that any company with developer openings is suitable"],
+        correctAnswer: "A) Align company mission, technical stack innovations, and engineering culture with personal career aspirations",
         keywords: ["research", "company values", "culture", "product", "growth opportunity", "mission", "align"],
         modelAnswer: "I researched your company's work in AI-driven personalization and was impressed by your engineering blog on real-time recommendation systems. Your emphasis on continuous learning, open-source contributions, and collaborative culture aligns perfectly with my technical interests and long-term career goals."
       },
@@ -929,6 +1057,9 @@ export default function App() {
         tags: ["HR Interview", "Growth Mindset"],
         question: "Tell me about a time you received critical feedback. How did you handle it and what changed?",
         hint: "Show you are open to feedback and took action...",
+        type: 'fillup',
+        correctAnswer: "growth mindset",
+        blankPlaceholder: "Enter the mindset term that views abilities and intelligence as developable through effort",
         keywords: ["feedback", "criticism", "open-minded", "action", "improvement", "mentorship", "growth"],
         modelAnswer: "My professor criticized my code for lacking modularity and being difficult to maintain. Instead of being defensive, I asked for specific examples, studied clean code principles, and rewrote the module using the Single Responsibility Principle. My next submission received full marks and positive code review comments."
       },
@@ -939,6 +1070,7 @@ export default function App() {
         tags: ["HR Interview", "Communication"],
         question: "Describe a situation where you had to explain a complex technical concept to a non-technical person.",
         hint: "Use analogies, avoid jargon, and confirm understanding...",
+        type: 'subjective',
         keywords: ["simplify", "analogy", "non-technical", "clear explanation", "jargon-free", "confirm understanding", "audience"],
         modelAnswer: "I explained machine learning model overfitting to a business stakeholder by comparing it to memorizing exam answers vs. understanding concepts. Using this analogy, they immediately understood why we needed more diverse training data. They approved the data collection budget on the spot."
       },
@@ -949,6 +1081,9 @@ export default function App() {
         tags: ["HR Interview", "Motivation"],
         question: "What motivates you to perform your best work every day?",
         hint: "Be genuine — intrinsic vs extrinsic motivation, purpose-driven...",
+        type: 'mcq',
+        options: ["A) Intrinsic drive to solve challenging real-world problems and ship impactful high-quality code", "B) Desire to minimize daily work hours and complete minimum checklist items", "C) Solely relying on external pressure from managers", "D) Avoiding collaborative team reviews to complete tasks faster"],
+        correctAnswer: "A) Intrinsic drive to solve challenging real-world problems and ship impactful high-quality code",
         keywords: ["motivation", "purpose", "challenge", "growth", "impact", "curiosity", "recognition"],
         modelAnswer: "I'm most motivated by solving challenging problems that have real-world impact. When I see that a feature I built helps users accomplish a goal faster or an ML model reduces decision error rates, that outcome is deeply satisfying. I also draw motivation from learning new technologies and sharing knowledge with teammates."
       },
@@ -959,6 +1094,9 @@ export default function App() {
         tags: ["HR Interview", "Productivity"],
         question: "How do you prioritize your tasks when you have multiple projects with competing deadlines?",
         hint: "Think about frameworks like Eisenhower Matrix or MoSCoW...",
+        type: 'fillup',
+        correctAnswer: "Eisenhower Matrix",
+        blankPlaceholder: "Enter 2x2 priority matrix tool named after a US President (Urgent vs Important)",
         keywords: ["prioritize", "eisenhower matrix", "moscow", "urgent", "important", "time-box", "deadline", "communicate"],
         modelAnswer: "I use the Eisenhower Matrix to categorize tasks by urgency and importance. High-impact, deadline-critical tasks come first. I time-box deep work sessions of 90 minutes, use daily to-do lists with 3 MITs (Most Important Tasks), and proactively communicate to stakeholders when timelines are at risk."
       },
@@ -969,6 +1107,7 @@ export default function App() {
         tags: ["HR Interview", "Remote Work"],
         question: "How do you stay productive and maintain communication when working remotely or independently?",
         hint: "Talk about tools, routines, and async communication habits...",
+        type: 'subjective',
         keywords: ["remote work", "self-discipline", "async communication", "standup", "tools", "schedule", "focus"],
         modelAnswer: "I maintain a consistent daily schedule: morning standup notes in Slack, 90-minute deep work blocks, and clear task tracking on Notion or Jira. I over-communicate progress updates asynchronously and use video calls for complex design discussions to avoid ambiguity."
       },
@@ -979,6 +1118,9 @@ export default function App() {
         tags: ["HR Interview", "Ethics"],
         question: "Describe a situation where you faced an ethical dilemma at work or in a project. What did you do?",
         hint: "Show integrity, decision-making process, and outcome...",
+        type: 'mcq',
+        options: ["A) Follow company whistleblowing/security compliance policies and escalate ethically to protect user data", "B) Ignore data privacy violations to preserve sprint velocity", "C) Discuss confidential system vulnerabilities on public social forums", "D) Authorize unauthorized database access if requested verbally by a peer"],
+        correctAnswer: "A) Follow company whistleblowing/security compliance policies and escalate ethically to protect user data",
         keywords: ["ethics", "integrity", "transparency", "right thing", "dilemma", "values", "consequence"],
         modelAnswer: "During a project, I discovered a data privacy issue where user emails were being logged in plaintext. I could have ignored it to meet the sprint deadline, but instead I immediately reported it to my team lead, documented the security risk, and helped fix the logging middleware before deployment. Integrity over speed."
       },
@@ -989,6 +1131,9 @@ export default function App() {
         tags: ["HR Interview", "Learning Agility"],
         question: "How do you keep up with rapidly evolving technology trends and learn new skills?",
         hint: "Talk about your learning habits, resources, and practice methods...",
+        type: 'fillup',
+        correctAnswer: "Proof of Concept (POC)",
+        blankPlaceholder: "Enter term for small exploratory proof-of-concept software project",
         keywords: ["continuous learning", "online courses", "documentation", "side projects", "tech blogs", "community", "practice"],
         modelAnswer: "I dedicate 1 hour daily to learning: reading official documentation, following engineering blogs (Uber, Netflix Engineering), and completing hands-on projects. I learn by building — my GitHub has projects in React, FastAPI, and ML. I also contribute to open-source and attend local tech meetups."
       },
@@ -999,6 +1144,7 @@ export default function App() {
         tags: ["HR Interview", "Negotiation"],
         question: "What are your salary expectations and how did you arrive at that number?",
         hint: "Research market rates, be flexible, tie it to your skills and value...",
+        type: 'subjective',
         keywords: ["market rate", "research", "glassdoor", "negotiable", "value", "skills", "flexible", "compensation"],
         modelAnswer: "Based on my research on platforms like Glassdoor and LinkedIn, the market range for this role and my skill set in [city] is ₹X–₹Y LPA. Given my hands-on experience in [relevant skills] and the value I can contribute, I'm targeting around ₹X LPA, though I'm open to discussion based on the full compensation package."
       },
@@ -1009,6 +1155,9 @@ export default function App() {
         tags: ["HR Interview", "Interpersonal Skills"],
         question: "Have you ever worked with a difficult colleague? How did you manage the working relationship?",
         hint: "Focus on professionalism, empathy, and constructive communication...",
+        type: 'mcq',
+        options: ["A) Practice empathy, focus on objective project facts rather than personality, and establish clear agreements", "B) Engage in public arguments during team standups", "C) Form cliques to exclude the colleague from technical discussions", "D) Refuse to review pull requests from that individual"],
+        correctAnswer: "A) Practice empathy, focus on objective project facts rather than personality, and establish clear agreements",
         keywords: ["difficult colleague", "empathy", "professional", "one-on-one", "understanding", "compromise", "team harmony"],
         modelAnswer: "I once worked with a teammate who was unresponsive to messages. Instead of escalating, I requested a 1:1 video call to understand their perspective. I discovered they were overwhelmed with two overlapping projects. We redistributed tasks together and established clearer response-time norms. Collaboration improved significantly."
       },
@@ -1019,6 +1168,7 @@ export default function App() {
         tags: ["HR Interview", "Self-Branding"],
         question: "What makes you uniquely qualified for this position compared to other candidates?",
         hint: "Highlight the intersection of your technical skills, soft skills, and passion...",
+        type: 'subjective',
         keywords: ["unique", "differentiate", "combination", "technical skills", "soft skills", "passion", "value", "results"],
         modelAnswer: "I combine strong technical depth (ML, full-stack development, cloud deployment) with effective communication and project leadership experience. I've shipped full-stack AI products end-to-end, mentored peers, and consistently delivered under real deadlines — a combination that goes beyond textbook knowledge."
       }
@@ -1033,6 +1183,9 @@ export default function App() {
         tags: ["Aptitude", "Work & Rate"],
         question: "A batch pipeline processes 12,000 records in 40 minutes with 2 workers. How many minutes will 6 workers take to process 36,000 records?",
         hint: "Work = Rate × Time × Workers...",
+        type: 'mcq',
+        options: ["A) 30 minutes", "B) 40 minutes", "C) 50 minutes", "D) 60 minutes"],
+        correctAnswer: "B) 40 minutes",
         keywords: ["work rate", "parallel processing", "150 records", "900 per minute", "40 minutes"],
         modelAnswer: "One worker: 12,000 / (40 × 2) = 150 records/min. Six workers: 6 × 150 = 900 records/min. Time for 36,000 records: 36,000 / 900 = 40 minutes."
       },
@@ -1043,6 +1196,9 @@ export default function App() {
         tags: ["Aptitude", "Percentages"],
         question: "A product is bought for ₹800 and sold for ₹960. What is the profit percentage?",
         hint: "Profit% = (Profit / Cost Price) × 100...",
+        type: 'fillup',
+        correctAnswer: "20%",
+        blankPlaceholder: "Enter profit percentage (e.g. 20%)",
         keywords: ["profit", "cost price", "selling price", "160", "20 percent", "percentage"],
         modelAnswer: "Profit = 960 − 800 = ₹160. Profit% = (160 / 800) × 100 = 20%."
       },
@@ -1053,6 +1209,9 @@ export default function App() {
         tags: ["Aptitude", "Speed Distance Time"],
         question: "A train 300m long passes a pole in 15 seconds. How long will it take to cross a 450m platform?",
         hint: "Speed = Distance / Time; total distance = train length + platform length...",
+        type: 'mcq',
+        options: ["A) 30.0 seconds", "B) 35.0 seconds", "C) 37.5 seconds", "D) 42.0 seconds"],
+        correctAnswer: "C) 37.5 seconds",
         keywords: ["speed", "distance", "time", "platform", "300", "450", "750", "20 m/s", "37.5 seconds"],
         modelAnswer: "Speed = 300 / 15 = 20 m/s. Total distance to cross platform = 300 + 450 = 750m. Time = 750 / 20 = 37.5 seconds."
       },
@@ -1063,6 +1222,9 @@ export default function App() {
         tags: ["Aptitude", "Logical Reasoning"],
         question: "Find the next number in the series: 2, 6, 12, 20, 30, ?",
         hint: "Look at the differences between consecutive terms...",
+        type: 'fillup',
+        correctAnswer: "42",
+        blankPlaceholder: "Enter the next number in the series 2, 6, 12, 20, 30, ?",
         keywords: ["series", "pattern", "difference", "42", "consecutive", "arithmetic progression"],
         modelAnswer: "Differences: 4, 6, 8, 10 — increasing by 2. Next difference = 12. Answer: 30 + 12 = 42."
       },
@@ -1073,6 +1235,9 @@ export default function App() {
         tags: ["Aptitude", "Probability"],
         question: "Two fair dice are rolled. What is the probability that the sum of the outcomes is 8?",
         hint: "List all favourable outcomes and divide by total outcomes (36)...",
+        type: 'mcq',
+        options: ["A) 1/6", "B) 5/36", "C) 7/36", "D) 1/9"],
+        correctAnswer: "B) 5/36",
         keywords: ["probability", "dice", "sum", "favorable outcomes", "36 total", "5 outcomes", "5/36"],
         modelAnswer: "Total outcomes = 6 × 6 = 36. Favourable (sum = 8): (2,6), (3,5), (4,4), (5,3), (6,2) = 5 outcomes. Probability = 5/36."
       },
@@ -1083,6 +1248,9 @@ export default function App() {
         tags: ["Aptitude", "Interest"],
         question: "What is the difference between compound interest and simple interest on ₹10,000 at 10% per annum for 2 years?",
         hint: "SI = P×R×T/100; CI = P(1+R/100)^T − P...",
+        type: 'fillup',
+        correctAnswer: "100",
+        blankPlaceholder: "Enter difference between CI and SI in ₹ (e.g. 100)",
         keywords: ["simple interest", "compound interest", "2000", "2100", "100 difference", "10000"],
         modelAnswer: "SI = 10,000 × 10 × 2 / 100 = ₹2,000. CI = 10,000 × (1.1)² − 10,000 = 12,100 − 10,000 = ₹2,100. Difference = ₹100."
       },
@@ -1093,6 +1261,9 @@ export default function App() {
         tags: ["Aptitude", "Ratio"],
         question: "A and B share profit in ratio 3:5. Total profit is ₹48,000. How much does B receive?",
         hint: "B's share = (5 / (3+5)) × Total...",
+        type: 'mcq',
+        options: ["A) ₹18,000", "B) ₹24,000", "C) ₹30,000", "D) ₹32,000"],
+        correctAnswer: "C) ₹30,000",
         keywords: ["ratio", "proportion", "share", "30000", "18000", "48000", "5/8"],
         modelAnswer: "Total parts = 3 + 5 = 8. B's share = (5/8) × 48,000 = ₹30,000."
       },
@@ -1103,6 +1274,9 @@ export default function App() {
         tags: ["Aptitude", "Clocks"],
         question: "What is the angle between the hour hand and minute hand of a clock at 3:30?",
         hint: "Hour hand moves 0.5° per minute; minute hand is at 180° at 3:30...",
+        type: 'fillup',
+        correctAnswer: "75",
+        blankPlaceholder: "Enter angle in degrees between hour and minute hand at 3:30 (e.g. 75)",
         keywords: ["clock", "angle", "hour hand", "minute hand", "75 degrees", "3:30"],
         modelAnswer: "At 3:30: Minute hand = 30 × 6 = 180°. Hour hand = (3 × 30) + (30 × 0.5) = 90 + 15 = 105°. Angle = |180 − 105| = 75°."
       },
@@ -1113,6 +1287,9 @@ export default function App() {
         tags: ["Aptitude", "Combinatorics"],
         question: "In how many ways can 3 students be selected from a group of 8 for a committee (order doesn't matter)?",
         hint: "Use nCr = n! / (r! × (n-r)!)...",
+        type: 'mcq',
+        options: ["A) 24 ways", "B) 48 ways", "C) 56 ways", "D) 72 ways"],
+        correctAnswer: "C) 56 ways",
         keywords: ["combination", "ncr", "8c3", "56 ways", "factorial", "selection"],
         modelAnswer: "C(8,3) = 8! / (3! × 5!) = (8 × 7 × 6) / (3 × 2 × 1) = 336 / 6 = 56 ways."
       },
@@ -1123,6 +1300,9 @@ export default function App() {
         tags: ["Aptitude", "Logical Reasoning"],
         question: "Pointing to a photograph, Ravi says, 'She is the daughter of my grandfather's only son.' What is the relationship of the girl to Ravi?",
         hint: "Grandfather's only son = Ravi's father...",
+        type: 'mcq',
+        options: ["A) Mother", "B) Aunt", "C) Sister", "D) Daughter"],
+        correctAnswer: "D) Daughter",
         keywords: ["blood relation", "grandfather", "father", "sister", "cousin", "daughter"],
         modelAnswer: "Grandfather's only son = Ravi's father. The girl is the daughter of Ravi's father, so she is Ravi's sister."
       },
@@ -1133,6 +1313,9 @@ export default function App() {
         tags: ["Aptitude", "Logical Reasoning"],
         question: "All coders are engineers. Some engineers are managers. Can we conclude: Some coders are managers?",
         hint: "Draw Venn diagrams and check if the conclusion follows necessarily...",
+        type: 'mcq',
+        options: ["A) Yes, definitely", "B) No, definitely not", "C) Cannot be determined definitely", "D) Only if all engineers are coders"],
+        correctAnswer: "C) Cannot be determined definitely",
         keywords: ["syllogism", "all", "some", "valid conclusion", "venn diagram", "not necessarily"],
         modelAnswer: "No, this conclusion does NOT necessarily follow. 'All coders are engineers' and 'some engineers are managers' doesn't guarantee any overlap between coders and managers. Some engineers who are managers may not be coders."
       },
@@ -1143,6 +1326,9 @@ export default function App() {
         tags: ["Aptitude", "Data Interpretation"],
         question: "A company's revenue: 2020=₹40L, 2021=₹60L, 2022=₹80L, 2023=₹100L. What is the average annual growth in revenue from 2020 to 2023?",
         hint: "Average growth = Total increase / Number of years...",
+        type: 'fillup',
+        correctAnswer: "150%",
+        blankPlaceholder: "Enter total revenue growth percentage from 40L to 100L (e.g. 150%)",
         keywords: ["average", "growth", "revenue", "20 lakhs", "3 years", "per year"],
         modelAnswer: "Total increase = 100 − 40 = ₹60L over 3 years. Average annual growth = 60 / 3 = ₹20 Lakhs per year."
       },
@@ -1153,6 +1339,9 @@ export default function App() {
         tags: ["Aptitude", "Work & Rate"],
         question: "Pipe A fills a tank in 6 hours; Pipe B fills it in 4 hours. If both pipes are opened together, how long to fill the tank?",
         hint: "Combined rate = 1/A + 1/B; Time = 1 / combined rate...",
+        type: 'mcq',
+        options: ["A) 2.4 hours", "B) 2.8 hours", "C) 3.0 hours", "D) 3.2 hours"],
+        correctAnswer: "A) 2.4 hours",
         keywords: ["pipe", "cistern", "combined rate", "12/5", "2.4 hours", "fill tank"],
         modelAnswer: "Rate A = 1/6, Rate B = 1/4. Combined = 1/6 + 1/4 = 2/12 + 3/12 = 5/12 per hour. Time = 12/5 = 2.4 hours (2 hours 24 minutes)."
       },
@@ -1163,6 +1352,9 @@ export default function App() {
         tags: ["Aptitude", "Directions"],
         question: "Starting from point A, Meera walks 5km North, then 3km East, then 5km South. How far and in what direction is she from A?",
         hint: "Track displacement in X and Y components...",
+        type: 'fillup',
+        correctAnswer: "5.83 km",
+        blankPlaceholder: "Enter straight-line distance from point A in km (e.g. 5.83 km)",
         keywords: ["direction", "north", "east", "south", "displacement", "3km east", "3km"],
         modelAnswer: "North 5km then South 5km cancel out. Net displacement: 3km East. Meera is 3km East of point A."
       },
@@ -1173,6 +1365,9 @@ export default function App() {
         tags: ["Aptitude", "Logical Reasoning"],
         question: "In a code language, APPLE is written as BQQMF. How is MANGO written in the same code?",
         hint: "Notice each letter is shifted by 1 position in the alphabet...",
+        type: 'fillup',
+        correctAnswer: "NBOHP",
+        blankPlaceholder: "Enter the coded word for MANGO (+1 shift)",
         keywords: ["coding decoding", "shift", "alphabet", "pattern", "NBOHP", "one position"],
         modelAnswer: "Each letter is shifted +1: A→B, P→Q, P→Q, L→M, E→F. Applying same to MANGO: M→N, A→B, N→O, G→H, O→P = NBOHP."
       },
@@ -1183,6 +1378,9 @@ export default function App() {
         tags: ["Aptitude", "Algebra"],
         question: "The sum of ages of father and son is 50 years. Five years ago, the father was 7 times the age of the son. Find their current ages.",
         hint: "Set up two equations with two unknowns...",
+        type: 'mcq',
+        options: ["A) Father 35, Son 15", "B) Father 37.5, Son 12.5", "C) Father 40, Son 10", "D) Father 42, Son 8"],
+        correctAnswer: "B) Father 37.5, Son 12.5",
         keywords: ["ages", "equations", "father", "son", "40", "10", "linear equations"],
         modelAnswer: "Let son = x, father = 50−x. Five years ago: (50−x−5) = 7(x−5) → 45−x = 7x−35 → 80 = 8x → x = 10. Son = 10, Father = 40."
       },
@@ -1193,6 +1391,9 @@ export default function App() {
         tags: ["Aptitude", "Number Theory"],
         question: "Find the LCM and HCF of 12 and 18. Verify that LCM × HCF = Product of numbers.",
         hint: "Prime factorization: 12 = 2²×3, 18 = 2×3²...",
+        type: 'fillup',
+        correctAnswer: "36 and 6",
+        blankPlaceholder: "Enter LCM and HCF of 12 and 18 (e.g. 36 and 6)",
         keywords: ["lcm", "hcf", "prime factorization", "36", "6", "product", "12 and 18"],
         modelAnswer: "12 = 2²×3, 18 = 2×3². HCF = 2¹×3¹ = 6. LCM = 2²×3² = 36. Verification: 6 × 36 = 216 = 12 × 18 ✓."
       },
@@ -1203,6 +1404,9 @@ export default function App() {
         tags: ["Aptitude", "Logical Reasoning"],
         question: "5 people (A, B, C, D, E) sit in a row. A sits at one end. B is to the immediate right of A. D is not adjacent to B. E sits at the other end. Where does C sit?",
         hint: "Place A and E at ends first, then apply constraints...",
+        type: 'mcq',
+        options: ["A) B", "B) C", "C) D", "D) E"],
+        correctAnswer: "B) C",
         keywords: ["seating", "arrangement", "row", "adjacent", "position 3", "middle", "constraints"],
         modelAnswer: "A is at position 1, B at position 2. E is at position 5. D is not adjacent to B (position 2), so D is not at position 3. D must be at position 4. Therefore C is at position 3 (middle)."
       },
@@ -1213,6 +1417,9 @@ export default function App() {
         tags: ["Aptitude", "Mixtures"],
         question: "In what ratio should water (cost ₹0) be mixed with milk (cost ₹40/L) to get a mixture worth ₹32/L?",
         hint: "Use Alligation: (Expensive − Mean) : (Mean − Cheap)...",
+        type: 'fillup',
+        correctAnswer: "1:4",
+        blankPlaceholder: "Enter ratio of water to milk (e.g. 1:4)",
         keywords: ["alligation", "mixture", "ratio", "1:4", "water", "milk", "mean price"],
         modelAnswer: "Using Alligation: Water side = 40−32 = 8; Milk side = 32−0 = 32. Ratio Water:Milk = 8:32 = 1:4."
       },
@@ -1223,6 +1430,9 @@ export default function App() {
         tags: ["Aptitude", "Set Theory"],
         question: "In a class of 60 students, 40 like Maths, 35 like Science, and 25 like both. How many like neither?",
         hint: "Use inclusion-exclusion: |M∪S| = |M| + |S| − |M∩S|...",
+        type: 'mcq',
+        options: ["A) 15 students", "B) 20 students", "C) 25 students", "D) 30 students"],
+        correctAnswer: "C) 25 students",
         keywords: ["venn diagram", "set theory", "inclusion exclusion", "union", "intersection", "50", "10 neither"],
         modelAnswer: "Students liking Maths or Science = 40 + 35 − 25 = 50. Students liking neither = 60 − 50 = 10."
       }
@@ -1237,6 +1447,11 @@ export default function App() {
         tags: ["Coding Interview", "Arrays"],
         question: "Given an array `nums` and a `target`, return indices of two numbers that add up to `target` in O(N) time.",
         hint: "Use a hash map to store complements (target − num)...",
+        type: 'problem',
+        starterCode: "def two_sum(nums, target):\n    # Return indices [i, j] such that nums[i] + nums[j] == target in O(N)\n    lookup = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in lookup:\n            return [lookup[complement], i]\n        lookup[num] = i\n    return []",
+        sampleInput: "nums = [2, 7, 11, 15], target = 9",
+        sampleOutput: "[0, 1]",
+        constraints: "Time: O(N), Space: O(N)",
         keywords: ["hash map", "dictionary", "o(n) time", "complement", "indices", "single pass"],
         modelAnswer: "Single-pass hash map: for each num at index i, check if (target − num) is in the map. If yes, return [map[target−num], i]. Else store map[num] = i. O(N) time, O(N) space."
       },
@@ -1247,6 +1462,11 @@ export default function App() {
         tags: ["Coding Interview", "Strings"],
         question: "Write a function to reverse a string in-place without using Python's reverse() or slice notation.",
         hint: "Use two pointers — one at start, one at end, swap and move inward...",
+        type: 'problem',
+        starterCode: "def reverse_string(s_list):\n    # Reverse character list in-place using two pointers\n    left, right = 0, len(s_list) - 1\n    while left < right:\n        s_list[left], s_list[right] = s_list[right], s_list[left]\n        left += 1\n        right -= 1\n    return s_list",
+        sampleInput: "s = ['h', 'e', 'l', 'l', 'o']",
+        sampleOutput: "['o', 'l', 'l', 'e', 'h']",
+        constraints: "Time: O(N), Space: O(1)",
         keywords: ["two pointers", "swap", "in-place", "iteration", "left right", "while loop"],
         modelAnswer: "Use two pointers l=0, r=len-1. While l<r: swap arr[l] and arr[r], then l++, r--. This is O(N) time, O(1) space."
       },
@@ -1257,6 +1477,9 @@ export default function App() {
         tags: ["Coding Interview", "DP"],
         question: "Compute the N-th Fibonacci number efficiently. What is the time complexity of the naive recursive solution vs the memoized version?",
         hint: "Naive recursion: O(2^N). Memoization / tabulation: O(N)...",
+        type: 'mcq',
+        options: ["A) Naive Recursion: O(2^N), Memoized/Tabulated DP: O(N)", "B) Naive Recursion: O(N), Memoized/Tabulated DP: O(1)", "C) Naive Recursion: O(N log N), Memoized/Tabulated DP: O(N²)", "D) Naive Recursion: O(N!), Memoized/Tabulated DP: O(log N)"],
+        correctAnswer: "A) Naive Recursion: O(2^N), Memoized/Tabulated DP: O(N)",
         keywords: ["fibonacci", "memoization", "dynamic programming", "o(2^n)", "o(n)", "cache", "bottom-up"],
         modelAnswer: "Naive recursion recalculates subproblems exponentially → O(2^N). Memoization stores results in a dict/array → O(N) time and O(N) space. Bottom-up DP using two variables achieves O(N) time and O(1) space."
       },
@@ -1267,6 +1490,11 @@ export default function App() {
         tags: ["Coding Interview", "Searching"],
         question: "Implement binary search on a sorted array. What is its time complexity and what precondition must be met?",
         hint: "Compare mid to target; eliminate half the search space each step...",
+        type: 'problem',
+        starterCode: "def binary_search(nums, target):\n    low, high = 0, len(nums) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1",
+        sampleInput: "nums = [1, 3, 5, 7, 9, 11], target = 7",
+        sampleOutput: "3",
+        constraints: "Time: O(log N), Space: O(1)",
         keywords: ["binary search", "sorted", "o(log n)", "mid", "low high", "precondition", "divide"],
         modelAnswer: "Binary search requires a sorted array. Set low=0, high=len-1. While low≤high: mid=(low+high)//2. If arr[mid]==target return mid. If arr[mid]<target, low=mid+1 else high=mid-1. Time: O(log N), Space: O(1)."
       },
@@ -1277,6 +1505,11 @@ export default function App() {
         tags: ["Coding Interview", "Linked Lists"],
         question: "Write code to reverse a singly linked list iteratively. What are the time and space complexities?",
         hint: "Track prev, curr, next pointers as you iterate...",
+        type: 'problem',
+        starterCode: "def reverse_linked_list(head):\n    # Reverse singly linked list iteratively with 3 pointers\n    prev, curr = None, head\n    while curr:\n        nxt = curr.next\n        curr.next = prev\n        prev = curr\n        curr = nxt\n    return prev",
+        sampleInput: "head = 1 -> 2 -> 3 -> 4 -> 5 -> None",
+        sampleOutput: "5 -> 4 -> 3 -> 2 -> 1 -> None",
+        constraints: "Time: O(N), Space: O(1)",
         keywords: ["linked list", "reverse", "prev", "curr", "next", "o(n) time", "o(1) space", "iterative"],
         modelAnswer: "Initialize prev=None, curr=head. While curr: save next=curr.next, set curr.next=prev, move prev=curr and curr=next. Return prev (new head). O(N) time, O(1) space."
       },
@@ -1287,6 +1520,11 @@ export default function App() {
         tags: ["Coding Interview", "Stack"],
         question: "Given a string of brackets ({[()]}), write an algorithm to check if parentheses are balanced.",
         hint: "Use a stack — push open brackets, pop and match on close brackets...",
+        type: 'problem',
+        starterCode: "def is_valid_parentheses(s):\n    stack = []\n    matching = {')': '(', '}': '{', ']': '['}\n    for ch in s:\n        if ch in matching.values():\n            stack.append(ch)\n        elif ch in matching:\n            if not stack or stack.pop() != matching[ch]:\n                return False\n    return len(stack) == 0",
+        sampleInput: "s = '([{}])'",
+        sampleOutput: "True",
+        constraints: "Time: O(N), Space: O(N)",
         keywords: ["stack", "balanced", "push", "pop", "match", "open brackets", "close brackets", "o(n)"],
         modelAnswer: "Iterate characters. If open bracket, push to stack. If close bracket, check if stack top matches. If mismatch or stack empty → unbalanced. After full iteration, stack must be empty → balanced. O(N) time, O(N) space."
       },
@@ -1297,6 +1535,9 @@ export default function App() {
         tags: ["Coding Interview", "Arrays"],
         question: "Find all duplicate numbers in an array of N integers in O(N) time and O(1) extra space (integers range 1 to N).",
         hint: "Use index as a hash — mark visited elements by negating the value at their index...",
+        type: 'fillup',
+        correctAnswer: "O(N) time and O(N) space",
+        blankPlaceholder: "Enter time and space complexity using a Hash Set for duplicates",
         keywords: ["duplicate", "index as hash", "negate", "o(n) time", "o(1) space", "mark visited"],
         modelAnswer: "For each num, go to index |num|-1. If value is negative, num is a duplicate. Otherwise negate the value at that index. This achieves O(N) time and O(1) extra space."
       },
@@ -1307,6 +1548,11 @@ export default function App() {
         tags: ["Coding Interview", "Trees", "BFS"],
         question: "Implement level order traversal (BFS) on a binary tree. Return nodes level by level.",
         hint: "Use a queue — enqueue root, then level by level dequeue and enqueue children...",
+        type: 'problem',
+        starterCode: "from collections import deque\n\ndef level_order(root):\n    # Breadth-First Search level order traversal\n    if not root: return []\n    res, queue = [], deque([root])\n    while queue:\n        level = []\n        for _ in range(len(queue)):\n            node = queue.popleft()\n            level.append(node.val)\n            if node.left: queue.append(node.left)\n            if node.right: queue.append(node.right)\n        res.append(level)\n    return res",
+        sampleInput: "root = [3, 9, 20, None, None, 15, 7]",
+        sampleOutput: "[[3], [9, 20], [15, 7]]",
+        constraints: "Time: O(N), Space: O(W) where W is max tree width",
         keywords: ["bfs", "queue", "level order", "binary tree", "dequeue", "enqueue", "o(n)"],
         modelAnswer: "Use a deque. Enqueue root. While queue: get current level size, process exactly that many nodes, appending left and right children. Collect each level into result. O(N) time and O(N) space."
       },
@@ -1317,6 +1563,9 @@ export default function App() {
         tags: ["Coding Interview", "Graphs", "DFS"],
         question: "Using DFS, how do you detect a cycle in a directed graph?",
         hint: "Track visited nodes and nodes currently in the recursion stack...",
+        type: 'mcq',
+        options: ["A) 3-Coloring DFS: 0=White (unvisited), 1=Gray (in recursion stack), 2=Black (completed)", "B) Fast & Slow two-pointer Floyd cycle runner on adjacency matrix", "C) Dijkstra's algorithm with priority queue relaxation", "D) Prim's minimum spanning tree cut property"],
+        correctAnswer: "A) 3-Coloring DFS: 0=White (unvisited), 1=Gray (in recursion stack), 2=Black (completed)",
         keywords: ["dfs", "cycle detection", "directed graph", "recursion stack", "visited", "back edge"],
         modelAnswer: "Maintain two sets: visited and rec_stack (current DFS path). During DFS, if we encounter a node already in rec_stack, a cycle exists (back edge). After returning from DFS, remove node from rec_stack. O(V+E) time."
       },
@@ -1327,6 +1576,11 @@ export default function App() {
         tags: ["Coding Interview", "DP", "Strings"],
         question: "Given two strings, find the length of their Longest Common Subsequence (LCS). Explain the DP approach.",
         hint: "Build a 2D DP table: dp[i][j] = LCS length of s1[:i] and s2[:j]...",
+        type: 'problem',
+        starterCode: "def longest_common_subsequence(text1, text2):\n    m, n = len(text1), len(text2)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if text1[i-1] == text2[j-1]:\n                dp[i][j] = 1 + dp[i-1][j-1]\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n    return dp[m][n]",
+        sampleInput: "text1 = 'abcde', text2 = 'ace'",
+        sampleOutput: "3",
+        constraints: "Time: O(M*N), Space: O(M*N)",
         keywords: ["lcs", "dynamic programming", "2d table", "subsequence", "o(m*n)", "dp"],
         modelAnswer: "Create dp[m+1][n+1] initialized to 0. For each i,j: if s1[i-1]==s2[j-1], dp[i][j]=dp[i-1][j-1]+1. Else dp[i][j]=max(dp[i-1][j], dp[i][j-1]). Answer is dp[m][n]. O(M×N) time and space."
       },
@@ -1337,6 +1591,9 @@ export default function App() {
         tags: ["Coding Interview", "Arrays"],
         question: "Merge two sorted arrays into a single sorted array in O(M+N) time.",
         hint: "Use two pointers — compare and pick the smaller element from each array...",
+        type: 'fillup',
+        correctAnswer: "O(M+N)",
+        blankPlaceholder: "Enter time complexity to merge two sorted arrays of sizes M and N",
         keywords: ["merge", "two pointers", "sorted", "o(m+n)", "compare", "append remainder"],
         modelAnswer: "Use pointer i for arr1, j for arr2. Compare arr1[i] and arr2[j], append the smaller to result and advance that pointer. After one array is exhausted, append remaining elements of the other. O(M+N) time, O(M+N) space."
       },
@@ -1347,6 +1604,11 @@ export default function App() {
         tags: ["Coding Interview", "Sorting"],
         question: "Implement Quick Sort. What is its average and worst-case time complexity and when does worst case occur?",
         hint: "Choose a pivot, partition the array around it, recursively sort sub-arrays...",
+        type: 'problem',
+        starterCode: "def quick_sort(arr):\n    # Divide and conquer QuickSort\n    if len(arr) <= 1: return arr\n    pivot = arr[len(arr) // 2]\n    left = [x for x in arr if x < pivot]\n    mid = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quick_sort(left) + mid + quick_sort(right)",
+        sampleInput: "arr = [38, 27, 43, 3, 9, 82, 10]",
+        sampleOutput: "[3, 9, 10, 27, 38, 43, 82]",
+        constraints: "Average Time: O(N log N)",
         keywords: ["quick sort", "pivot", "partition", "o(n log n) average", "o(n²) worst", "already sorted", "in-place"],
         modelAnswer: "Pick pivot (e.g., last element). Partition array: smaller elements to left, larger to right. Recursively sort both halves. Average: O(N log N). Worst case: O(N²) when array is already sorted and pivot is always min/max. Use random pivot or median-of-three to avoid worst case."
       },
@@ -1357,6 +1619,9 @@ export default function App() {
         tags: ["Coding Interview", "Strings"],
         question: "Write a function to check if two strings are anagrams of each other in O(N) time.",
         hint: "Compare character frequency counts...",
+        type: 'mcq',
+        options: ["A) Compare character frequency maps in O(N) time and O(1) space (26 alphabet buckets)", "B) Nested double loop comparing every pair in O(N²)", "C) Check string length only without inspecting contents", "D) Calculate integer sum of ASCII ordinals without frequency counts"],
+        correctAnswer: "A) Compare character frequency maps in O(N) time and O(1) space (26 alphabet buckets)",
         keywords: ["anagram", "frequency count", "counter", "o(n)", "character map", "sorted comparison"],
         modelAnswer: "Method 1: Use Counter/frequency dict — count chars in s1, subtract counts for s2, check all zero. Method 2: sort both strings and compare. Counter method: O(N) time, O(1) space (26 lowercase letters)."
       },
@@ -1367,6 +1632,11 @@ export default function App() {
         tags: ["Coding Interview", "DP", "Arrays"],
         question: "Given an integer array, find the contiguous subarray with the largest sum using Kadane's Algorithm.",
         hint: "Track current sum and maximum sum as you scan left to right...",
+        type: 'problem',
+        starterCode: "def max_sub_array(nums):\n    # Kadane's algorithm for maximum contiguous subarray sum\n    max_so_far = current_max = nums[0]\n    for x in nums[1:]:\n        current_max = max(x, current_max + x)\n        max_so_far = max(max_so_far, current_max)\n    return max_so_far",
+        sampleInput: "nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]",
+        sampleOutput: "6",
+        constraints: "Time: O(N), Space: O(1)",
         keywords: ["kadane", "maximum subarray", "current sum", "max sum", "o(n)", "dynamic programming"],
         modelAnswer: "Initialize max_sum = current_sum = arr[0]. For each element from index 1: current_sum = max(arr[i], current_sum + arr[i]). Update max_sum = max(max_sum, current_sum). O(N) time, O(1) space."
       },
@@ -1377,6 +1647,11 @@ export default function App() {
         tags: ["Coding Interview", "Trees"],
         question: "Write a recursive function to find the height of a binary tree.",
         hint: "Height = 1 + max(height of left subtree, height of right subtree)...",
+        type: 'problem',
+        starterCode: "def tree_height(root):\n    # Recursive calculation of maximum tree height / depth\n    if not root: return 0\n    return 1 + max(tree_height(root.left), tree_height(root.right))",
+        sampleInput: "root = [3, 9, 20, None, None, 15, 7]",
+        sampleOutput: "3",
+        constraints: "Time: O(N), Space: O(H)",
         keywords: ["binary tree", "height", "depth", "recursion", "base case", "o(n)", "max left right"],
         modelAnswer: "Base case: if node is None, return 0. Recursive: return 1 + max(height(node.left), height(node.right)). O(N) time — visits every node once."
       },
@@ -1387,6 +1662,9 @@ export default function App() {
         tags: ["Coding Interview", "Strings"],
         question: "Write an O(N) function to check if a string is a palindrome, ignoring spaces and case.",
         hint: "Two pointers — left and right, skip non-alphanumeric chars...",
+        type: 'fillup',
+        correctAnswer: "O(N) time and O(1) space",
+        blankPlaceholder: "Enter time and space complexity for two-pointer palindrome check",
         keywords: ["palindrome", "two pointers", "o(n)", "alphanumeric", "case insensitive", "ignore spaces"],
         modelAnswer: "Use two pointers l=0, r=len-1. Skip non-alphanumeric chars. Compare s[l].lower() == s[r].lower(). If mismatch return False. If l≥r return True. O(N) time, O(1) space."
       },
@@ -1397,6 +1675,11 @@ export default function App() {
         tags: ["Coding Interview", "Matrix"],
         question: "Given an M×N matrix, return all elements in spiral order (clockwise from top-left).",
         hint: "Maintain four boundaries: top, bottom, left, right; shrink after each pass...",
+        type: 'problem',
+        starterCode: "def spiral_order(matrix):\n    if not matrix: return []\n    res = []\n    top, bottom, left, right = 0, len(matrix)-1, 0, len(matrix[0])-1\n    while top <= bottom and left <= right:\n        for j in range(left, right + 1): res.append(matrix[top][j])\n        top += 1\n        for i in range(top, bottom + 1): res.append(matrix[i][right])\n        right -= 1\n        if top <= bottom:\n            for j in range(right, left - 1, -1): res.append(matrix[bottom][j])\n            bottom -= 1\n        if left <= right:\n            for i in range(bottom, top - 1, -1): res.append(matrix[i][left])\n            left += 1\n    return res",
+        sampleInput: "matrix = [[1,2,3],[4,5,6],[7,8,9]]",
+        sampleOutput: "[1, 2, 3, 6, 9, 8, 7, 4, 5]",
+        constraints: "Time: O(M*N), Space: O(1)",
         keywords: ["spiral", "matrix", "top bottom left right", "boundaries", "clockwise", "o(m*n)"],
         modelAnswer: "Use top, bottom, left, right pointers. Traverse right along top row, down along right col, left along bottom row, up along left col. Shrink boundaries after each traversal. Continue while top≤bottom and left≤right. O(M×N) time."
       },
@@ -1407,6 +1690,11 @@ export default function App() {
         tags: ["Coding Interview", "Heap", "Arrays"],
         question: "Given an array, return the K most frequent elements in O(N log K) time.",
         hint: "Use a frequency map and a min-heap of size K...",
+        type: 'problem',
+        starterCode: "import heapq\nfrom collections import Counter\n\ndef top_k_frequent(nums, k):\n    count = Counter(nums)\n    return heapq.nlargest(k, count.keys(), key=count.get)",
+        sampleInput: "nums = [1, 1, 1, 2, 2, 3], k = 2",
+        sampleOutput: "[1, 2]",
+        constraints: "Time: O(N log K), Space: O(N)",
         keywords: ["heap", "min heap", "frequency", "counter", "o(n log k)", "top k", "priority queue"],
         modelAnswer: "Count frequencies using a dict/Counter. Use a min-heap of size K to track top K elements. For each (freq, num), push to heap; if heap size > K, pop. Final heap contains the K most frequent elements. O(N log K) time."
       },
@@ -1417,6 +1705,9 @@ export default function App() {
         tags: ["Coding Interview", "Stack", "Queue"],
         question: "Implement a Queue using two stacks. What is the amortized time complexity of enqueue and dequeue?",
         hint: "One stack for push, one for pop — transfer when second is empty...",
+        type: 'mcq',
+        options: ["A) Push is O(1); Pop is amortized O(1) using two stacks (in_stack and out_stack)", "B) Both Push and Pop are strictly O(N) on every operation", "C) Push is O(N log N); Pop is O(1)", "D) Pop requires O(N²) quadratic recursive shifting"],
+        correctAnswer: "A) Push is O(1); Pop is amortized O(1) using two stacks (in_stack and out_stack)",
         keywords: ["queue", "two stacks", "amortized o(1)", "enqueue", "dequeue", "transfer", "amortized"],
         modelAnswer: "Stack1 for enqueue (push). Stack2 for dequeue. When dequeue is called and stack2 is empty, transfer all from stack1 to stack2 (reverses order). Pop from stack2. Enqueue: O(1). Dequeue: O(N) worst case but O(1) amortized."
       },
@@ -1427,6 +1718,9 @@ export default function App() {
         tags: ["Coding Interview", "Graphs", "Algorithms"],
         question: "Explain Dijkstra's shortest path algorithm. What data structure makes it efficient and what is its time complexity?",
         hint: "Use a min-heap (priority queue) for greedy selection of minimum distance node...",
+        type: 'fillup',
+        correctAnswer: "Min-Heap or Priority Queue",
+        blankPlaceholder: "Enter priority data structure used with Dijkstra to achieve O((V+E) log V)",
         keywords: ["dijkstra", "shortest path", "priority queue", "min heap", "relaxation", "o((v+e) log v)", "greedy"],
         modelAnswer: "Dijkstra finds the shortest path from source to all nodes in a weighted graph (non-negative edges). Initialize all distances as infinity, source as 0. Use a min-heap: repeatedly extract the node with minimum distance, relax its neighbors (update if shorter path found). Time: O((V+E) log V) with binary heap."
       }
@@ -1438,6 +1732,7 @@ export default function App() {
         difficulty: "Intermediate",
         tags: ["Deep Learning", "Generalization"],
         question: "How do you detect overfitting in complex neural networks or gradient boosted decision trees, and what concrete techniques do you apply to mitigate it?",
+        type: 'subjective',
         keywords: ["dropout", "early stopping", "l1", "l2", "weight decay", "cross validation", "data augmentation", "regularization", "validation loss", "learning rate"],
         modelAnswer: "Overfitting is primarily detected when validation loss begins to diverge or increase while training loss continues decreasing. To mitigate it in neural networks: 1) Apply Dropout layers (typically 0.2 to 0.5) to prevent co-adaptation of neurons; 2) Implement Early Stopping based on validation loss patience; 3) Use L2 Weight Decay to constrain parameter norms; 4) Employ Data Augmentation to increase training diversity; and 5) In Gradient Boosted Trees (like XGBoost), tune hyper-parameters such as max_depth (3–6), colsample_bytree, and min_child_weight."
       },
@@ -1447,6 +1742,9 @@ export default function App() {
         difficulty: "Intermediate",
         tags: ["Model Evaluation", "Metrics"],
         question: "In fraud detection or disease diagnosis where 99.5% of cases are negative, why is standard Accuracy misleading, and which evaluation metrics and resampling strategies should you use instead?",
+        type: 'mcq',
+        options: ["A) PR-AUC (Precision-Recall Area Under Curve), F1-Score, and SMOTE resampling", "B) Raw Accuracy and Mean Squared Error only", "C) R² Coefficient of Determination without class weighting", "D) Ignoring the positive minority class completely"],
+        correctAnswer: "A) PR-AUC (Precision-Recall Area Under Curve), F1-Score, and SMOTE resampling",
         keywords: ["accuracy paradox", "precision", "recall", "f1", "pr-auc", "roc-auc", "smote", "oversampling", "undersampling", "class weights", "confusion matrix"],
         modelAnswer: "Standard accuracy suffers from the 'Accuracy Paradox': a naive classifier predicting everything as negative achieves 99.5% accuracy while identifying 0 fraudulent cases. Instead: 1) Evaluate Macro/Micro F1-Score to balance Precision and Recall; 2) Utilize PR-AUC (Precision-Recall Area Under Curve), which is much more informative than ROC-AUC under severe imbalance; 3) Apply Cost-Sensitive Learning / Class Weighting (e.g. scale_pos_weight in XGBoost); and 4) Use resampling techniques like SMOTE (Synthetic Minority Over-sampling) on the training set."
       },
@@ -1456,6 +1754,9 @@ export default function App() {
         difficulty: "Advanced",
         tags: ["NLP", "Transformers"],
         question: "How does the Multi-Head Self-Attention mechanism in Transformers solve the fundamental sequential bottleneck of RNNs and LSTMs?",
+        type: 'fillup',
+        correctAnswer: "Multi-Head Self-Attention",
+        blankPlaceholder: "Enter Transformer attention operation formula: softmax(Q * K^T / sqrt(d_k)) * V",
         keywords: ["parallelization", "self-attention", "sequential bottleneck", "vanishing gradient", "o(1) path length", "qkv", "query key value", "positional encoding"],
         modelAnswer: "RNNs and LSTMs process tokens sequentially step-by-step (token t depends on hidden state t-1), prohibiting GPU parallelization across long sequences and suffering from vanishing gradients. Transformers replace recurrence entirely with Multi-Head Self-Attention: 1) All tokens are processed simultaneously in parallel using Query, Key, and Value matrix multiplications (Q * K^T / sqrt(d_k)); 2) The path length between any two tokens is O(1), enabling direct dependency modeling; and 3) Positional Encodings inject token order into the permutation-invariant architecture."
       },
@@ -1465,6 +1766,9 @@ export default function App() {
         difficulty: "Fundamental",
         tags: ["Optimization", "Preprocessing"],
         question: "Why is feature scaling (StandardScaler vs MinMaxScaler) crucial for distance-based and gradient-descent models like Logistic Regression and SVMs, but unnecessary for Decision Trees?",
+        type: 'fillup',
+        correctAnswer: "Decision Trees",
+        blankPlaceholder: "Enter algorithm family invariant to monotonic feature scaling (e.g. Decision Trees)",
         keywords: ["gradient descent", "condition number", "standardscaler", "minmax", "euclidean distance", "decision tree", "monotonic", "orthogonality"],
         modelAnswer: "Gradient Descent optimization converges much faster when features are on the same scale, as unscaled features create elongated, skewed contour ellipses leading to oscillations. Similarly, distance-based algorithms (k-NN, SVM, k-Means) are dominated by features with arbitrarily large numerical ranges. Conversely, Decision Trees and Tree Ensembles (Random Forest, XGBoost) split each feature independently based on monotonic order thresholds (e.g., x_i > threshold), meaning linear scalings do not change the split criteria or information gain."
       },
@@ -1474,6 +1778,7 @@ export default function App() {
         difficulty: "Advanced",
         tags: ["MLOps", "Production"],
         question: "What is the distinction between Data Drift and Concept Drift in a production AI system, and how would you build an automated monitoring and retraining pipeline?",
+        type: 'subjective',
         keywords: ["data drift", "concept drift", "covariate shift", "ks-test", "psi", "population stability", "ground truth lag", "retraining trigger", "fastapi", "monitoring"],
         modelAnswer: "Data Drift (Covariate Shift) occurs when input feature distribution P(X) changes over time (e.g., changing resume vocabulary) while P(Y|X) remains constant. Concept Drift occurs when the underlying statistical relationship between features and target labels P(Y|X) changes. An automated monitoring pipeline: 1) Logs all inference feature vectors into PostgreSQL/S3; 2) Computes Population Stability Index (PSI) and Kolmogorov-Smirnov (KS) tests against baseline; and 3) Automatically triggers retraining pipelines and validation checks when PSI > 0.2."
       }
@@ -1485,6 +1790,9 @@ export default function App() {
         difficulty: "Intermediate",
         tags: ["Backend", "Caching", "Redis"],
         question: "How does Redis in-memory caching improve API latency, and how do you handle cache invalidation, cache stampede (Thundering Herd), and cache penetration?",
+        type: 'mcq',
+        options: ["A) Cache-Aside with TTL, distributed mutex locking (Redlock), and Bloom filters", "B) Disabling cache expiration and querying DB directly on every hit", "C) Infinite TTL with client-side localStorage caching only", "D) Dropping database tables whenever cache misses occur"],
+        correctAnswer: "A) Cache-Aside with TTL, distributed mutex locking (Redlock), and Bloom filters",
         keywords: ["redis", "ttl", "cache aside", "write through", "thundering herd", "mutex lock", "bloom filter", "cache penetration", "cache stampede"],
         modelAnswer: "Redis provides sub-millisecond in-memory data retrieval (RAM vs Disk I/O). Key strategies: 1) Cache-Aside Pattern: Application queries cache first; on cache miss, queries DB and populates cache with TTL; 2) Cache Stampede / Thundering Herd: When a high-traffic key expires, multiple concurrent requests hammer the DB. Mitigate using distributed mutex locking (Redlock) or probabilistic early expiration; 3) Cache Penetration: Mitigate using Bloom Filters at the gateway or caching empty null results with short TTL."
       },
@@ -1494,6 +1802,9 @@ export default function App() {
         difficulty: "Intermediate",
         tags: ["Databases", "SQL", "Indexing"],
         question: "Explain how B-Tree indexes work in relational databases like PostgreSQL. When should you avoid adding an index, and what are the trade-offs on write-heavy tables?",
+        type: 'fillup',
+        correctAnswer: "B-Tree",
+        blankPlaceholder: "Enter default balanced search tree index structure in PostgreSQL (e.g. B-Tree)",
         keywords: ["b-tree", "o(log n)", "write overhead", "disk space", "low cardinality", "table scan", "wal", "insert overhead", "selectivity"],
         modelAnswer: "A B-Tree (Balanced Tree) index maintains sorted multi-level leaf nodes pointing to physical tuple heap offsets, reducing search complexity from O(N) sequential table scan to O(log N). Trade-offs: 1) Every INSERT, UPDATE, or DELETE requires rebalancing and updating all corresponding index trees, generating extra Write-Ahead Logging (WAL) and disk write amplification; 2) Indexes consume significant RAM/disk buffer space. Avoid indexing low-cardinality columns (e.g., boolean flags) where query planners prefer sequential scans, and avoid over-indexing tables with high write-to-read ratios."
       },
@@ -1503,6 +1814,7 @@ export default function App() {
         difficulty: "Advanced",
         tags: ["Node.js", "Concurrency", "Architecture"],
         question: "What is the difference between concurrency and parallelism, and how does the single-threaded Event Loop in Node.js / JavaScript achieve high non-blocking I/O throughput?",
+        type: 'subjective',
         keywords: ["concurrency vs parallelism", "event loop", "libuv", "call stack", "callback queue", "microtask queue", "non-blocking", "worker threads"],
         modelAnswer: "Concurrency is the composition of independently executing processes (interleaved execution on a single core), while Parallelism is the simultaneous execution of multiple computations on multiple physical CPU cores. Node.js uses a single-threaded Event Loop backed by the libuv threadpool: 1) JavaScript execution occurs on one main thread without locking overhead; 2) I/O operations (network sockets, disk, DB queries) are offloaded to OS kernel asynchronous primitives (epoll/kqueue); 3) When an I/O operation completes, its callback is enqueued into the Event Loop phases (Timers, Poll, Check) and Microtask Queue (Promises), ensuring the main thread never blocks waiting for I/O."
       },
@@ -1512,6 +1824,9 @@ export default function App() {
         difficulty: "Intermediate",
         tags: ["APIs", "System Design"],
         question: "Compare RESTful APIs with GraphQL in terms of network efficiency, over-fetching / under-fetching, caching simplicity, and schema governance.",
+        type: 'mcq',
+        options: ["A) REST has native HTTP caching; GraphQL prevents over/under-fetching but risks N+1 queries", "B) REST requires single POST endpoint; GraphQL uses standard HTTP verbs", "C) REST eliminates all database queries; GraphQL requires Redis", "D) GraphQL cannot return JSON responses"],
+        correctAnswer: "A) REST has native HTTP caching; GraphQL prevents over/under-fetching but risks N+1 queries",
         keywords: ["rest", "graphql", "over-fetching", "under-fetching", "n+1 problem", "http caching", "schema stitching", "dataloader"],
         modelAnswer: "1) Network Efficiency: REST endpoints often suffer from Over-fetching (returning extraneous fields) or Under-fetching (requiring N network round-trips to assemble related resources). GraphQL allows clients to specify exact requested field shapes in a single query; 2) Caching: REST leverages native HTTP protocol caching (ETag, Cache-Control, edge CDNs) out-of-the-box. GraphQL uses single POST endpoints (/graphql), requiring client-side normalized caching (Apollo/Relay); 3) Database Performance: GraphQL queries can easily trigger the N+1 database problem if resolvers are not batched using DataLoader."
       },
@@ -1521,6 +1836,9 @@ export default function App() {
         difficulty: "Advanced",
         tags: ["Security", "Authentication", "JWT"],
         question: "How do JWTs facilitate stateless authentication, and how should access and refresh tokens be stored to defend against Cross-Site Scripting (XSS) and Cross-Site Request Forgery (CSRF)?",
+        type: 'fillup',
+        correctAnswer: "HttpOnly",
+        blankPlaceholder: "Enter secure cookie flag preventing JavaScript XSS token theft",
         keywords: ["jwt", "stateless", "access token", "refresh token", "httponly cookie", "xss", "csrf", "samesite", "token revocation", "signature"],
         modelAnswer: "A JSON Web Token (Header.Payload.Signature) is cryptographically signed using a secret (HMAC-SHA256) or public/private key (RS256). Any service can verify the signature and read user claims without querying a central session database. Security best practices: 1) Never store sensitive tokens in browser localStorage or sessionStorage, as any injected XSS script can exfiltrate them; 2) Store short-lived Access Tokens (5–15 min) in memory and long-lived Refresh Tokens in an HttpOnly, Secure, SameSite=Strict cookie inaccessible to JavaScript; 3) Defend against CSRF using SameSite cookies and CSRF anti-forgery tokens; and 4) Implement token blacklisting / revocation in Redis for immediate logout or compromised credentials."
       }
@@ -1532,6 +1850,9 @@ export default function App() {
         difficulty: "Fundamental",
         tags: ["Docker", "Virtualization"],
         question: "What is the architectural difference between Docker containers and traditional Virtual Machines, and why are containers significantly lighter and faster to boot?",
+        type: 'mcq',
+        options: ["A) Containers share host OS kernel using cgroups/namespaces; VMs emulate full guest OS and virtual hardware", "B) VMs have faster boot times and smaller image footprints than containers", "C) Containers require Type 1 hypervisor (ESXi/Xen) while VMs do not", "D) Docker containers cannot run on Linux servers"],
+        correctAnswer: "A) Containers share host OS kernel using cgroups/namespaces; VMs emulate full guest OS and virtual hardware",
         keywords: ["shared kernel", "hypervisor", "guest os", "namespaces", "cgroups", "isolation", "boot time", "resource overhead"],
         modelAnswer: "Virtual Machines run on a Hypervisor (Type 1 or Type 2) and require a complete, independent Guest Operating System kernel, virtualized BIOS, and emulated virtual hardware, resulting in gigabyte image sizes and minute-long boot times. Docker containers virtualize at the OS layer: they share the host OS kernel and use Linux cgroups (for resource limiting: CPU/RAM) and namespaces (for process, PID, network, and mount isolation). Because no guest OS boots, containers launch in milliseconds and consume negligible memory overhead."
       },
@@ -1541,6 +1862,9 @@ export default function App() {
         difficulty: "Advanced",
         tags: ["Kubernetes", "DevOps"],
         question: "Explain the relationship and roles of Kubernetes Pods, ReplicaSets, Deployments, Services, and Ingress Controllers in a production cluster.",
+        type: 'fillup',
+        correctAnswer: "Pod",
+        blankPlaceholder: "Enter smallest deployable compute unit in Kubernetes (e.g. Pod)",
         keywords: ["pod", "deployment", "replicaset", "clusterip", "service", "ingress", "kube-proxy", "rolling update", "self-healing"],
         modelAnswer: "1) Pod: Smallest deployable unit, encapsulating one or more tightly coupled containers sharing localhost network and storage volumes; 2) Deployment & ReplicaSet: Deployments manage declarative state and rolling updates with zero downtime, maintaining a desired count of identical Pods via ReplicaSets for self-healing; 3) Service: Provides a stable virtual ClusterIP and internal L4 load balancing across transient Pod IPs using label selectors; 4) Ingress Controller (e.g. NGINX Ingress): Acts as the cluster L7 reverse proxy, routing external HTTP/HTTPS traffic to internal Services based on hostnames and URL paths, managing SSL/TLS termination."
       },
@@ -1550,6 +1874,9 @@ export default function App() {
         difficulty: "Intermediate",
         tags: ["CI/CD", "Deployments"],
         question: "Compare Blue-Green Deployments with Canary Deployments. How do you manage database schema migrations during zero-downtime releases?",
+        type: 'mcq',
+        options: ["A) Blue-Green switches 100% traffic instantly; Canary gradually routes a small percentage (e.g. 5%)", "B) Canary drops 100% of user traffic to run offline tests", "C) Blue-Green requires stopping all servers for 1 hour maintenance windows", "D) Canary deployment does not support automated rollback"],
+        correctAnswer: "A) Blue-Green switches 100% traffic instantly; Canary gradually routes a small percentage (e.g. 5%)",
         keywords: ["blue green", "canary deployment", "traffic routing", "expand and contract", "backward compatibility", "rollback", "database migration"],
         modelAnswer: "1) Blue-Green: Maintains two identical production environments. Traffic is switched 100% instantly from Blue (active) to Green (new version) at the load balancer level, enabling instant rollback if issues arise; 2) Canary: Routes a small percentage of real user traffic (e.g. 5%) to the new version while monitoring error rates and latency before incrementally scaling to 100%; 3) Database Migrations: Zero-downtime requires the 'Expand and Contract' pattern: Step 1 (Expand) - Add new columns as nullable/default without dropping old columns, ensuring backward compatibility with both versions; Step 2 - Deploy code writing to both; Step 3 (Contract) - Backfill old data and safely remove deprecated schema."
       },
@@ -1559,6 +1886,9 @@ export default function App() {
         difficulty: "Intermediate",
         tags: ["Terraform", "IaC"],
         question: "Why is declarative Infrastructure as Code (Terraform) preferred over imperative CLI scripts, and how do you protect and manage the Terraform state file in team environments?",
+        type: 'fillup',
+        correctAnswer: "S3",
+        blankPlaceholder: "Enter AWS storage service commonly used for remote Terraform state backend (e.g. S3)",
         keywords: ["declarative vs imperative", "terraform state", "drift detection", "remote backend", "s3 bucket", "dynamodb state locking", "idempotent"],
         modelAnswer: "Declarative IaC specifies the desired end-state (e.g., 'create an S3 bucket with versioning enabled'); Terraform automatically calculates dependency graphs, creates execution plans (terraform plan), and converges the infrastructure idempotently. Imperative scripts (Bash/AWS CLI) define step-by-step actions and frequently fail on re-runs. For team state management: 1) Store terraform.tfstate in a remote backend (e.g. AWS S3, Google Cloud Storage) with server-side encryption; 2) Enable State Locking (via AWS DynamoDB) to prevent concurrent conflicting applies; and 3) Enable S3 versioning for disaster recovery."
       },
@@ -1589,7 +1919,8 @@ export default function App() {
     setInterviewDomain(domainKey)
     setInterviewActive(true)
     setCurrentQIdx(0)
-    setUserAnswerText('')
+    const firstQ = shuffled[0]
+    setUserAnswerText(firstQ?.type === 'problem' ? (firstQ.starterCode || '') : '')
     setSavedAnswers({})
     setEvaluationResults({})
     setTimerSeconds(900)
@@ -1598,47 +1929,68 @@ export default function App() {
     setShowModelAnswer(false)
   }
 
-  // Evaluate Current Question Answer
+  // Evaluate Current Question Answer (Supports MCQ, Fill-up, Problem Solving & Subjective)
   const handleEvaluateAnswer = () => {
     const questionsList = sessionQuestions.length > 0 ? sessionQuestions : (interviewQuestions[interviewDomain] || [])
     const currentQ = questionsList[currentQIdx]
     const text = (userAnswerText || savedAnswers[currentQIdx] || '').trim()
 
-    if (!text || text.length < 15) {
+    if (!text) {
+      alert('Please provide an answer, fill the blank, or select an option to evaluate.')
+      return
+    }
+
+    if ((!currentQ.type || currentQ.type === 'subjective') && text.length < 15) {
       alert('Please provide a more detailed technical explanation (at least a couple of sentences) to receive an AI evaluation.')
       return
     }
 
     setIsEvaluating(true)
     setTimeout(() => {
-      const textLower = text.toLowerCase()
-      const matched = currentQ.keywords.filter(k => textLower.includes(k.toLowerCase()))
-      const wordCount = text.split(/\s+/).length
+      let totalScore = 80
+      let grade = 'Good - Solid Core Concepts'
+      let strengths = []
+      let improvements = []
 
-      // Calculate score based on keyword coverage and depth
-      const kwScore = Math.min(65, Math.round((matched.length / Math.max(3, currentQ.keywords.length * 0.45)) * 65))
-      const depthScore = Math.min(30, Math.round((wordCount / 50) * 30))
-      const totalScore = Math.min(96, Math.max(48, kwScore + depthScore))
-
-      let grade = 'Proficient - Strong Technical Articulation'
-      if (totalScore >= 85) grade = 'Exceptional - High Readiness'
-      else if (totalScore >= 70) grade = 'Good - Solid Core Concepts'
-      else grade = 'Needs Practice - Missing Key Terminology'
-
-      const strengths = matched.length > 0 
-        ? matched.slice(0, 3).map(k => `Accurately articulated concept: "${k}"`)
-        : ['Clear logical structure and technical attempt']
-
-      const missing = currentQ.keywords
-        .filter(k => !textLower.includes(k.toLowerCase()))
-        .slice(0, 3)
-        .map(k => `Could elaborate on: "${k}"`)
+      if (currentQ.type === 'mcq') {
+        const isCorrect = text.trim().toLowerCase() === (currentQ.correctAnswer || '').trim().toLowerCase() ||
+                          text.trim().startsWith(currentQ.correctAnswer?.slice(0, 2) || '')
+        totalScore = isCorrect ? 96 : 52
+        grade = isCorrect ? 'Exceptional - Accurate MCQ Choice' : 'Needs Practice - Incorrect Option'
+        strengths = isCorrect ? [`Correctly identified: "${currentQ.correctAnswer}"`] : ['Active attempt at multiple choice problem']
+        improvements = isCorrect ? ['Consistent accuracy across multiple choice tests.'] : [`Correct answer is: "${currentQ.correctAnswer}". Review explanation.`]
+      } else if (currentQ.type === 'fillup') {
+        const isCorrect = text.trim().toLowerCase().includes((currentQ.correctAnswer || '').trim().toLowerCase())
+        totalScore = isCorrect ? 94 : 55
+        grade = isCorrect ? 'Proficient - Exact Keyword Match' : 'Needs Practice - Missing Keyword'
+        strengths = isCorrect ? [`Accurately identified term: "${currentQ.correctAnswer}"`] : ['Attempted keyword completion']
+        improvements = isCorrect ? ['Solid syntax recall.'] : [`Expected keyword: "${currentQ.correctAnswer}".`]
+      } else if (currentQ.type === 'problem') {
+        const textLower = text.toLowerCase()
+        const matched = (currentQ.keywords || []).filter(k => textLower.includes(k.toLowerCase()))
+        const kwScore = Math.min(65, Math.round((matched.length / Math.max(2, (currentQ.keywords || []).length * 0.4)) * 65))
+        const depthScore = Math.min(30, Math.round((text.length / 70) * 30))
+        totalScore = Math.min(96, Math.max(50, kwScore + depthScore))
+        grade = totalScore >= 85 ? 'Exceptional - Clean Implementation' : 'Good - Functional Logic'
+        strengths = matched.length > 0 ? matched.slice(0, 3).map(k => `Implemented pattern: "${k}"`) : ['Structured programmatic solution']
+        improvements = (currentQ.keywords || []).filter(k => !textLower.includes(k.toLowerCase())).slice(0, 2).map(k => `Could optimize: "${k}"`)
+      } else {
+        const textLower = text.toLowerCase()
+        const matched = (currentQ.keywords || []).filter(k => textLower.includes(k.toLowerCase()))
+        const wordCount = text.split(/\s+/).length
+        const kwScore = Math.min(65, Math.round((matched.length / Math.max(3, (currentQ.keywords || []).length * 0.45)) * 65))
+        const depthScore = Math.min(30, Math.round((wordCount / 50) * 30))
+        totalScore = Math.min(96, Math.max(48, kwScore + depthScore))
+        grade = totalScore >= 85 ? 'Exceptional - High Readiness' : totalScore >= 70 ? 'Good - Solid Core Concepts' : 'Needs Practice - Missing Key Terminology'
+        strengths = matched.length > 0 ? matched.slice(0, 3).map(k => `Accurately articulated concept: "${k}"`) : ['Clear logical structure and technical attempt']
+        improvements = (currentQ.keywords || []).filter(k => !textLower.includes(k.toLowerCase())).slice(0, 3).map(k => `Could elaborate on: "${k}"`)
+      }
 
       const feedback = {
         score: totalScore,
         grade,
         strengths,
-        improvements: missing.length > 0 ? missing : ['Excellent coverage across all primary evaluation criteria.'],
+        improvements: improvements.length > 0 ? improvements : ['Excellent coverage across all primary evaluation criteria.'],
         modelAnswer: currentQ.modelAnswer
       }
 
@@ -1657,7 +2009,9 @@ export default function App() {
         setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
       }
       setCurrentQIdx(nextIdx)
-      setUserAnswerText(savedAnswers[nextIdx] || '')
+      const nextQ = questionsList[nextIdx]
+      const existing = savedAnswers[nextIdx]
+      setUserAnswerText(existing !== undefined ? existing : (nextQ?.type === 'problem' ? (nextQ.starterCode || '') : ''))
       setShowModelAnswer(false)
     }
   }
@@ -1665,12 +2019,15 @@ export default function App() {
   // Navigate to Previous Question
   const handlePrevQuestion = () => {
     const prevIdx = currentQIdx - 1
+    const questionsList = sessionQuestions.length > 0 ? sessionQuestions : (interviewQuestions[interviewDomain] || [])
     if (prevIdx >= 0) {
       if (userAnswerText.trim()) {
         setSavedAnswers(prev => ({ ...prev, [currentQIdx]: userAnswerText }))
       }
       setCurrentQIdx(prevIdx)
-      setUserAnswerText(savedAnswers[prevIdx] || '')
+      const prevQ = questionsList[prevIdx]
+      const existing = savedAnswers[prevIdx]
+      setUserAnswerText(existing !== undefined ? existing : (prevQ?.type === 'problem' ? (prevQ.starterCode || '') : ''))
       setShowModelAnswer(false)
     }
   }
@@ -3328,10 +3685,19 @@ export default function App() {
                           <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1.5rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
                               <div style={{ flex: 1 }}>
-                                <span className="match-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', marginBottom: '0.6rem', display: 'inline-block' }}>
-                                  {q.tags ? q.tags.join(' - ') : 'Python Developer - Technical'}
-                                </span>
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
+                                  <span className="match-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+                                    {q.tags ? q.tags.join(' - ') : 'Technical Interview'}
+                                  </span>
+                                  <span className="match-badge" style={{
+                                    background: q.type === 'mcq' ? 'rgba(16, 185, 129, 0.15)' : q.type === 'fillup' ? 'rgba(245, 158, 11, 0.15)' : q.type === 'problem' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                                    color: q.type === 'mcq' ? '#10b981' : q.type === 'fillup' ? '#f59e0b' : q.type === 'problem' ? '#c084fc' : '#60a5fa',
+                                    fontWeight: 700
+                                  }}>
+                                    {q.type === 'mcq' ? '🎯 Multiple Choice (MCQ)' : q.type === 'fillup' ? '✏️ Fill in the Blank' : q.type === 'problem' ? '💻 Problem Solving' : '📝 Conceptual Explanation'}
+                                  </span>
+                                </div>
+                                <h3 style={{ fontSize: '1.18rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.5rem', lineHeight: 1.4 }}>
                                   {q.question}
                                 </h3>
                               </div>
@@ -3339,22 +3705,152 @@ export default function App() {
                                 <div style={{ fontWeight: 700, marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                   <span>💡 Hint</span>
                                 </div>
-                                <div>{q.hint || 'Think about its features and popularity...'}</div>
+                                <div>{q.hint || 'Think about its features and practical applications...'}</div>
                               </div>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem' }}>
-                              <textarea
-                                rows={6}
-                                value={userAnswerText !== '' ? userAnswerText : (savedAnswers[currentQIdx] || '')}
-                                onChange={(e) => {
-                                  setUserAnswerText(e.target.value)
-                                  setSavedAnswers(prev => ({ ...prev, [currentQIdx]: e.target.value }))
-                                }}
-                                placeholder="Type your answer here..."
-                                style={{ width: '100%', padding: '14px', borderRadius: '10px', background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#ffffff', fontSize: '0.9rem', lineHeight: 1.6, resize: 'vertical' }}
-                              />
-                            </div>
+                            {/* 1. MCQ FORMAT */}
+                            {q.type === 'mcq' && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                                {(q.options || []).map((opt, oIdx) => {
+                                  const currentVal = userAnswerText !== '' ? userAnswerText : (savedAnswers[currentQIdx] || '')
+                                  const isSelected = currentVal === opt
+                                  return (
+                                    <button
+                                      key={oIdx}
+                                      type="button"
+                                      onClick={() => {
+                                        setUserAnswerText(opt)
+                                        setSavedAnswers(prev => ({ ...prev, [currentQIdx]: opt }))
+                                      }}
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.85rem',
+                                        padding: '12px 16px',
+                                        borderRadius: '10px',
+                                        background: isSelected ? 'rgba(37, 99, 235, 0.22)' : 'var(--bg-card)',
+                                        border: isSelected ? '2px solid #2563eb' : '1px solid var(--border)',
+                                        color: isSelected ? '#ffffff' : '#cbd5e1',
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        fontSize: '0.92rem',
+                                        transition: 'all 0.15s ease'
+                                      }}
+                                    >
+                                      <span style={{
+                                        width: '28px',
+                                        height: '28px',
+                                        borderRadius: '6px',
+                                        background: isSelected ? '#2563eb' : 'rgba(255, 255, 255, 0.08)',
+                                        color: '#ffffff',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: 700,
+                                        fontSize: '0.85rem',
+                                        flexShrink: 0
+                                      }}>
+                                        {String.fromCharCode(65 + oIdx)}
+                                      </span>
+                                      <span style={{ flex: 1, fontWeight: isSelected ? 600 : 400 }}>{opt}</span>
+                                      {isSelected && <Check size={18} color="#38bdf8" />}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            )}
+
+                            {/* 2. FILL IN THE BLANK FORMAT */}
+                            {q.type === 'fillup' && (
+                              <div style={{ marginBottom: '1.25rem', padding: '1.25rem', background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                                <div style={{ fontSize: '0.85rem', color: '#f59e0b', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}>
+                                  <span>✏️ Type the exact missing keyword, formula or terminology:</span>
+                                </div>
+                                <input
+                                  type="text"
+                                  value={userAnswerText !== '' ? userAnswerText : (savedAnswers[currentQIdx] || '')}
+                                  onChange={(e) => {
+                                    setUserAnswerText(e.target.value)
+                                    setSavedAnswers(prev => ({ ...prev, [currentQIdx]: e.target.value }))
+                                  }}
+                                  placeholder={q.blankPlaceholder || "Enter missing keyword / term here..."}
+                                  style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    borderRadius: '8px',
+                                    background: 'var(--bg-input)',
+                                    border: '2px solid #2563eb',
+                                    color: '#ffffff',
+                                    fontSize: '0.95rem',
+                                    fontFamily: 'Consolas, monospace',
+                                    boxSizing: 'border-box'
+                                  }}
+                                />
+                              </div>
+                            )}
+
+                            {/* 3. PROBLEM SOLVING / CODING FORMAT */}
+                            {q.type === 'problem' && (
+                              <div style={{ marginBottom: '1.25rem' }}>
+                                {(q.sampleInput || q.sampleOutput) && (
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem', padding: '0.85rem 1rem', background: 'rgba(168, 85, 247, 0.08)', borderRadius: '8px', border: '1px solid rgba(168, 85, 247, 0.25)', fontSize: '0.82rem' }}>
+                                    {q.sampleInput && <div><span style={{ color: '#c084fc', fontWeight: 700 }}>Input: </span><code style={{ color: '#e2e8f0' }}>{q.sampleInput}</code></div>}
+                                    {q.sampleOutput && <div><span style={{ color: '#c084fc', fontWeight: 700 }}>Output: </span><code style={{ color: '#e2e8f0' }}>{q.sampleOutput}</code></div>}
+                                    {q.constraints && <div><span style={{ color: '#c084fc', fontWeight: 700 }}>Target: </span><code style={{ color: '#e2e8f0' }}>{q.constraints}</code></div>}
+                                  </div>
+                                )}
+
+                                <div style={{ border: '1px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 14px', background: '#070e28', borderBottom: '1px solid var(--border)', fontSize: '0.75rem', color: '#94a3b8' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444' }} />
+                                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b' }} />
+                                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }} />
+                                      <span style={{ marginLeft: '6px', fontWeight: 600, color: '#e2e8f0' }}>solution.py</span>
+                                    </div>
+                                    <span>Interactive Code Workspace</span>
+                                  </div>
+                                  <textarea
+                                    rows={8}
+                                    value={userAnswerText !== '' ? userAnswerText : (savedAnswers[currentQIdx] !== undefined ? savedAnswers[currentQIdx] : (q.starterCode || ''))}
+                                    onChange={(e) => {
+                                      setUserAnswerText(e.target.value)
+                                      setSavedAnswers(prev => ({ ...prev, [currentQIdx]: e.target.value }))
+                                    }}
+                                    placeholder="Write your code or problem-solving logic here..."
+                                    style={{
+                                      width: '100%',
+                                      padding: '14px',
+                                      background: '#0a0f1d',
+                                      border: 'none',
+                                      color: '#38bdf8',
+                                      fontFamily: 'Consolas, "Fira Code", monospace',
+                                      fontSize: '0.88rem',
+                                      lineHeight: 1.6,
+                                      resize: 'vertical',
+                                      boxSizing: 'border-box'
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 4. SUBJECTIVE / CONCEPTUAL EXPLANATION (DEFAULT) */}
+                            {(!q.type || q.type === 'subjective') && (
+                              <div style={{ marginBottom: '1.25rem' }}>
+                                <textarea
+                                  rows={6}
+                                  value={userAnswerText !== '' ? userAnswerText : (savedAnswers[currentQIdx] || '')}
+                                  onChange={(e) => {
+                                    setUserAnswerText(e.target.value)
+                                    setSavedAnswers(prev => ({ ...prev, [currentQIdx]: e.target.value }))
+                                  }}
+                                  placeholder="Type your explanation or technical answer here..."
+                                  style={{ width: '100%', padding: '14px', borderRadius: '10px', background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#ffffff', fontSize: '0.9rem', lineHeight: 1.6, resize: 'vertical', boxSizing: 'border-box' }}
+                                />
+                              </div>
+                            )}
 
                             {/* Navigation Buttons */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -3963,14 +4459,14 @@ export default function App() {
               )
             })()}
 
-            {/* 11. NOTIFICATIONS */}
+            {/* 11. NOTIFICATIONS (JOB RECOMMENDATIONS & CAMPUS DRIVES) */}
             {activeTab === 'notifications' && (
               <div>
                 <div className="welcome-header">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                      <h2>Notification Center</h2>
-                      <p>Stay updated on placement drives, interview results, and AI feedback</p>
+                      <h2>Job Recommendation & Placement Alerts</h2>
+                      <p>Personalized employment alerts, high-affinity campus openings & recruitment drives</p>
                     </div>
                     <button
                       className="btn-secondary"
@@ -3982,7 +4478,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="white-panel" style={{ maxWidth: '850px' }}>
+                <div className="white-panel" style={{ maxWidth: '900px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                     {notificationsList.map((notif) => (
                       <div
@@ -3991,37 +4487,58 @@ export default function App() {
                           display: 'flex',
                           alignItems: 'flex-start',
                           gap: '1rem',
-                          padding: '1rem 1.25rem',
+                          padding: '1.1rem 1.25rem',
                           borderRadius: '10px',
                           background: notif.read ? 'var(--bg-card)' : 'rgba(37, 99, 235, 0.08)',
-                          border: notif.read ? '1px solid var(--border)' : '1px solid rgba(37, 99, 235, 0.3)',
-                          transition: 'all 0.2s ease'
+                          border: notif.read ? '1px solid var(--border)' : '1px solid rgba(37, 99, 235, 0.35)',
+                          transition: 'all 0.2s ease',
+                          flexWrap: 'wrap'
                         }}
                       >
                         <div style={{
-                          width: '40px',
-                          height: '40px',
+                          width: '42px',
+                          height: '42px',
                           borderRadius: '10px',
-                          background: notif.type === 'interview' ? 'rgba(16, 185, 129, 0.15)' : notif.type === 'placement' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(192, 132, 252, 0.15)',
-                          color: notif.type === 'interview' ? '#10b981' : notif.type === 'placement' ? '#38bdf8' : '#c084fc',
+                          background: `${notif.fitColor || '#38bdf8'}22`,
+                          color: notif.fitColor || '#38bdf8',
+                          border: `1px solid ${notif.fitColor || '#38bdf8'}44`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0
                         }}>
-                          {notif.type === 'interview' ? <Award size={20} /> : notif.type === 'placement' ? <Briefcase size={20} /> : <Bell size={20} />}
+                          <Briefcase size={20} />
                         </div>
 
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>{notif.title}</h4>
+                        <div style={{ flex: 1, minWidth: '260px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                              <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>{notif.title}</h4>
+                              {notif.fit && (
+                                <span className="match-badge" style={{ background: `${notif.fitColor}22`, color: notif.fitColor, border: `1px solid ${notif.fitColor}44`, fontSize: '0.72rem', padding: '2px 8px' }}>
+                                  {notif.fit}
+                                </span>
+                              )}
+                            </div>
                             <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{notif.time}</span>
                           </div>
-                          <p style={{ fontSize: '0.84rem', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>{notif.desc}</p>
+
+                          <p style={{ fontSize: '0.84rem', color: '#cbd5e1', margin: '0 0 0.5rem', lineHeight: 1.5 }}>{notif.desc}</p>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>📍 {notif.location}</span>
+                            <button
+                              className="btn-pill-outline"
+                              onClick={() => setActiveTab('job-recommendations')}
+                              style={{ padding: '3px 12px', fontSize: '0.75rem', borderColor: notif.fitColor, color: notif.fitColor }}
+                            >
+                              View in Job Recommendations →
+                            </button>
+                          </div>
                         </div>
 
                         {!notif.read && (
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', marginTop: '6px' }} />
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', marginTop: '6px', flexShrink: 0 }} />
                         )}
                       </div>
                     ))}
