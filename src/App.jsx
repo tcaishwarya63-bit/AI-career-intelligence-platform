@@ -98,6 +98,408 @@ export default function App() {
   const [quizAnswer, setQuizAnswer] = useState(null)
   const [quizScore, setQuizScore] = useState(null)
 
+  // Interactive Skill Assessment State
+  const [selectedAssessmentCategory, setSelectedAssessmentCategory] = useState('python')
+  const [assessmentStep, setAssessmentStep] = useState('selector') // 'selector' | 'quiz' | 'result'
+  const [currentAssessQIdx, setCurrentAssessQIdx] = useState(0)
+  const [assessUserAnswers, setAssessUserAnswers] = useState({})
+  const [assessTimeLeft, setAssessTimeLeft] = useState(300) // 5 mins
+  const [assessTimerActive, setAssessTimerActive] = useState(false)
+  const [lastAssessResult, setLastAssessResult] = useState(null)
+
+  // Verified Badges Earned by Student
+  const [verifiedBadges, setVerifiedBadges] = useState([
+    {
+      id: 'badge-py',
+      category: 'python',
+      title: 'Python Mastery',
+      level: 'Advanced',
+      score: 95,
+      date: 'Oct 2026',
+      badgeColor: '#38bdf8',
+      icon: '🐍',
+      verifiedHash: 'CC-PY-98421',
+      skills: ['Functions', 'OOP', 'Decorators', 'Generators']
+    },
+    {
+      id: 'badge-sql',
+      category: 'sql',
+      title: 'SQL & Database Design',
+      level: 'Intermediate',
+      score: 90,
+      date: 'Nov 2026',
+      badgeColor: '#10b981',
+      icon: '🗄️',
+      verifiedHash: 'CC-SQL-77312',
+      skills: ['JOINs', 'Indexing', 'Aggregations', 'ACID']
+    }
+  ])
+
+  // Comprehensive Question Bank for Skill Assessments
+  const assessmentCategories = {
+    python: {
+      id: 'python',
+      title: 'Python Core & Advanced',
+      icon: '🐍',
+      color: '#38bdf8',
+      description: 'Language syntax, OOP, closures, generators & data structures',
+      questionsCount: 5,
+      duration: '5 Mins',
+      passingScore: 70,
+      questions: [
+        {
+          id: 1,
+          q: "What is the output of `bool([])` and `bool([False])` in Python?",
+          options: [
+            "False and True",
+            "False and False",
+            "True and True",
+            "True and False"
+          ],
+          correct: 0,
+          explanation: "An empty list is falsy in Python, whereas a non-empty list `[False]` has a length of 1 and evaluates to True."
+        },
+        {
+          id: 2,
+          q: "Which built-in Python module is used to preserve function metadata in decorators?",
+          options: [
+            "sys",
+            "functools (via @functools.wraps)",
+            "inspect",
+            "typing"
+          ],
+          correct: 1,
+          explanation: "`@functools.wraps` copies over docstrings, function names, and argument signatures from original to wrapped functions."
+        },
+        {
+          id: 3,
+          q: "What does Python's GIL (Global Interpreter Lock) specifically prevent?",
+          options: [
+            "Multiple processes from running concurrently",
+            "Multiple native threads from executing Python bytecode simultaneously",
+            "Asynchronous event loops from polling sockets",
+            "Garbage collection of cyclic references"
+          ],
+          correct: 1,
+          explanation: "The GIL ensures only one native OS thread executes CPython bytecode at any given instant."
+        },
+        {
+          id: 4,
+          q: "What is the average time complexity of dictionary key lookup in Python?",
+          options: [
+            "O(log N)",
+            "O(1)",
+            "O(N)",
+            "O(N log N)"
+          ],
+          correct: 1,
+          explanation: "Python dictionaries use hash tables with open addressing, giving O(1) average lookup."
+        },
+        {
+          id: 5,
+          q: "Which keyword is used to create a generator function in Python that produces a lazy iterator stream?",
+          options: [
+            "return",
+            "yield",
+            "await",
+            "emit"
+          ],
+          correct: 1,
+          explanation: "`yield` pauses the function state and yields the next value on demand, saving memory."
+        }
+      ]
+    },
+    sql: {
+      id: 'sql',
+      title: 'SQL, RDBMS & Indexing',
+      icon: '🗄️',
+      color: '#10b981',
+      description: 'Relational design, JOIN mechanics, B-Tree indices & ACID transactions',
+      questionsCount: 5,
+      duration: '5 Mins',
+      passingScore: 70,
+      questions: [
+        {
+          id: 1,
+          q: "Which SQL JOIN returns all rows from the left table, and matched rows from the right table (with NULLs for unmatched)?",
+          options: [
+            "INNER JOIN",
+            "LEFT OUTER JOIN",
+            "FULL OUTER JOIN",
+            "CROSS JOIN"
+          ],
+          correct: 1,
+          explanation: "LEFT OUTER JOIN preserves every row from the left table regardless of whether a matching record exists on the right."
+        },
+        {
+          id: 2,
+          q: "In ACID transaction properties, what does 'Atomicity' guarantee?",
+          options: [
+            "Transactions execute at the speed of light",
+            "All operations within the transaction succeed completely or all are rolled back",
+            "Data is replicated across at least three physical storage nodes",
+            "No two users can query the table simultaneously"
+          ],
+          correct: 1,
+          explanation: "Atomicity ensures 'all-or-nothing' execution — partial commits never leave the database corrupted."
+        },
+        {
+          id: 3,
+          q: "What data structure do PostgreSQL and MySQL InnoDB predominantly use for default table indices?",
+          options: [
+            "Binary Search Tree",
+            "B-Tree / B+ Tree",
+            "Hash Table",
+            "Trie"
+          ],
+          correct: 1,
+          explanation: "B-Trees keep data sorted and allow logarithmic O(log N) searches, sequential scans, and range queries on disk."
+        },
+        {
+          id: 4,
+          q: "Which SQL clause is used to filter aggregated grouped data produced by GROUP BY?",
+          options: [
+            "WHERE",
+            "HAVING",
+            "ORDER BY",
+            "LIMIT"
+          ],
+          correct: 1,
+          explanation: "`WHERE` filters row records before grouping; `HAVING` filters aggregated values after grouping."
+        },
+        {
+          id: 5,
+          q: "What is a major downside of adding too many indexes on a database table?",
+          options: [
+            "Slows down SELECT queries",
+            "Degrades write performance (INSERT/UPDATE/DELETE) due to index rebalancing",
+            "Prevents primary key generation",
+            "Forces table locks on simple read queries"
+          ],
+          correct: 1,
+          explanation: "Every write operation must update all corresponding index trees, generating extra disk I/O and Write-Ahead Logging overhead."
+        }
+      ]
+    },
+    dsa: {
+      id: 'dsa',
+      title: 'Data Structures & Algorithms',
+      icon: '⚡',
+      color: '#c084fc',
+      description: 'Arrays, Trees, Graphs, Sorting, Dynamic Programming & Complexity',
+      questionsCount: 5,
+      duration: '5 Mins',
+      passingScore: 70,
+      questions: [
+        {
+          id: 1,
+          q: "What is the worst-case time complexity of QuickSort when the pivot is always the smallest/largest element?",
+          options: [
+            "O(N log N)",
+            "O(N²)",
+            "O(N)",
+            "O(log N)"
+          ],
+          correct: 1,
+          explanation: "When partitions are severely unbalanced (e.g. sorted array with first element as pivot), QuickSort degrades to O(N²)."
+        },
+        {
+          id: 2,
+          q: "Which data structure is fundamentally used in Breadth-First Search (BFS) graph traversal?",
+          options: [
+            "Stack (LIFO)",
+            "Queue (FIFO)",
+            "Max-Heap",
+            "Priority Tree"
+          ],
+          correct: 1,
+          explanation: "BFS explores nodes level by level in First-In-First-Out order using a Queue."
+        },
+        {
+          id: 3,
+          q: "In an array of N integers, how can Two Sum be solved in optimal O(N) time?",
+          options: [
+            "Nested loops comparing every pair",
+            "Single pass using a Hash Map to store target complements",
+            "Binary search on unsorted elements",
+            "Divide and conquer recursion"
+          ],
+          correct: 1,
+          explanation: "A Hash Map stores `complement = target - num` with its index, enabling O(1) checks during a single pass."
+        },
+        {
+          id: 4,
+          q: "What is the time complexity to search an item in a balanced Binary Search Tree (AVL / Red-Black Tree)?",
+          options: [
+            "O(1)",
+            "O(log N)",
+            "O(N)",
+            "O(N log N)"
+          ],
+          correct: 1,
+          explanation: "Self-balancing binary trees maintain height H = O(log N), guaranteeing logarithmic search time."
+        },
+        {
+          id: 5,
+          q: "Which algorithmic paradigm breaks a problem into overlapping subproblems and stores results in a lookup table?",
+          options: [
+            "Greedy Algorithm",
+            "Dynamic Programming (Memoization / Tabulation)",
+            "Brute Force Backtracking",
+            "Divide and Conquer without state cache"
+          ],
+          correct: 1,
+          explanation: "Dynamic programming caches overlapping subproblem solutions to prevent exponential recomputations."
+        }
+      ]
+    },
+    ml: {
+      id: 'ml',
+      title: 'Machine Learning & AI',
+      icon: '🤖',
+      color: '#f59e0b',
+      description: 'Supervised Learning, Loss Functions, Model Metrics, Neural Nets & Transformers',
+      questionsCount: 5,
+      duration: '5 Mins',
+      passingScore: 70,
+      questions: [
+        {
+          id: 1,
+          q: "In an imbalanced dataset where 99% of cases are negative, why is standard Accuracy misleading?",
+          options: [
+            "Because Accuracy cannot be represented as a percentage",
+            "A naive model predicting all negatives scores 99% accuracy while detecting zero positives",
+            "Loss functions do not compute on imbalanced classes",
+            "Gradient descent diverges on negative samples"
+          ],
+          correct: 1,
+          explanation: "The 'Accuracy Paradox': evaluating Macro F1-score or PR-AUC gives a true metric of predictive capability."
+        },
+        {
+          id: 2,
+          q: "Which technique is commonly used to prevent overfitting in deep neural networks by randomly deactivating neurons?",
+          options: [
+            "Batch Normalization",
+            "Dropout",
+            "Data Augmentation",
+            "Gradient Clipping"
+          ],
+          correct: 1,
+          explanation: "Dropout randomly sets a fraction of input units to 0 at each update, preventing co-adaptation of features."
+        },
+        {
+          id: 3,
+          q: "What is the core mathematical mechanism that allows Transformers to process all tokens in parallel instead of sequentially like LSTMs?",
+          options: [
+            "Convolutional Kernels",
+            "Multi-Head Self-Attention (Query, Key, Value matrices)",
+            "Backpropagation through time (BPTT)",
+            "Recurrent hidden state transitions"
+          ],
+          correct: 1,
+          explanation: "Multi-Head Self-Attention computes pairwise token representations simultaneously across matrix multiplications."
+        },
+        {
+          id: 4,
+          q: "Why does feature scaling (MinMaxScaler / StandardScaler) matter for Logistic Regression and SVMs but NOT for Decision Trees?",
+          options: [
+            "Decision Trees do not use numerical features",
+            "Decision trees split each feature independently based on monotonic thresholds",
+            "Logistic Regression has fewer parameters than trees",
+            "SVMs only accept integers"
+          ],
+          correct: 1,
+          explanation: "Tree splits depend solely on the relative order of values along a single feature dimension, invariant to linear scaling."
+        },
+        {
+          id: 5,
+          q: "What does the term 'Concept Drift' refer to in a production ML deployment?",
+          options: [
+            "The training server running out of memory",
+            "The statistical relationship between input features and target labels P(Y|X) changes over time",
+            "The API response format changing from JSON to XML",
+            "Hyperparameters getting wiped after reboot"
+          ],
+          correct: 1,
+          explanation: "Concept drift occurs when real-world patterns evolve, making previously trained weights obsolete."
+        }
+      ]
+    },
+    cloud: {
+      id: 'cloud',
+      title: 'Cloud & DevOps Architecture',
+      icon: '☁️',
+      color: '#06b6d4',
+      description: 'Docker, Kubernetes, CI/CD Pipelines, Microservices & Infrastructure',
+      questionsCount: 5,
+      duration: '5 Mins',
+      passingScore: 70,
+      questions: [
+        {
+          id: 1,
+          q: "What is the key architectural difference between Docker containers and Virtual Machines (VMs)?",
+          options: [
+            "Containers virtualize the hardware; VMs virtualize the browser",
+            "Containers share the host OS kernel via namespaces/cgroups; VMs run a full guest OS on a hypervisor",
+            "Containers only run Python applications; VMs run any language",
+            "VMs launch in milliseconds; containers take minutes"
+          ],
+          correct: 1,
+          explanation: "Containers are lightweight OS-level isolation primitives sharing one kernel; VMs require a complete virtualized hardware stack."
+        },
+        {
+          id: 2,
+          q: "In Kubernetes, what is the smallest deployable computing unit?",
+          options: [
+            "Cluster",
+            "Pod",
+            "ReplicaSet",
+            "Deployment"
+          ],
+          correct: 1,
+          explanation: "A Pod encapsulates one or more containers sharing storage and network namespaces."
+        },
+        {
+          id: 3,
+          q: "Which deployment strategy routes a small percentage (e.g. 5%) of live production traffic to a new version to test stability?",
+          options: [
+            "Blue-Green Deployment",
+            "Canary Deployment",
+            "Rolling In-Place Upgrade",
+            "Recreate Deployment"
+          ],
+          correct: 1,
+          explanation: "Canary deployments expose a small subset of real user traffic to the release before 100% rollout."
+        },
+        {
+          id: 4,
+          q: "Why is Terraform called 'declarative' Infrastructure as Code (IaC)?",
+          options: [
+            "You write step-by-step shell commands to create each server",
+            "You define the desired target state and Terraform automatically figures out the actions to achieve it",
+            "It only supports AWS cloud resources",
+            "It executes only on developer laptops without state files"
+          ],
+          correct: 1,
+          explanation: "Declarative IaC specifies the end result (e.g. '3 EC2 instances'); the engine computes the execution plan."
+        },
+        {
+          id: 5,
+          q: "What is the primary function of a reverse proxy like NGINX in microservices architecture?",
+          options: [
+            "Storing customer passwords in plaintext",
+            "Routing external requests, load balancing, SSL termination, and API rate limiting",
+            "Compiling TypeScript code at runtime",
+            "Managing relational database transaction logs"
+          ],
+          correct: 1,
+          explanation: "NGINX serves as an edge gateway managing traffic distribution, SSL certificates, and security policies."
+        }
+      ]
+    }
+  }
+
+
   // Learning Path Roadmap State & PDF Export
   const [roadmapSteps, setRoadmapSteps] = useState([
     { id: 1, title: 'Foundational Mathematics & Algorithmic Thinking', desc: 'Linear Algebra, Probability, Multivariable Calculus, and Data Structures in Python.', duration: 'Weeks 1–4', status: 'completed', tags: ['Khan Academy Linear Algebra', 'LeetCode Core 75', 'Python OOP'] },
@@ -5152,48 +5554,489 @@ export default function App() {
 
             {/* 3. SKILL ASSESSMENT */}
             {activeTab === 'skill-assessment' && (
-              <div>
+              <div className="skill-assessment-container">
                 <div className="welcome-header">
-                  <h2>Career Readiness Aptitude Assessments</h2>
-                  <p>Interactive problem solving to calibrate your Career Match score</p>
+                  <h2>Adaptive Skill Assessment & Verified Badge Engine</h2>
+                  <p>Interactive timed diagnostics to validate technical competencies and earn official blockchain-verifiable badges</p>
                 </div>
-                <div className="white-panel" style={{ maxWidth: '800px' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>Diagnostic Problem Solving Question</h3>
-                  <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: '0.75rem 0 1.25rem' }}>
-                    When tackling a new system architecture problem, which task energizes you most?
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                    {[
-                      'Analyzing mathematical patterns and building predictive data models',
-                      'Designing clean user interfaces and real-time frontend states',
-                      'Configuring distributed cloud clusters and low-latency APIs',
-                      'Defining product roadmap, user research, and team requirements'
-                    ].map((opt, idx) => (
-                      <button
-                        key={idx}
-                        className="btn-secondary"
-                        style={{
-                          justifyContent: 'flex-start',
-                          padding: '12px 16px',
-                          borderColor: quizAnswer === idx ? '#2563eb' : 'var(--border)',
-                          background: quizAnswer === idx ? 'rgba(37, 99, 235, 0.15)' : 'var(--bg-card)',
-                          color: quizAnswer === idx ? '#38bdf8' : '#e2e8f0'
-                        }}
-                        onClick={() => { setQuizAnswer(idx); setQuizScore(92) }}
-                      >
-                        <span style={{ fontWeight: 700, marginRight: '0.5rem' }}>{String.fromCharCode(65 + idx)}.</span>
-                        {opt}
-                      </button>
-                    ))}
+
+                {/* ═══════════════════════════════════════════════════════════════════
+                    1. VERIFIED BADGES SHOWCASE SHELF
+                   ═══════════════════════════════════════════════════════════════════ */}
+                <div className="white-panel" style={{ marginBottom: '1.5rem', padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Award size={20} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>
+                          Your Verified Skill Badges
+                        </h3>
+                        <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: 0 }}>
+                          Earned by scoring 70%+ in rigorous timed diagnostics • Recognized by CareerCast partner recruiters
+                        </p>
+                      </div>
+                    </div>
+                    <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                      {verifiedBadges.length} Competencies Certified ★
+                    </span>
                   </div>
 
-                  {quizScore && (
-                    <div className="alert alert-success">
-                      <CheckCircle2 size={18} />
-                      <span>Aptitude calibrated to 92%! Your profile demonstrates high affinity for Software & Data Intelligence.</span>
-                    </div>
-                  )}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                    {verifiedBadges.map((b) => (
+                      <div
+                        key={b.id}
+                        style={{
+                          padding: '1.2rem',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
+                          border: `1.5px solid ${b.badgeColor}40`,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          boxShadow: `0 8px 24px ${b.badgeColor}15`,
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <div style={{
+                          position: 'absolute',
+                          top: '-15px',
+                          right: '-15px',
+                          width: '70px',
+                          height: '70px',
+                          borderRadius: '50%',
+                          background: `${b.badgeColor}15`,
+                          filter: 'blur(10px)',
+                          pointerEvents: 'none'
+                        }} />
+
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                              <span style={{ fontSize: '1.8rem' }}>{b.icon}</span>
+                              <div>
+                                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>
+                                  {b.title}
+                                </h4>
+                                <span style={{ fontSize: '0.72rem', color: b.badgeColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                  {b.level} Level • {b.score}% Score
+                                </span>
+                              </div>
+                            </div>
+                            <span style={{
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              padding: '2px 8px',
+                              borderRadius: '9999px',
+                              background: 'rgba(16, 185, 129, 0.2)',
+                              color: '#10b981',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}>
+                              <CheckCircle2 size={11} /> Verified
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', margin: '0.75rem 0' }}>
+                            {b.skills.map((sk, skIdx) => (
+                              <span key={skIdx} style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', color: '#cbd5e1' }}>
+                                ✓ {sk}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.65rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#64748b' }}>
+                          <span>ID: {b.verifiedHash}</span>
+                          <span style={{ color: '#94a3b8' }}>Issued: {b.date}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* ═══════════════════════════════════════════════════════════════════
+                    2. ASSESSMENT STEP: CATEGORY SELECTOR VIEW
+                   ═══════════════════════════════════════════════════════════════════ */}
+                {assessmentStep === 'selector' && (
+                  <div className="white-panel" style={{ padding: '1.5rem' }}>
+                    <div style={{ marginBottom: '1.25rem' }}>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', margin: '0 0 4px' }}>
+                        Choose Assessment Category to Certify
+                      </h3>
+                      <p className="panel-sub" style={{ margin: 0 }}>
+                        Select a domain track. Complete the 5 questions within 5 minutes. Score 70% or higher to automatically generate and unlock your official Verified Skill Badge.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                      {Object.values(assessmentCategories).map((cat) => {
+                        const isSelected = selectedAssessmentCategory === cat.id
+                        const alreadyEarned = verifiedBadges.some(b => b.category === cat.id)
+                        return (
+                          <div
+                            key={cat.id}
+                            onClick={() => setSelectedAssessmentCategory(cat.id)}
+                            style={{
+                              padding: '1.25rem',
+                              borderRadius: '12px',
+                              background: isSelected ? 'rgba(37, 99, 235, 0.12)' : 'var(--bg-card)',
+                              border: isSelected ? `2px solid ${cat.color}` : '1px solid var(--border)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between',
+                              transition: 'all 0.2s ease',
+                              boxShadow: isSelected ? `0 8px 20px ${cat.color}25` : 'none'
+                            }}
+                          >
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
+                                <span style={{ fontSize: '2rem' }}>{cat.icon}</span>
+                                {alreadyEarned && (
+                                  <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                                    ★ Badge Earned
+                                  </span>
+                                )}
+                              </div>
+                              <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: '0 0 4px' }}>
+                                {cat.title}
+                              </h4>
+                              <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0 0 0.85rem', lineHeight: 1.4 }}>
+                                {cat.description}
+                              </p>
+                            </div>
+
+                            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.6rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#cbd5e1' }}>
+                              <span>⏱️ {cat.duration}</span>
+                              <span style={{ color: cat.color, fontWeight: 700 }}>Pass: {cat.passingScore}%+</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <button
+                        className="btn-solid-blue"
+                        onClick={() => {
+                          setAssessUserAnswers({})
+                          setCurrentAssessQIdx(0)
+                          setAssessTimeLeft(300)
+                          setAssessTimerActive(true)
+                          setAssessmentStep('quiz')
+                        }}
+                        style={{
+                          padding: '12px 36px',
+                          fontSize: '1rem',
+                          borderRadius: '9999px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.6rem',
+                          boxShadow: '0 6px 20px rgba(37, 99, 235, 0.45)'
+                        }}
+                      >
+                        <span>Start {assessmentCategories[selectedAssessmentCategory]?.title} Test</span>
+                        <ArrowRight size={18} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ═══════════════════════════════════════════════════════════════════
+                    3. ASSESSMENT STEP: LIVE QUIZ INTERACTION
+                   ═══════════════════════════════════════════════════════════════════ */}
+                {assessmentStep === 'quiz' && (() => {
+                  const currentCategory = assessmentCategories[selectedAssessmentCategory]
+                  const qList = currentCategory?.questions || []
+                  const currQ = qList[currentAssessQIdx]
+                  const selectedOpt = assessUserAnswers[currentAssessQIdx]
+
+                  return (
+                    <div>
+                      {/* Top Bar with Category, Progress and Timer */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                        <button
+                          onClick={() => setAssessmentStep('selector')}
+                          style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', fontWeight: 700 }}
+                        >
+                          <ArrowLeft size={18} />
+                          <span>Quit to Categories</span>
+                        </button>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{ fontSize: '0.82rem', color: currentCategory.color, fontWeight: 700, padding: '4px 12px', borderRadius: '9999px', background: `${currentCategory.color}20` }}>
+                            {currentCategory.icon} {currentCategory.title}
+                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '5px 14px', borderRadius: '9999px', fontSize: '0.88rem', fontWeight: 700 }}>
+                            <Clock size={15} />
+                            <span>05:00 Timed Track</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar & Questions Grid */}
+                      <div className="white-panel" style={{ marginBottom: '1.25rem', padding: '1rem 1.25rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0' }}>
+                            Question {currentAssessQIdx + 1} of {qList.length}
+                          </span>
+                          <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                            {Object.keys(assessUserAnswers).length} of {qList.length} Answered
+                          </span>
+                        </div>
+                        <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '9999px', overflow: 'hidden' }}>
+                          <div style={{ width: `${((currentAssessQIdx + 1) / qList.length) * 100}%`, height: '100%', background: 'linear-gradient(90deg, #2563eb, #38bdf8)', transition: 'width 0.3s ease' }} />
+                        </div>
+                      </div>
+
+                      {/* Question Content */}
+                      <div className="white-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                          <span className="match-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+                            Competency Diagnostic
+                          </span>
+                          <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                            Pass Threshold: 70%
+                          </span>
+                        </div>
+
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#ffffff', margin: '0 0 1.25rem', lineHeight: 1.5 }}>
+                          {currQ.q}
+                        </h3>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                          {currQ.options.map((opt, optIdx) => {
+                            const isSelected = selectedOpt === optIdx
+                            return (
+                              <button
+                                key={optIdx}
+                                type="button"
+                                onClick={() => setAssessUserAnswers(prev => ({ ...prev, [currentAssessQIdx]: optIdx }))}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.85rem',
+                                  padding: '14px 16px',
+                                  borderRadius: '10px',
+                                  background: isSelected ? 'rgba(37, 99, 235, 0.2)' : 'var(--bg-card)',
+                                  border: isSelected ? '2px solid #2563eb' : '1px solid var(--border)',
+                                  color: isSelected ? '#ffffff' : '#cbd5e1',
+                                  cursor: 'pointer',
+                                  textAlign: 'left',
+                                  fontSize: '0.92rem',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <span style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '6px',
+                                  background: isSelected ? '#2563eb' : 'rgba(255, 255, 255, 0.08)',
+                                  color: '#ffffff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontWeight: 700,
+                                  fontSize: '0.85rem',
+                                  flexShrink: 0
+                                }}>
+                                  {String.fromCharCode(65 + optIdx)}
+                                </span>
+                                <span style={{ flex: 1, fontWeight: isSelected ? 600 : 400 }}>{opt}</span>
+                                {isSelected && <Check size={18} color="#38bdf8" />}
+                              </button>
+                            )
+                          })}
+                        </div>
+
+                        {/* Navigation Buttons */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <button
+                            className="sidebar-logout-btn"
+                            disabled={currentAssessQIdx === 0}
+                            onClick={() => setCurrentAssessQIdx(prev => Math.max(0, prev - 1))}
+                            style={{ width: 'auto', padding: '9px 20px', opacity: currentAssessQIdx === 0 ? 0.4 : 1 }}
+                          >
+                            ← Previous
+                          </button>
+
+                          {currentAssessQIdx < qList.length - 1 ? (
+                            <button
+                              className="btn-solid-blue"
+                              onClick={() => setCurrentAssessQIdx(prev => prev + 1)}
+                              style={{ padding: '9px 24px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                            >
+                              <span>Next Question</span>
+                              <ArrowRight size={16} />
+                            </button>
+                          ) : (
+                            <button
+                              className="btn-solid-blue"
+                              onClick={() => {
+                                // Calculate score
+                                let correctCount = 0
+                                qList.forEach((q, idx) => {
+                                  if (assessUserAnswers[idx] === q.correct) {
+                                    correctCount += 1
+                                  }
+                                })
+                                const scorePct = Math.round((correctCount / qList.length) * 100)
+                                const passed = scorePct >= currentCategory.passingScore
+
+                                // If passed and badge not already earned, award badge!
+                                if (passed && !verifiedBadges.some(b => b.category === currentCategory.id)) {
+                                  const newBadge = {
+                                    id: `badge-${currentCategory.id}`,
+                                    category: currentCategory.id,
+                                    title: `${currentCategory.title.split('&')[0].trim()} Certified`,
+                                    level: scorePct >= 90 ? 'Advanced' : 'Intermediate',
+                                    score: scorePct,
+                                    date: 'Nov 2026',
+                                    badgeColor: currentCategory.color,
+                                    icon: currentCategory.icon,
+                                    verifiedHash: `CC-${currentCategory.id.toUpperCase()}-${Math.floor(10000 + Math.random() * 90000)}`,
+                                    skills: ['Verified Diagnostics', 'Core Foundations', 'Problem Solving']
+                                  }
+                                  setVerifiedBadges(prev => [newBadge, ...prev])
+                                }
+
+                                setLastAssessResult({
+                                  category: currentCategory,
+                                  score: scorePct,
+                                  correctCount,
+                                  total: qList.length,
+                                  passed
+                                })
+                                setAssessmentStep('result')
+                              }}
+                              style={{ background: 'linear-gradient(135deg, #10b981, #2563eb)', padding: '10px 28px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)' }}
+                            >
+                              <span>Submit & Calculate Grade</span>
+                              <CheckCircle2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                {/* ═══════════════════════════════════════════════════════════════════
+                    4. ASSESSMENT STEP: RESULTS & BADGE UNLOCK VIEW
+                   ═══════════════════════════════════════════════════════════════════ */}
+                {assessmentStep === 'result' && lastAssessResult && (
+                  <div className="white-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+                    <div style={{
+                      width: '84px',
+                      height: '84px',
+                      borderRadius: '50%',
+                      background: lastAssessResult.passed ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                      color: lastAssessResult.passed ? '#10b981' : '#ef4444',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 1.25rem',
+                      border: `2px solid ${lastAssessResult.passed ? '#10b981' : '#ef4444'}`
+                    }}>
+                      {lastAssessResult.passed ? <Award size={44} /> : <XCircle size={44} />}
+                    </div>
+
+                    <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#ffffff', margin: '0 0 6px' }}>
+                      {lastAssessResult.passed ? 'Congratulations! Badge Unlocked!' : 'Assessment Complete — Keep Practicing!'}
+                    </h2>
+                    <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: '0 0 1.5rem', maxWidth: '540px', marginLeft: 'auto', marginRight: 'auto' }}>
+                      {lastAssessResult.passed
+                        ? `You scored ${lastAssessResult.score}% in ${lastAssessResult.category.title}, surpassing the ${lastAssessResult.category.passingScore}% passing threshold. Your official Verified Skill Badge has been issued and linked to your candidate profile.`
+                        : `You scored ${lastAssessResult.score}%. The passing threshold is ${lastAssessResult.category.passingScore}%. Review the explanations below and re-test anytime to earn your badge.`}
+                    </p>
+
+                    {/* Score summary cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
+                      <div style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: lastAssessResult.passed ? '#10b981' : '#f59e0b' }}>
+                          {lastAssessResult.score}%
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Overall Score</div>
+                      </div>
+                      <div style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#38bdf8' }}>
+                          {lastAssessResult.correctCount} / {lastAssessResult.total}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Correct Answers</div>
+                      </div>
+                      <div style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: lastAssessResult.passed ? '#10b981' : '#ef4444' }}>
+                          {lastAssessResult.passed ? 'PASSED' : 'RETRY'}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Diagnostic Status</div>
+                      </div>
+                    </div>
+
+                    {/* Review Explanations */}
+                    <div style={{ textAlign: 'left', maxWidth: '750px', margin: '0 auto 2rem', background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '1rem' }}>
+                        Detailed Answer Review & Rationale
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {lastAssessResult.category.questions.map((q, idx) => {
+                          const userAns = assessUserAnswers[idx]
+                          const isCorrect = userAns === q.correct
+                          return (
+                            <div key={idx} style={{ padding: '0.85rem 1rem', borderRadius: '8px', background: isCorrect ? 'rgba(16,185,129,0.07)' : 'rgba(239,68,68,0.07)', border: isCorrect ? '1px solid rgba(16,185,129,0.25)' : '1px solid rgba(239,68,68,0.25)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>Q{idx + 1}: {q.q}</span>
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: isCorrect ? '#10b981' : '#ef4444' }}>
+                                  {isCorrect ? '✓ Correct' : '✕ Incorrect'}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '4px 0' }}>
+                                Correct Answer: <strong style={{ color: '#e2e8f0' }}>{q.options[q.correct]}</strong>
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic' }}>
+                                💡 {q.explanation}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <button
+                        className="btn-secondary"
+                        onClick={() => setAssessmentStep('selector')}
+                        style={{ padding: '10px 24px', borderRadius: '9999px' }}
+                      >
+                        ← Back to Categories
+                      </button>
+                      <button
+                        className="btn-solid-blue"
+                        onClick={() => {
+                          setAssessUserAnswers({})
+                          setCurrentAssessQIdx(0)
+                          setAssessmentStep('quiz')
+                        }}
+                        style={{ padding: '10px 26px', borderRadius: '9999px' }}
+                      >
+                        Retake Assessment
+                      </button>
+                      {lastAssessResult.passed && (
+                        <button
+                          className="btn-solid-blue"
+                          onClick={() => setActiveTab('certifications')}
+                          style={{ background: 'linear-gradient(135deg, #10b981, #059669)', padding: '10px 26px', borderRadius: '9999px' }}
+                        >
+                          View in Certifications →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
