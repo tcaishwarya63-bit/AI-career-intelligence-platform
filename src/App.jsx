@@ -120,6 +120,8 @@ export default function App() {
   const [showModelAnswer, setShowModelAnswer] = useState(false)
   const [sessionQuestions, setSessionQuestions] = useState([]) // shuffled 5-question subset per session
   const [showReviewPanel, setShowReviewPanel] = useState(false) // pre-submit review overview
+  const [quizDifficulty, setQuizDifficulty] = useState('mixed') // 'easy' | 'medium' | 'hard' | 'mixed'
+  const [quizQuestionCount, setQuizQuestionCount] = useState(20) // 20 to 40
 
   // Interview history — grows each time a session is finished
   const [interviewHistory, setInterviewHistory] = useState([
@@ -1912,10 +1914,22 @@ export default function App() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  // Start Interview Session — shuffle bank & pick SESSION_SIZE random questions
+  // Start Interview Session — filter by difficulty, shuffle & pick quizQuestionCount questions
   const handleStartInterview = (domainKey) => {
-    const bank = interviewQuestions[domainKey] || []
-    const shuffled = shuffleArray(bank).slice(0, SESSION_SIZE)
+    let bank = interviewQuestions[domainKey] || []
+    // Filter by difficulty
+    if (quizDifficulty !== 'mixed') {
+      const diffMap = {
+        easy: ['Easy', 'Fundamental'],
+        medium: ['Intermediate'],
+        hard: ['Advanced']
+      }
+      const allowed = diffMap[quizDifficulty] || []
+      const filtered = bank.filter(q => allowed.includes(q.difficulty))
+      // fall back to full bank if not enough questions
+      bank = filtered.length >= 5 ? filtered : bank
+    }
+    const shuffled = shuffleArray(bank).slice(0, quizQuestionCount)
     setSessionQuestions(shuffled)
     setInterviewDomain(domainKey)
     setInterviewActive(true)
@@ -1924,7 +1938,7 @@ export default function App() {
     setUserAnswerText(firstQ?.type === 'problem' ? (firstQ.starterCode || '') : '')
     setSavedAnswers({})
     setEvaluationResults({})
-    setTimerSeconds(900)
+    setTimerSeconds(quizQuestionCount * 45) // 45 seconds per question
     setTimerRunning(true)
     setSessionFinished(false)
     setShowModelAnswer(false)
@@ -3632,14 +3646,124 @@ export default function App() {
                         })}
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+                      {/* ── Quiz Configuration Row ── */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginTop: '1.25rem' }}>
+
+                        {/* Difficulty Selector */}
+                        <div style={{ padding: '1rem 1.1rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            🎯 Difficulty Level
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {[
+                              { key: 'easy',   label: 'Easy',   color: '#10b981', bg: 'rgba(16,185,129,0.15)',  desc: 'Fundamentals' },
+                              { key: 'medium', label: 'Medium', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  desc: 'Intermediate' },
+                              { key: 'hard',   label: 'Hard',   color: '#ef4444', bg: 'rgba(239,68,68,0.15)',   desc: 'Advanced' },
+                              { key: 'mixed',  label: 'Mixed',  color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', desc: 'All levels' }
+                            ].map(d => (
+                              <button
+                                key={d.key}
+                                onClick={() => setQuizDifficulty(d.key)}
+                                style={{
+                                  padding: '7px 14px',
+                                  borderRadius: '8px',
+                                  border: quizDifficulty === d.key ? `2px solid ${d.color}` : '2px solid transparent',
+                                  background: quizDifficulty === d.key ? d.bg : 'rgba(255,255,255,0.05)',
+                                  color: quizDifficulty === d.key ? d.color : '#94a3b8',
+                                  cursor: 'pointer',
+                                  fontSize: '0.82rem',
+                                  fontWeight: quizDifficulty === d.key ? 700 : 500,
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'center',
+                                  gap: '2px',
+                                  transition: 'all 0.15s ease',
+                                  minWidth: '56px'
+                                }}
+                              >
+                                <span>{d.label}</span>
+                                <span style={{ fontSize: '0.65rem', opacity: 0.75 }}>{d.desc}</span>
+                              </button>
+                            ))}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.5rem' }}>
+                            {quizDifficulty === 'easy' && '✅ Fundamental & Easy questions only'}
+                            {quizDifficulty === 'medium' && '✅ Intermediate level questions only'}
+                            {quizDifficulty === 'hard' && '✅ Advanced level questions only'}
+                            {quizDifficulty === 'mixed' && '✅ Questions from all difficulty levels'}
+                          </div>
+                        </div>
+
+                        {/* Question Count Selector */}
+                        <div style={{ padding: '1rem 1.1rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            📝 Number of Questions
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+                            {[20, 25, 30, 35, 40].map(n => (
+                              <button
+                                key={n}
+                                onClick={() => setQuizQuestionCount(n)}
+                                style={{
+                                  padding: '7px 14px',
+                                  borderRadius: '8px',
+                                  border: quizQuestionCount === n ? '2px solid #38bdf8' : '2px solid transparent',
+                                  background: quizQuestionCount === n ? 'rgba(56,189,248,0.15)' : 'rgba(255,255,255,0.05)',
+                                  color: quizQuestionCount === n ? '#38bdf8' : '#94a3b8',
+                                  cursor: 'pointer',
+                                  fontSize: '0.85rem',
+                                  fontWeight: quizQuestionCount === n ? 700 : 500,
+                                  transition: 'all 0.15s ease',
+                                  minWidth: '44px',
+                                  textAlign: 'center'
+                                }}
+                              >
+                                {n}
+                              </button>
+                            ))}
+                          </div>
+                          {/* Slider */}
+                          <input
+                            type="range"
+                            min={20}
+                            max={40}
+                            step={1}
+                            value={quizQuestionCount}
+                            onChange={e => setQuizQuestionCount(Number(e.target.value))}
+                            style={{ width: '100%', accentColor: '#38bdf8', cursor: 'pointer' }}
+                          />
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+                            <span>Min: 20</span>
+                            <span style={{ color: '#38bdf8', fontWeight: 700 }}>{quizQuestionCount} Questions Selected</span>
+                            <span>Max: 40</span>
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.4rem' }}>
+                            ⏱️ Estimated time: ~{Math.round(quizQuestionCount * 1.5)} minutes
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Summary strip before start */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem', padding: '0.65rem 1rem', borderRadius: '8px', background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+                          <span style={{ color: '#38bdf8', fontWeight: 700 }}>{interviewDomain.charAt(0).toUpperCase() + interviewDomain.slice(1)}</span>
+                          {' · '}
+                          <span style={{
+                            color: quizDifficulty === 'easy' ? '#10b981' : quizDifficulty === 'medium' ? '#f59e0b' : quizDifficulty === 'hard' ? '#ef4444' : '#a78bfa',
+                            fontWeight: 700, textTransform: 'capitalize'
+                          }}>{quizDifficulty}</span>
+                          {' · '}
+                          <span style={{ color: '#e2e8f0', fontWeight: 700 }}>{quizQuestionCount} Questions</span>
+                          {' · '}
+                          <span>~{Math.round(quizQuestionCount * 1.5)} min</span>
+                        </div>
                         <button
                           className="btn-solid-blue"
                           onClick={() => handleStartInterview(interviewDomain)}
-                          style={{ padding: '12px 36px', fontSize: '1rem', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 6px 20px rgba(37, 99, 235, 0.45)' }}
+                          style={{ padding: '10px 28px', fontSize: '0.95rem', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 6px 20px rgba(37, 99, 235, 0.45)' }}
                         >
-                          <span>Start Practice</span>
-                          <ArrowRight size={18} />
+                          <span>🚀 Start Quiz</span>
+                          <ArrowRight size={16} />
                         </button>
                       </div>
                     </div>
@@ -3659,9 +3783,25 @@ export default function App() {
                         <span>Interview Practice – {interviewDomain === 'technical' ? 'Technical' : interviewDomain === 'hr' ? 'HR' : interviewDomain === 'aptitude' ? 'Aptitude' : 'Coding'}</span>
                       </button>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '6px 14px', borderRadius: '9999px', fontSize: '0.9rem', fontWeight: 700 }}>
-                        <Clock size={16} />
-                        <span>{formatTimer(timerSeconds)}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                        {/* Difficulty badge */}
+                        <span style={{
+                          padding: '5px 12px',
+                          borderRadius: '9999px',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          background: quizDifficulty === 'easy' ? 'rgba(16,185,129,0.15)' : quizDifficulty === 'medium' ? 'rgba(245,158,11,0.15)' : quizDifficulty === 'hard' ? 'rgba(239,68,68,0.15)' : 'rgba(167,139,250,0.15)',
+                          color: quizDifficulty === 'easy' ? '#10b981' : quizDifficulty === 'medium' ? '#f59e0b' : quizDifficulty === 'hard' ? '#ef4444' : '#a78bfa',
+                          border: `1px solid ${quizDifficulty === 'easy' ? 'rgba(16,185,129,0.3)' : quizDifficulty === 'medium' ? 'rgba(245,158,11,0.3)' : quizDifficulty === 'hard' ? 'rgba(239,68,68,0.3)' : 'rgba(167,139,250,0.3)'}`,
+                          textTransform: 'capitalize'
+                        }}>
+                          {quizDifficulty === 'easy' ? '🟢' : quizDifficulty === 'medium' ? '🟡' : quizDifficulty === 'hard' ? '🔴' : '🟣'} {quizDifficulty}
+                        </span>
+                        {/* Timer */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '6px 14px', borderRadius: '9999px', fontSize: '0.9rem', fontWeight: 700 }}>
+                          <Clock size={16} />
+                          <span>{formatTimer(timerSeconds)}</span>
+                        </div>
                       </div>
                     </div>
 
