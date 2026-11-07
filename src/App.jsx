@@ -2253,8 +2253,8 @@ export default function App() {
     { id: 'resume-analyzer', label: 'Resume Analyzer', icon: FileText },
     { id: 'interview-preparation', label: 'Interview Preparation', icon: Mic },
     { id: 'skill-gap-analysis', label: 'Skill Gap Analysis', icon: BarChart3 },
-    { id: 'certifications', label: 'Certifications', icon: Award },
     { id: 'my-progress', label: 'My Progress', icon: TrendingUp },
+    { id: 'certifications', label: 'Certifications', icon: Award },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
