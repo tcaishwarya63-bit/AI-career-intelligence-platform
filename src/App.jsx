@@ -2094,6 +2094,154 @@ export default function App() {
     { name: 'BITS Pilani', program: 'B.E. Computer Science with AI & Deep Learning Minor', location: 'Pilani & Goa', rating: '4.7 ★', nirf: 'Tier 1' }
   ]
 
+  // Certifications Hub State
+  const [certFilterProvider, setCertFilterProvider] = useState('All')
+  const [certFilterType, setCertFilterType] = useState('All')
+  const [showAddCertModal, setShowAddCertModal] = useState(false)
+  const [newCertTitle, setNewCertTitle] = useState('')
+  const [newCertProvider, setNewCertProvider] = useState('Google')
+  const [newCertUrl, setNewCertUrl] = useState('')
+  const [studentCertifications, setStudentCertifications] = useState([
+    {
+      id: 1,
+      title: "Google Data Analytics Professional Certificate",
+      provider: "Google",
+      issuer: "Coursera / Grow with Google",
+      badge: "Verified Credential",
+      skills: ["Data Analysis", "SQL", "R Programming", "Tableau", "Data Cleaning"],
+      date: "Sep 2026",
+      status: "Completed",
+      credlyUrl: "https://www.coursera.org/professional-certificates/google-data-analytics"
+    },
+    {
+      id: 2,
+      title: "Python for Machine Learning Certification",
+      provider: "Great Learning",
+      issuer: "Great Learning Academy",
+      badge: "Free Certified",
+      skills: ["Python", "Supervised Learning", "Scikit-Learn", "NumPy", "Pandas"],
+      date: "Oct 2026",
+      status: "Completed",
+      credlyUrl: "https://www.mygreatlearning.com/academy/learn-for-free/courses/python-for-machine-learning"
+    }
+  ])
+
+  // Catalog of Recommended Industry Certifications to Bridge Skill Gaps
+  const industryCertCatalog = [
+    {
+      id: 'g-1',
+      title: 'Google IT Automation with Python',
+      provider: 'Google',
+      platform: 'Coursera / Google Skillshop',
+      level: 'Beginner to Intermediate',
+      duration: '4-6 Weeks (Self-paced)',
+      cost: 'Financial Aid Available / Free Audit',
+      type: 'Financial Aid',
+      skillsCovered: ['Python', 'Git', 'Automation', 'Configuration Management', 'Cloud'],
+      targetRoles: ['Machine Learning Engineer', 'Data Scientist', 'Full Stack Software Engineer'],
+      link: 'https://grow.google/certificates/it-automation/',
+      badgeColor: '#4285F4',
+      rating: 4.8,
+      studentsEnrolled: '320k+'
+    },
+    {
+      id: 'gl-1',
+      title: 'MLOps & Kubernetes Deployment Fundamentals',
+      provider: 'Great Learning',
+      platform: 'Great Learning Academy',
+      level: 'Intermediate',
+      duration: '3.5 Hours (Self-paced)',
+      cost: '100% Free with Certificate',
+      type: 'Free',
+      skillsCovered: ['MLOps Pipeline Deployment', 'Kubernetes', 'Docker Containerization', 'CI/CD'],
+      targetRoles: ['Machine Learning Engineer', 'Cloud Solutions Architect'],
+      link: 'https://www.mygreatlearning.com/academy/learn-for-free/courses/kubernetes-tutorial',
+      badgeColor: '#059669',
+      rating: 4.7,
+      studentsEnrolled: '95k+'
+    },
+    {
+      id: 'gl-2',
+      title: 'Cloud Computing & AWS Architecture Essentials',
+      provider: 'Great Learning',
+      platform: 'Great Learning Academy',
+      level: 'Beginner',
+      duration: '2.5 Hours (Self-paced)',
+      cost: '100% Free with Certificate',
+      type: 'Free',
+      skillsCovered: ['AWS SageMaker', 'Cloud Architecture', 'S3 & EC2', 'IAM'],
+      targetRoles: ['Cloud Solutions Architect', 'Machine Learning Engineer', 'Data Scientist'],
+      link: 'https://www.mygreatlearning.com/academy/learn-for-free/courses/aws-for-beginners',
+      badgeColor: '#059669',
+      rating: 4.9,
+      studentsEnrolled: '140k+'
+    },
+    {
+      id: 'g-2',
+      title: 'Google Cloud Digital Leader & ML Foundations',
+      provider: 'Google',
+      platform: 'Google Cloud Skills Boost',
+      level: 'Foundational',
+      duration: '15 Hours',
+      cost: 'Free Tier / Skills Boost',
+      type: 'Free',
+      skillsCovered: ['Cloud Architecture', 'Google Cloud Platform', 'BigQuery', 'ML Infrastructure'],
+      targetRoles: ['Cloud Solutions Architect', 'Data Scientist'],
+      link: 'https://www.cloudskillsboost.google/paths/9',
+      badgeColor: '#4285F4',
+      rating: 4.9,
+      studentsEnrolled: '210k+'
+    },
+    {
+      id: 'aws-1',
+      title: 'AWS Certified Machine Learning - Specialty Prep',
+      provider: 'AWS',
+      platform: 'AWS Skill Builder / Educate',
+      level: 'Advanced',
+      duration: '8 Weeks',
+      cost: 'Free Student Tier via AWS Educate',
+      type: 'Free',
+      skillsCovered: ['AWS SageMaker', 'Feature Engineering', 'Model Tuning', 'Data Pipeline'],
+      targetRoles: ['Machine Learning Engineer', 'Data Scientist'],
+      link: 'https://aws.amazon.com/education/awseducate/',
+      badgeColor: '#f59e0b',
+      rating: 4.8,
+      studentsEnrolled: '180k+'
+    },
+    {
+      id: 'ms-1',
+      title: 'Microsoft Certified: Azure AI Fundamentals (AI-900)',
+      provider: 'Microsoft',
+      platform: 'Microsoft Learn',
+      level: 'Beginner',
+      duration: '10 Hours',
+      cost: '100% Free Learning Path + Free Student Exam Voucher',
+      type: 'Free',
+      skillsCovered: ['Machine Learning', 'Computer Vision', 'NLP', 'System Design'],
+      targetRoles: ['Machine Learning Engineer', 'Product Manager'],
+      link: 'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/',
+      badgeColor: '#0284c7',
+      rating: 4.8,
+      studentsEnrolled: '450k+'
+    },
+    {
+      id: 'ibm-1',
+      title: 'IBM Full Stack Cloud Developer Professional Certificate',
+      provider: 'IBM',
+      platform: 'Coursera / IBM Training',
+      level: 'Intermediate',
+      duration: '3 Months (Self-paced)',
+      cost: 'Financial Aid Available / Audit Free',
+      type: 'Financial Aid',
+      skillsCovered: ['System Design', 'Microservices', 'Docker', 'Kubernetes', 'CI/CD'],
+      targetRoles: ['Full Stack Software Engineer', 'Cloud Solutions Architect'],
+      link: 'https://www.coursera.org/professional-certificates/ibm-full-stack-cloud-developer',
+      badgeColor: '#6366f1',
+      rating: 4.7,
+      studentsEnrolled: '88k+'
+    }
+  ]
+
   // The 12 Exact Side Headings from Teacher's Reference Picture
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -3134,6 +3282,383 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                {/* ═══════════════════════════════════════════════════════════════════
+                    CERTIFICATIONS SECTION (BRIDGING SKILL GAPS FOR STUDENTS)
+                   ═══════════════════════════════════════════════════════════════════ */}
+                <div className="white-panel" style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '4px' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(37,99,235,0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Award size={18} />
+                        </div>
+                        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>
+                          Certifications
+                        </h3>
+                        <span className="match-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', fontSize: '0.75rem' }}>
+                          Accredited & Free Tracks
+                        </span>
+                      </div>
+                      <p className="panel-sub" style={{ margin: 0 }}>
+                        Curated industry-recognized certificates from Google, Great Learning, Microsoft & AWS to bridge your missing skills for {selectedTargetRole}
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <button
+                        className="btn-solid-blue"
+                        onClick={() => setShowAddCertModal(true)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '8px 16px', fontSize: '0.82rem', borderRadius: '8px' }}
+                      >
+                        <Award size={15} />
+                        <span>Add My Certificate</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Student's Verified Credentials Shelf */}
+                  <div style={{ marginBottom: '1.5rem', padding: '1rem 1.25rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span>🎓 Student Credentials Portfolio</span>
+                        <span style={{ fontSize: '0.72rem', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '2px 8px', borderRadius: '9999px' }}>
+                          {studentCertifications.length} Verified
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Verifiable via Credly / Institutional Registry</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
+                      {studentCertifications.map((sc) => (
+                        <div
+                          key={sc.id}
+                          style={{
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between'
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                              <span style={{
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                background: sc.provider === 'Google' ? 'rgba(66, 133, 244, 0.15)' : 'rgba(5, 150, 105, 0.15)',
+                                color: sc.provider === 'Google' ? '#60a5fa' : '#34d399'
+                              }}>
+                                {sc.provider}
+                              </span>
+                              <span style={{ fontSize: '0.72rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 600 }}>
+                                <CheckCircle2 size={12} /> {sc.badge}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginBottom: '4px' }}>
+                              {sc.title}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.6rem' }}>
+                              Issued by: {sc.issuer} • {sc.date}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                              {sc.skills.map((sk, sidx) => (
+                                <span key={sidx} style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', color: '#cbd5e1' }}>
+                                  ✓ {sk}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.6rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Status: Authentic</span>
+                            <a
+                              href={sc.credlyUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ fontSize: '0.75rem', color: '#38bdf8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 600 }}
+                            >
+                              <span>View Certificate</span>
+                              <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Guide Info Banner for Students */}
+                  <div style={{ marginBottom: '1.25rem', padding: '1rem', borderRadius: '8px', background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.25)', display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
+                    <div style={{ color: '#38bdf8', marginTop: '2px' }}>
+                      <Brain size={20} />
+                    </div>
+                    <div style={{ flex: 1, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                      <strong style={{ color: '#ffffff' }}>How to earn these accredited certifications for free or student aid:</strong>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.6rem', marginTop: '0.5rem' }}>
+                        <div>
+                          <strong style={{ color: '#60a5fa' }}>• Google Career Certs:</strong> Apply via Coursera's <em>"Financial Aid Available"</em> link on each course page. Approved in 14 days for 100% free certification.
+                        </div>
+                        <div>
+                          <strong style={{ color: '#34d399' }}>• Great Learning Academy:</strong> 100% completely free enrollment & instant certificate on scoring 60%+ in self-paced quiz assessments.
+                        </div>
+                        <div>
+                          <strong style={{ color: '#f59e0b' }}>• AWS & Microsoft:</strong> Free sandboxes on Microsoft Learn & AWS Educate with free student verification badges.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Filters: Provider & Cost Type */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#94a3b8', marginRight: '4px' }}>Filter Provider:</span>
+                      {['All', 'Google', 'Great Learning', 'AWS', 'Microsoft', 'IBM'].map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => setCertFilterProvider(p)}
+                          style={{
+                            padding: '4px 12px',
+                            borderRadius: '9999px',
+                            fontSize: '0.75rem',
+                            fontWeight: certFilterProvider === p ? 700 : 500,
+                            border: 'none',
+                            background: certFilterProvider === p ? '#2563eb' : 'rgba(255,255,255,0.07)',
+                            color: certFilterProvider === p ? '#ffffff' : '#cbd5e1',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Type:</span>
+                      {['All', 'Free', 'Financial Aid'].map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => setCertFilterType(t)}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            fontSize: '0.75rem',
+                            fontWeight: certFilterType === t ? 700 : 500,
+                            border: certFilterType === t ? '1px solid #10b981' : '1px solid var(--border)',
+                            background: certFilterType === t ? 'rgba(16,185,129,0.15)' : 'transparent',
+                            color: certFilterType === t ? '#10b981' : '#94a3b8',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Recommended Certifications Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '1rem' }}>
+                    {industryCertCatalog
+                      .filter(c => certFilterProvider === 'All' || c.provider === certFilterProvider)
+                      .filter(c => certFilterType === 'All' || c.type === certFilterType)
+                      .map((cert) => (
+                        <div
+                          key={cert.id}
+                          className="certification-card"
+                          style={{
+                            borderRadius: '10px',
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border)',
+                            padding: '1.25rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            transition: 'transform 0.2s ease, border-color 0.2s ease'
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '3px 9px',
+                                borderRadius: '4px',
+                                background: cert.provider === 'Google' ? 'rgba(66, 133, 244, 0.15)' :
+                                            cert.provider === 'Great Learning' ? 'rgba(5, 150, 105, 0.15)' :
+                                            cert.provider === 'AWS' ? 'rgba(245, 158, 11, 0.15)' :
+                                            cert.provider === 'Microsoft' ? 'rgba(2, 132, 199, 0.15)' : 'rgba(99, 102, 241, 0.15)',
+                                color: cert.provider === 'Google' ? '#60a5fa' :
+                                       cert.provider === 'Great Learning' ? '#34d399' :
+                                       cert.provider === 'AWS' ? '#fbbf24' :
+                                       cert.provider === 'Microsoft' ? '#38bdf8' : '#a5b4fc'
+                              }}>
+                                {cert.provider}
+                              </span>
+                              <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700, background: 'rgba(16,185,129,0.12)', padding: '2px 8px', borderRadius: '4px' }}>
+                                {cert.cost}
+                              </span>
+                            </div>
+
+                            <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#ffffff', margin: '0 0 4px', lineHeight: 1.4 }}>
+                              {cert.title}
+                            </h4>
+                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                              {cert.platform} • {cert.duration} • Level: {cert.level}
+                            </div>
+
+                            <div style={{ fontSize: '0.72rem', color: '#cbd5e1', fontWeight: 600, marginBottom: '0.35rem' }}>
+                              Skills Targeted to Fill Gaps:
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                              {cert.skillsCovered.map((sk, sidx) => (
+                                <span key={sidx} style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                                  + {sk}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                              ⭐ {cert.rating} ({cert.studentsEnrolled} students)
+                            </div>
+                            <a
+                              href={cert.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="btn-solid-blue"
+                              style={{ textDecoration: 'none', padding: '6px 14px', fontSize: '0.78rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                              <span>Enroll Course</span>
+                              <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Modal to Upload / Add Student Certificate */}
+                {showAddCertModal && (
+                  <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    padding: '1rem'
+                  }}>
+                    <div style={{
+                      width: '100%',
+                      maxWidth: '480px',
+                      background: '#111827',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border)',
+                      padding: '1.5rem',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Award size={20} color="#38bdf8" />
+                          <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#ffffff' }}>Add Completed Certificate</h3>
+                        </div>
+                        <button
+                          onClick={() => setShowAddCertModal(false)}
+                          style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '4px' }}>Course / Certificate Title *</label>
+                          <input
+                            type="text"
+                            value={newCertTitle}
+                            onChange={(e) => setNewCertTitle(e.target.value)}
+                            placeholder="e.g. Google Data Analytics or Great Learning Python"
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#ffffff', fontSize: '0.85rem' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '4px' }}>Provider / Organization *</label>
+                          <select
+                            value={newCertProvider}
+                            onChange={(e) => setNewCertProvider(e.target.value)}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#ffffff', fontSize: '0.85rem' }}
+                          >
+                            <option value="Google">Google (Grow with Google / Coursera)</option>
+                            <option value="Great Learning">Great Learning Academy</option>
+                            <option value="AWS">Amazon Web Services (AWS Educate)</option>
+                            <option value="Microsoft">Microsoft Learn</option>
+                            <option value="IBM">IBM Developer Skills Network</option>
+                            <option value="Other">Other Verified Academy</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '4px' }}>Verification Link or Credly ID (Optional)</label>
+                          <input
+                            type="text"
+                            value={newCertUrl}
+                            onChange={(e) => setNewCertUrl(e.target.value)}
+                            placeholder="https://coursera.org/verify/... or certificate URL"
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', background: 'var(--bg-input)', border: '1px solid var(--border)', color: '#ffffff', fontSize: '0.85rem' }}
+                          />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', justifyContent: 'flex-end' }}>
+                          <button
+                            className="btn-secondary"
+                            onClick={() => setShowAddCertModal(false)}
+                            style={{ padding: '8px 16px', fontSize: '0.82rem' }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn-solid-blue"
+                            onClick={() => {
+                              if (!newCertTitle.trim()) {
+                                alert('Please provide the certificate title.');
+                                return;
+                              }
+                              const newEntry = {
+                                id: Date.now(),
+                                title: newCertTitle,
+                                provider: newCertProvider,
+                                issuer: `${newCertProvider} Academy`,
+                                badge: 'Student Verified',
+                                skills: ['Verified Competency', 'Skill Gap Addressed'],
+                                date: 'Nov 2026',
+                                status: 'Completed',
+                                credlyUrl: newCertUrl.trim() || 'https://www.coursera.org/'
+                              };
+                              setStudentCertifications(prev => [newEntry, ...prev]);
+                              setNewCertTitle('');
+                              setNewCertUrl('');
+                              setShowAddCertModal(false);
+                            }}
+                            style={{ padding: '8px 18px', fontSize: '0.82rem' }}
+                          >
+                            Save to Profile
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
