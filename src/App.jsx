@@ -2507,13 +2507,13 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="stat-card-white">
+                  <div className="stat-card-white" onClick={() => setActiveTab('skill-gap-analysis')} style={{ cursor: 'pointer' }} title="Click to view Certifications">
                     <div>
                       <div className="stat-card-label">Certifications</div>
                       <div className="stat-card-num">6</div>
                       <div className="stat-card-growth">
                         <TrendingUp size={14} />
-                        <span>20% this month</span>
+                        <span>20% this month • View</span>
                       </div>
                     </div>
                     <div className="stat-icon-box" style={{ background: '#f3e8ff', color: '#8b5cf6' }}>
@@ -2641,6 +2641,92 @@ export default function App() {
                       </div>
                     </div>
                     <button className="btn-solid-blue" style={{ background: '#6366f1' }}>Continue</button>
+                  </div>
+                </div>
+
+                {/* ── Certifications (Bridge Skill Gaps) Showcase on Dashboard ── */}
+                <div className="white-panel" style={{ marginTop: '1.25rem', padding: '1.25rem 1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Award size={18} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>
+                          Certifications
+                        </h3>
+                        <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>
+                          Accredited industry courses from Google, Great Learning & Microsoft to bridge your skill gaps
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      className="btn-pill-outline"
+                      style={{ padding: '5px 14px', fontSize: '0.78rem' }}
+                      onClick={() => setActiveTab('skill-gap-analysis')}
+                    >
+                      View All in Skill Gap Analysis →
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                    {industryCertCatalog.slice(0, 3).map((cert) => (
+                      <div
+                        key={cert.id}
+                        style={{
+                          padding: '1rem',
+                          borderRadius: '8px',
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                            <span style={{
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              background: cert.provider === 'Google' ? 'rgba(66, 133, 244, 0.15)' : 'rgba(5, 150, 105, 0.15)',
+                              color: cert.provider === 'Google' ? '#60a5fa' : '#34d399'
+                            }}>
+                              {cert.provider}
+                            </span>
+                            <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 600 }}>{cert.cost}</span>
+                          </div>
+                          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#ffffff', marginBottom: '4px' }}>
+                            {cert.title}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
+                            {cert.platform} • {cert.duration}
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                            {cert.skillsCovered.slice(0, 3).map((sk, i) => (
+                              <span key={i} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>
+                                + {sk}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.6rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>⭐ {cert.rating}</span>
+                          <a
+                            href={cert.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn-solid-blue"
+                            style={{ textDecoration: 'none', padding: '5px 12px', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <span>Enroll</span>
+                            <ExternalLink size={12} />
+                          </a>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
