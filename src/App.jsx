@@ -2745,8 +2745,8 @@ export default function App() {
                 onClick={() => setShowNotifDropdown(!showNotifDropdown)}
               >
                 <Bell size={18} />
-                {notificationsList.filter(n => !n.read).length > 0 && (
-                  <span className="notif-badge">{notificationsList.filter(n => !n.read).length}</span>
+                {notificationsList.filter(n => !n.read && !n.deadlineExpired).length > 0 && (
+                  <span className="notif-badge">{notificationsList.filter(n => !n.read && !n.deadlineExpired).length}</span>
                 )}
               </button>
 
@@ -2772,7 +2772,7 @@ export default function App() {
                       <Bell size={15} color="#38bdf8" />
                       <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>Notifications</span>
                       <span style={{ fontSize: '0.72rem', padding: '1px 7px', borderRadius: '9999px', background: 'rgba(37, 99, 235, 0.2)', color: '#60a5fa', fontWeight: 600 }}>
-                        {notificationsList.filter(n => !n.read).length} unread
+                        {notificationsList.filter(n => !n.read && !n.deadlineExpired).length} unread
                       </span>
                     </div>
                     {notificationsList.some(n => !n.read) && (
@@ -2786,9 +2786,8 @@ export default function App() {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto' }}>
-                    {notificationsList.slice(0, 4).map(notif => {
-                      const isExpiredDropdown = notif.deadlineExpired
-                      const isActiveDropdown = !isExpiredDropdown && !notif.read
+                    {notificationsList.filter(n => !n.deadlineExpired).map(notif => {
+                      const isActiveDropdown = !notif.read
                       return (
                         <div 
                           key={notif.id}
@@ -2802,33 +2801,29 @@ export default function App() {
                             borderRadius: '8px',
                             background: isActiveDropdown
                               ? 'rgba(234,179,8,0.10)'
-                              : isExpiredDropdown
-                                ? 'rgba(255,255,255,0.01)'
-                                : 'rgba(255,255,255,0.02)',
+                              : 'rgba(255,255,255,0.03)',
                             border: isActiveDropdown
                               ? '1px solid rgba(234,179,8,0.45)'
-                              : isExpiredDropdown
-                                ? '1px solid rgba(255,255,255,0.05)'
-                                : '1px solid rgba(255, 255, 255, 0.05)',
-                            opacity: isExpiredDropdown ? 0.45 : 1,
+                              : '1px solid rgba(255,255,255,0.07)',
                             cursor: 'pointer',
                             transition: 'background 0.15s ease'
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: isExpiredDropdown ? '#64748b' : '#ffffff', textDecoration: isExpiredDropdown ? 'line-through' : 'none' }}>{notif.title}</span>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: isActiveDropdown ? '#ffffff' : '#94a3b8' }}>{notif.title}</span>
                             <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{notif.time}</span>
                           </div>
-                          <p style={{ fontSize: '0.74rem', color: '#94a3b8', margin: '0 0 4px', lineHeight: 1.3 }}>{notif.desc.slice(0, 75)}...</p>
-                          {isExpiredDropdown ? (
-                            <span style={{ fontSize: '0.68rem', color: '#f87171', fontWeight: 600, background: 'rgba(239,68,68,0.10)', padding: '1px 6px', borderRadius: '4px' }}>
-                              ⛔ Deadline Expired
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: '0.68rem', color: isActiveDropdown ? '#fbbf24' : '#60a5fa', fontWeight: 600, background: isActiveDropdown ? 'rgba(234,179,8,0.15)' : 'rgba(37,99,235,0.15)', padding: '1px 6px', borderRadius: '4px' }}>
-                              {isActiveDropdown ? '⚡ ' : ''}{notif.fit}
-                            </span>
-                          )}
+                          <p style={{ fontSize: '0.74rem', color: isActiveDropdown ? '#94a3b8' : '#64748b', margin: '0 0 4px', lineHeight: 1.3 }}>{notif.desc.slice(0, 75)}...</p>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 600,
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            color: isActiveDropdown ? '#fbbf24' : '#60a5fa',
+                            background: isActiveDropdown ? 'rgba(234,179,8,0.15)' : 'rgba(37,99,235,0.10)'
+                          }}>
+                            {isActiveDropdown ? '⚡ ' : '✓ Read — '}{notif.fit}
+                          </span>
                         </div>
                       )
                     })}
@@ -6421,9 +6416,9 @@ export default function App() {
                     <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: 'rgba(234, 179, 8, 0.25)', border: '2px solid #eab308', display: 'inline-block' }}></span>
                     Active — Apply Now
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#64748b' }}>
-                    <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'inline-block', opacity: 0.5 }}></span>
-                    Deadline Expired / Already Read
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#94a3b8' }}>
+                    <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', display: 'inline-block' }}></span>
+                    Deadline Expired
                   </div>
                 </div>
 
@@ -6442,38 +6437,44 @@ export default function App() {
                             gap: '1rem',
                             padding: '1.1rem 1.25rem',
                             borderRadius: '10px',
-                            // ACTIVE (unread + not expired): bright yellow highlighter glow
+                            // ACTIVE: bright yellow highlighter glow
+                            // EXPIRED: deep red-tinted, fully visible card
+                            // READ (not expired): calm blue-tinted
                             background: isActive
                               ? 'linear-gradient(135deg, rgba(234,179,8,0.14) 0%, rgba(37,99,235,0.10) 100%)'
                               : isExpired
-                                ? 'rgba(255,255,255,0.015)'
+                                ? 'linear-gradient(135deg, rgba(239,68,68,0.10) 0%, rgba(127,29,29,0.08) 100%)'
                                 : 'rgba(37, 99, 235, 0.05)',
                             border: isActive
                               ? '2px solid rgba(234, 179, 8, 0.6)'
                               : isExpired
-                                ? '1px solid rgba(255,255,255,0.06)'
+                                ? '1px solid rgba(239,68,68,0.35)'
                                 : '1px solid rgba(37, 99, 235, 0.2)',
                             boxShadow: isActive
                               ? '0 0 16px rgba(234,179,8,0.18), inset 0 0 0 1px rgba(234,179,8,0.08)'
-                              : 'none',
-                            opacity: isExpired ? 0.45 : 1,
+                              : isExpired
+                                ? '0 0 10px rgba(239,68,68,0.08)'
+                                : 'none',
+                            opacity: 1,
                             transition: 'all 0.2s ease',
                             flexWrap: 'wrap',
                             position: 'relative'
                           }}
                         >
-                          {/* Yellow left-bar accent for active notifications */}
-                          {isActive && (
-                            <div style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: '10%',
-                              height: '80%',
-                              width: '4px',
-                              borderRadius: '0 4px 4px 0',
-                              background: 'linear-gradient(180deg, #fbbf24, #eab308)'
-                            }} />
-                          )}
+                          {/* Yellow left-bar accent for active / Red for expired */}
+                          <div style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: '10%',
+                            height: '80%',
+                            width: '4px',
+                            borderRadius: '0 4px 4px 0',
+                            background: isActive
+                              ? 'linear-gradient(180deg, #fbbf24, #eab308)'
+                              : isExpired
+                                ? 'linear-gradient(180deg, #ef4444, #b91c1c)'
+                                : 'linear-gradient(180deg, #2563eb, #1d4ed8)'
+                          }} />
 
                           {/* Company Icon */}
                           <div style={{
@@ -6483,13 +6484,13 @@ export default function App() {
                             background: isActive
                               ? 'rgba(234,179,8,0.15)'
                               : isExpired
-                                ? 'rgba(255,255,255,0.04)'
+                                ? 'rgba(239,68,68,0.12)'
                                 : 'rgba(37, 99, 235, 0.10)',
-                            color: isActive ? '#fbbf24' : isExpired ? '#475569' : '#60a5fa',
+                            color: isActive ? '#fbbf24' : isExpired ? '#f87171' : '#60a5fa',
                             border: isActive
                               ? '1px solid rgba(234,179,8,0.4)'
                               : isExpired
-                                ? '1px solid rgba(255,255,255,0.08)'
+                                ? '1px solid rgba(239,68,68,0.3)'
                                 : '1px solid rgba(59, 130, 246, 0.25)',
                             display: 'flex',
                             alignItems: 'center',
@@ -6505,14 +6506,13 @@ export default function App() {
                                 <h4 style={{
                                   fontSize: '0.98rem',
                                   fontWeight: 700,
-                                  color: isExpired ? '#64748b' : '#ffffff',
-                                  margin: 0,
-                                  textDecoration: isExpired ? 'line-through' : 'none'
+                                  color: isExpired ? '#fca5a5' : '#ffffff',
+                                  margin: 0
                                 }}>
                                   {notif.title}
                                 </h4>
 
-                                {/* Match badge — only show for active */}
+                                {/* Match badge */}
                                 {notif.fit && !isExpired && (
                                   <span style={{
                                     fontSize: '0.72rem',
@@ -6530,13 +6530,13 @@ export default function App() {
                                 {/* DEADLINE EXPIRED badge */}
                                 {isExpired && (
                                   <span style={{
-                                    fontSize: '0.68rem',
+                                    fontSize: '0.72rem',
                                     fontWeight: 700,
-                                    padding: '2px 8px',
+                                    padding: '3px 10px',
                                     borderRadius: '9999px',
-                                    background: 'rgba(239,68,68,0.10)',
-                                    color: '#f87171',
-                                    border: '1px solid rgba(239,68,68,0.25)',
+                                    background: 'rgba(239,68,68,0.20)',
+                                    color: '#fca5a5',
+                                    border: '1px solid rgba(239,68,68,0.45)',
                                     letterSpacing: '0.03em'
                                   }}>
                                     ⛔ Deadline Expired
@@ -6560,7 +6560,7 @@ export default function App() {
                                   </span>
                                 )}
                               </div>
-                              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{notif.time}</span>
+                              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{notif.time}</span>
                             </div>
 
                             {/* Deadline row */}
@@ -6568,9 +6568,9 @@ export default function App() {
                               <span style={{
                                 fontSize: '0.72rem',
                                 fontWeight: 600,
-                                color: isExpired ? '#ef4444' : '#10b981',
-                                background: isExpired ? 'rgba(239,68,68,0.08)' : 'rgba(16,185,129,0.08)',
-                                border: isExpired ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(16,185,129,0.25)',
+                                color: isExpired ? '#fca5a5' : '#10b981',
+                                background: isExpired ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.08)',
+                                border: isExpired ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(16,185,129,0.25)',
                                 padding: '1px 8px',
                                 borderRadius: '4px'
                               }}>
@@ -6580,7 +6580,7 @@ export default function App() {
 
                             <p style={{
                               fontSize: '0.84rem',
-                              color: isExpired ? '#475569' : '#cbd5e1',
+                              color: isExpired ? '#94a3b8' : '#cbd5e1',
                               margin: '0 0 0.5rem',
                               lineHeight: 1.5
                             }}>
@@ -6588,7 +6588,7 @@ export default function App() {
                             </p>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                              <span style={{ fontSize: '0.75rem', color: isExpired ? '#475569' : '#94a3b8' }}>📍 {notif.location}</span>
+                              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>📍 {notif.location}</span>
                               {!isExpired ? (
                                 <button
                                   className="btn-pill-outline"
@@ -6605,8 +6605,16 @@ export default function App() {
                                   View Job Details →
                                 </button>
                               ) : (
-                                <span style={{ fontSize: '0.74rem', color: '#475569', fontStyle: 'italic' }}>
-                                  Registration closed
+                                <span style={{
+                                  fontSize: '0.74rem',
+                                  color: '#f87171',
+                                  fontWeight: 600,
+                                  background: 'rgba(239,68,68,0.10)',
+                                  border: '1px solid rgba(239,68,68,0.25)',
+                                  padding: '3px 12px',
+                                  borderRadius: '9999px'
+                                }}>
+                                  Registration Closed
                                 </span>
                               )}
                             </div>
