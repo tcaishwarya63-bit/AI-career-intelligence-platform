@@ -1,58 +1,118 @@
 {
+  "dataset": {
+    "total_profiles": 359,
+    "career_categories": 10,
+    "train_profiles": 269,
+    "test_profiles": 90
+  },
   "models": [
     {
       "name": "Logistic Regression",
-      "type": "Linear Baseline",
-      "macro_f1": 1.0,
-      "accuracy": 100.0,
+      "type": "Linear Baseline (L2 Regularized)",
+      "accuracy": 48.9,
+      "precision": 0.35,
+      "recall": 0.33,
+      "macro_f1": 0.33,
+      "top5_recall": 82.2,
       "threshold_met": false
     },
     {
       "name": "Random Forest",
-      "type": "Bagging Ensemble",
-      "macro_f1": 1.0,
-      "accuracy": 100.0,
+      "type": "Bagging Ensemble (100 Trees)",
+      "accuracy": 51.1,
+      "precision": 0.37,
+      "recall": 0.35,
+      "macro_f1": 0.35,
+      "top5_recall": 85.6,
       "threshold_met": false
     },
     {
       "name": "XGBoost",
-      "type": "Gradient Boosting",
-      "macro_f1": 1.0,
-      "accuracy": 100.0,
+      "type": "Gradient Boosting (Tuned depth=6, lr=0.1)",
+      "accuracy": 53.33,
+      "precision": 0.39,
+      "recall": 0.37,
+      "macro_f1": 0.37,
+      "top5_recall": 88.9,
+      "threshold_met": false
+    },
+    {
+      "name": "Combined 3-Model Ensemble",
+      "type": "Weighted Probability Fusion + SBERT",
+      "accuracy": 53.33,
+      "precision": 0.40,
+      "recall": 0.38,
+      "macro_f1": 0.3697,
+      "top5_recall": 90.00,
       "threshold_met": true
     }
   ],
   "top5_recommendations": [
     {
       "rank": 1,
-      "role": "ML Engineer",
-      "confidence": "94%",
-      "match": "94%"
+      "role": "Machine Learning Engineer",
+      "lr_score": "72%",
+      "rf_score": "88%",
+      "xgb_score": "94%",
+      "ensemble_prob": "88%",
+      "skill_alignment": "95%",
+      "final_score": "89.4%"
     },
     {
       "rank": 2,
       "role": "Data Scientist",
-      "confidence": "89%",
-      "match": "89%"
+      "lr_score": "70%",
+      "rf_score": "84%",
+      "xgb_score": "89%",
+      "ensemble_prob": "83%",
+      "skill_alignment": "90%",
+      "final_score": "84.4%"
     },
     {
       "rank": 3,
-      "role": "Backend Dev",
-      "confidence": "85%",
-      "match": "85%"
+      "role": "Full Stack Software Engineer",
+      "lr_score": "65%",
+      "rf_score": "78%",
+      "xgb_score": "85%",
+      "ensemble_prob": "78%",
+      "skill_alignment": "82%",
+      "final_score": "78.8%"
     },
     {
       "rank": 4,
-      "role": "Product Manager",
-      "confidence": "81%",
-      "match": "81%"
+      "role": "Cloud Solutions Architect",
+      "lr_score": "60%",
+      "rf_score": "74%",
+      "xgb_score": "81%",
+      "ensemble_prob": "73%",
+      "skill_alignment": "75%",
+      "final_score": "73.4%"
     },
     {
       "rank": 5,
-      "role": "AI Researcher",
-      "confidence": "78%",
-      "match": "78%"
+      "role": "Product Manager",
+      "lr_score": "58%",
+      "rf_score": "70%",
+      "xgb_score": "78%",
+      "ensemble_prob": "70%",
+      "skill_alignment": "70%",
+      "final_score": "70.0%"
     }
   ],
-  "target_f1_threshold": 0.8
+  "benchmark_targets": {
+    "macro_f1_target": 0.80,
+    "macro_f1_achieved": 0.3697,
+    "macro_f1_status": "Unmet (acknowledged due to survey size and multiclass overlap)",
+    "synonym_similarity_target": 0.85,
+    "synonym_similarity_status": "Unmet",
+    "top5_recall_target": 0.90,
+    "top5_recall_achieved": 0.90,
+    "top5_recall_status": "Met (90.00%)"
+  },
+  "limitations": {
+    "dataset": "359 anonymized profiles across 10 career categories (269 train, 90 test).",
+    "semeval_validation": "Not performed because dataset was unavailable.",
+    "curated_linkedin_validation": "Not performed because dataset was unavailable."
+  },
+  "conclusion": "Milestone 2 implemented advanced prediction models, semantic skill matching, personalized career ranking, skill-gap analysis, and learning resources. Top-5 recall reached 90% on the available survey test set, while further data and model improvements are required to meet the remaining benchmark targets."
 }
