@@ -533,6 +533,7 @@ export default function App() {
   ])
 
   // Notification Center State: Curated Job Recommendations & Placements
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false)
   const [notificationsList, setNotificationsList] = useState([
     {
       id: 1,
@@ -542,8 +543,10 @@ export default function App() {
       desc: 'Based on your verified skills in Python, PyTorch & MLOps, your profile ranks in the top 5% of candidates. Package: ₹28,00,000 - ₹38,00,000 / yr.',
       location: 'Bangalore, India (Hybrid)',
       fit: '94% Match',
-      fitColor: '#10b981',
+      fitColor: '#2563eb',
       time: '15 minutes ago',
+      deadline: 'Nov 20, 2026',
+      deadlineExpired: false,
       type: 'job',
       read: false
     },
@@ -557,6 +560,8 @@ export default function App() {
       fit: '89% Match',
       fitColor: '#2563eb',
       time: '2 hours ago',
+      deadline: 'Nov 18, 2026',
+      deadlineExpired: false,
       type: 'job',
       read: false
     },
@@ -568,8 +573,10 @@ export default function App() {
       desc: 'High-priority recommendation: Multi-region cloud infrastructure & zero-downtime deployment team in Mumbai. Package: ₹22,00,000 - ₹30,00,000 / yr.',
       location: 'Mumbai, India (Hybrid)',
       fit: '85% Match',
-      fitColor: '#6366f1',
+      fitColor: '#2563eb',
       time: '5 hours ago',
+      deadline: 'Nov 15, 2026',
+      deadlineExpired: false,
       type: 'job',
       read: false
     },
@@ -581,10 +588,12 @@ export default function App() {
       desc: 'E-commerce logistics & customer analytics group shortlisted your profile based on SQL, Statistics & Tableau diagnostic marks. Package: ₹18–25 LPA.',
       location: 'Bangalore, India (On-site)',
       fit: '88% Match',
-      fitColor: '#10b981',
+      fitColor: '#2563eb',
       time: 'Yesterday',
+      deadline: 'Nov 05, 2026',
+      deadlineExpired: true,
       type: 'job',
-      read: false
+      read: true
     },
     {
       id: 5,
@@ -594,8 +603,10 @@ export default function App() {
       desc: 'Applied AI research opening for multimodal LLMs & PyTorch architecture optimization. Direct referral link available. Package: ₹20–28 LPA.',
       location: 'Remote (India)',
       fit: '82% Match',
-      fitColor: '#ec4899',
+      fitColor: '#2563eb',
       time: '2 days ago',
+      deadline: 'Oct 30, 2026',
+      deadlineExpired: true,
       type: 'job',
       read: true
     },
@@ -607,8 +618,10 @@ export default function App() {
       desc: 'Logistics technology & routing algorithm squad is hiring PMs with algorithmic problem-solving background. Package: ₹22–32 LPA.',
       location: 'Gurgaon, India (Hybrid)',
       fit: '81% Match',
-      fitColor: '#f59e0b',
+      fitColor: '#2563eb',
       time: '3 days ago',
+      deadline: 'Nov 01, 2026',
+      deadlineExpired: true,
       type: 'job',
       read: true
     }
@@ -2725,10 +2738,125 @@ export default function App() {
           </div>
 
           <div className="header-right">
-            <button className="notif-btn" title="Notifications">
-              <Bell size={18} />
-              <span className="notif-badge">3</span>
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button 
+                className="notif-btn" 
+                title="Notifications"
+                onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+              >
+                <Bell size={18} />
+                {notificationsList.filter(n => !n.read).length > 0 && (
+                  <span className="notif-badge">{notificationsList.filter(n => !n.read).length}</span>
+                )}
+              </button>
+
+              {showNotifDropdown && (
+                <div 
+                  className="notif-dropdown"
+                  style={{
+                    position: 'absolute',
+                    top: '48px',
+                    right: 0,
+                    width: '360px',
+                    maxWidth: '90vw',
+                    background: '#111827',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(37, 99, 235, 0.15)',
+                    padding: '0.85rem',
+                    zIndex: 1000
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.6rem', borderBottom: '1px solid var(--border)', marginBottom: '0.6rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Bell size={15} color="#38bdf8" />
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>Notifications</span>
+                      <span style={{ fontSize: '0.72rem', padding: '1px 7px', borderRadius: '9999px', background: 'rgba(37, 99, 235, 0.2)', color: '#60a5fa', fontWeight: 600 }}>
+                        {notificationsList.filter(n => !n.read).length} unread
+                      </span>
+                    </div>
+                    {notificationsList.some(n => !n.read) && (
+                      <button 
+                        onClick={() => setNotificationsList(prev => prev.map(n => ({ ...n, read: true })))}
+                        style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.72rem', cursor: 'pointer', padding: '2px 6px' }}
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto' }}>
+                    {notificationsList.slice(0, 4).map(notif => {
+                      const isExpiredDropdown = notif.deadlineExpired
+                      const isActiveDropdown = !isExpiredDropdown && !notif.read
+                      return (
+                        <div 
+                          key={notif.id}
+                          onClick={() => {
+                            setNotificationsList(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n))
+                            setShowNotifDropdown(false)
+                            setActiveTab('notifications')
+                          }}
+                          style={{
+                            padding: '0.6rem 0.75rem',
+                            borderRadius: '8px',
+                            background: isActiveDropdown
+                              ? 'rgba(234,179,8,0.10)'
+                              : isExpiredDropdown
+                                ? 'rgba(255,255,255,0.01)'
+                                : 'rgba(255,255,255,0.02)',
+                            border: isActiveDropdown
+                              ? '1px solid rgba(234,179,8,0.45)'
+                              : isExpiredDropdown
+                                ? '1px solid rgba(255,255,255,0.05)'
+                                : '1px solid rgba(255, 255, 255, 0.05)',
+                            opacity: isExpiredDropdown ? 0.45 : 1,
+                            cursor: 'pointer',
+                            transition: 'background 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: isExpiredDropdown ? '#64748b' : '#ffffff', textDecoration: isExpiredDropdown ? 'line-through' : 'none' }}>{notif.title}</span>
+                            <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{notif.time}</span>
+                          </div>
+                          <p style={{ fontSize: '0.74rem', color: '#94a3b8', margin: '0 0 4px', lineHeight: 1.3 }}>{notif.desc.slice(0, 75)}...</p>
+                          {isExpiredDropdown ? (
+                            <span style={{ fontSize: '0.68rem', color: '#f87171', fontWeight: 600, background: 'rgba(239,68,68,0.10)', padding: '1px 6px', borderRadius: '4px' }}>
+                              ⛔ Deadline Expired
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.68rem', color: isActiveDropdown ? '#fbbf24' : '#60a5fa', fontWeight: 600, background: isActiveDropdown ? 'rgba(234,179,8,0.15)' : 'rgba(37,99,235,0.15)', padding: '1px 6px', borderRadius: '4px' }}>
+                              {isActiveDropdown ? '⚡ ' : ''}{notif.fit}
+                            </span>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      setShowNotifDropdown(false)
+                      setActiveTab('notifications')
+                    }}
+                    style={{
+                      width: '100%',
+                      marginTop: '0.6rem',
+                      padding: '6px',
+                      background: 'rgba(37, 99, 235, 0.12)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '6px',
+                      color: '#60a5fa',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    View All in Notifications →
+                  </button>
+                </div>
+              )}
+            </div>
 
             {session ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -6287,70 +6415,218 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* Legend */}
+                <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#94a3b8' }}>
+                    <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: 'rgba(234, 179, 8, 0.25)', border: '2px solid #eab308', display: 'inline-block' }}></span>
+                    Active — Apply Now
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#64748b' }}>
+                    <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'inline-block', opacity: 0.5 }}></span>
+                    Deadline Expired / Already Read
+                  </div>
+                </div>
+
                 <div className="white-panel" style={{ maxWidth: '900px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                    {notificationsList.map((notif) => (
-                      <div
-                        key={notif.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'flex-start',
-                          gap: '1rem',
-                          padding: '1.1rem 1.25rem',
-                          borderRadius: '10px',
-                          background: notif.read ? 'var(--bg-card)' : 'rgba(37, 99, 235, 0.08)',
-                          border: notif.read ? '1px solid var(--border)' : '1px solid rgba(37, 99, 235, 0.35)',
-                          transition: 'all 0.2s ease',
-                          flexWrap: 'wrap'
-                        }}
-                      >
-                        <div style={{
-                          width: '42px',
-                          height: '42px',
-                          borderRadius: '10px',
-                          background: `${notif.fitColor || '#38bdf8'}22`,
-                          color: notif.fitColor || '#38bdf8',
-                          border: `1px solid ${notif.fitColor || '#38bdf8'}44`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}>
-                          <Briefcase size={20} />
-                        </div>
+                    {notificationsList.map((notif) => {
+                      const isExpired = notif.deadlineExpired
+                      const isActive = !isExpired && !notif.read
 
-                        <div style={{ flex: 1, minWidth: '260px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                              <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>{notif.title}</h4>
-                              {notif.fit && (
-                                <span className="match-badge" style={{ background: `${notif.fitColor}22`, color: notif.fitColor, border: `1px solid ${notif.fitColor}44`, fontSize: '0.72rem', padding: '2px 8px' }}>
-                                  {notif.fit}
+                      return (
+                        <div
+                          key={notif.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '1rem',
+                            padding: '1.1rem 1.25rem',
+                            borderRadius: '10px',
+                            // ACTIVE (unread + not expired): bright yellow highlighter glow
+                            background: isActive
+                              ? 'linear-gradient(135deg, rgba(234,179,8,0.14) 0%, rgba(37,99,235,0.10) 100%)'
+                              : isExpired
+                                ? 'rgba(255,255,255,0.015)'
+                                : 'rgba(37, 99, 235, 0.05)',
+                            border: isActive
+                              ? '2px solid rgba(234, 179, 8, 0.6)'
+                              : isExpired
+                                ? '1px solid rgba(255,255,255,0.06)'
+                                : '1px solid rgba(37, 99, 235, 0.2)',
+                            boxShadow: isActive
+                              ? '0 0 16px rgba(234,179,8,0.18), inset 0 0 0 1px rgba(234,179,8,0.08)'
+                              : 'none',
+                            opacity: isExpired ? 0.45 : 1,
+                            transition: 'all 0.2s ease',
+                            flexWrap: 'wrap',
+                            position: 'relative'
+                          }}
+                        >
+                          {/* Yellow left-bar accent for active notifications */}
+                          {isActive && (
+                            <div style={{
+                              position: 'absolute',
+                              left: 0,
+                              top: '10%',
+                              height: '80%',
+                              width: '4px',
+                              borderRadius: '0 4px 4px 0',
+                              background: 'linear-gradient(180deg, #fbbf24, #eab308)'
+                            }} />
+                          )}
+
+                          {/* Company Icon */}
+                          <div style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '10px',
+                            background: isActive
+                              ? 'rgba(234,179,8,0.15)'
+                              : isExpired
+                                ? 'rgba(255,255,255,0.04)'
+                                : 'rgba(37, 99, 235, 0.10)',
+                            color: isActive ? '#fbbf24' : isExpired ? '#475569' : '#60a5fa',
+                            border: isActive
+                              ? '1px solid rgba(234,179,8,0.4)'
+                              : isExpired
+                                ? '1px solid rgba(255,255,255,0.08)'
+                                : '1px solid rgba(59, 130, 246, 0.25)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            <Briefcase size={20} />
+                          </div>
+
+                          <div style={{ flex: 1, minWidth: '260px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '5px', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                                <h4 style={{
+                                  fontSize: '0.98rem',
+                                  fontWeight: 700,
+                                  color: isExpired ? '#64748b' : '#ffffff',
+                                  margin: 0,
+                                  textDecoration: isExpired ? 'line-through' : 'none'
+                                }}>
+                                  {notif.title}
+                                </h4>
+
+                                {/* Match badge — only show for active */}
+                                {notif.fit && !isExpired && (
+                                  <span style={{
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    padding: '2px 10px',
+                                    borderRadius: '9999px',
+                                    background: isActive ? 'rgba(234,179,8,0.20)' : 'rgba(37,99,235,0.15)',
+                                    color: isActive ? '#fbbf24' : '#93c5fd',
+                                    border: isActive ? '1px solid rgba(234,179,8,0.5)' : '1px solid rgba(59,130,246,0.3)'
+                                  }}>
+                                    {notif.fit}
+                                  </span>
+                                )}
+
+                                {/* DEADLINE EXPIRED badge */}
+                                {isExpired && (
+                                  <span style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    padding: '2px 8px',
+                                    borderRadius: '9999px',
+                                    background: 'rgba(239,68,68,0.10)',
+                                    color: '#f87171',
+                                    border: '1px solid rgba(239,68,68,0.25)',
+                                    letterSpacing: '0.03em'
+                                  }}>
+                                    ⛔ Deadline Expired
+                                  </span>
+                                )}
+
+                                {/* APPLY NOW badge for active */}
+                                {isActive && (
+                                  <span style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 800,
+                                    padding: '2px 10px',
+                                    borderRadius: '9999px',
+                                    background: 'rgba(234,179,8,0.25)',
+                                    color: '#fbbf24',
+                                    border: '1px solid rgba(234,179,8,0.6)',
+                                    letterSpacing: '0.04em',
+                                    textTransform: 'uppercase'
+                                  }}>
+                                    ⚡ Apply Now
+                                  </span>
+                                )}
+                              </div>
+                              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{notif.time}</span>
+                            </div>
+
+                            {/* Deadline row */}
+                            <div style={{ marginBottom: '5px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                color: isExpired ? '#ef4444' : '#10b981',
+                                background: isExpired ? 'rgba(239,68,68,0.08)' : 'rgba(16,185,129,0.08)',
+                                border: isExpired ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(16,185,129,0.25)',
+                                padding: '1px 8px',
+                                borderRadius: '4px'
+                              }}>
+                                {isExpired ? '🔴' : '🟢'} Deadline: {notif.deadline}
+                              </span>
+                            </div>
+
+                            <p style={{
+                              fontSize: '0.84rem',
+                              color: isExpired ? '#475569' : '#cbd5e1',
+                              margin: '0 0 0.5rem',
+                              lineHeight: 1.5
+                            }}>
+                              {notif.desc}
+                            </p>
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '0.75rem', color: isExpired ? '#475569' : '#94a3b8' }}>📍 {notif.location}</span>
+                              {!isExpired ? (
+                                <button
+                                  className="btn-pill-outline"
+                                  onClick={() => setActiveTab('job-recommendations')}
+                                  style={{
+                                    padding: '5px 16px',
+                                    fontSize: '0.76rem',
+                                    fontWeight: 700,
+                                    borderColor: isActive ? 'rgba(234,179,8,0.7)' : 'rgba(59,130,246,0.4)',
+                                    color: isActive ? '#fbbf24' : '#60a5fa',
+                                    background: isActive ? 'rgba(234,179,8,0.10)' : 'rgba(37,99,235,0.08)'
+                                  }}
+                                >
+                                  View Job Details →
+                                </button>
+                              ) : (
+                                <span style={{ fontSize: '0.74rem', color: '#475569', fontStyle: 'italic' }}>
+                                  Registration closed
                                 </span>
                               )}
                             </div>
-                            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{notif.time}</span>
                           </div>
 
-                          <p style={{ fontSize: '0.84rem', color: '#cbd5e1', margin: '0 0 0.5rem', lineHeight: 1.5 }}>{notif.desc}</p>
-
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>📍 {notif.location}</span>
-                            <button
-                              className="btn-pill-outline"
-                              onClick={() => setActiveTab('job-recommendations')}
-                              style={{ padding: '3px 12px', fontSize: '0.75rem', borderColor: notif.fitColor, color: notif.fitColor }}
-                            >
-                              View in Job Recommendations →
-                            </button>
-                          </div>
+                          {/* Unread dot — only on active */}
+                          {isActive && (
+                            <span style={{
+                              width: '10px',
+                              height: '10px',
+                              borderRadius: '50%',
+                              background: '#eab308',
+                              boxShadow: '0 0 8px rgba(234,179,8,0.8)',
+                              marginTop: '6px',
+                              flexShrink: 0
+                            }} />
+                          )}
                         </div>
-
-                        {!notif.read && (
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', marginTop: '6px', flexShrink: 0 }} />
-                        )}
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               </div>

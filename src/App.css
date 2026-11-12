@@ -212,13 +212,21 @@
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notif-btn:hover {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #60a5fa;
 }
 
 .notif-badge {
   position: absolute;
   top: -2px;
   right: -2px;
-  background: #8b5cf6;
+  background: #2563eb;
   color: #ffffff;
   font-size: 0.65rem;
   font-weight: 700;
@@ -229,6 +237,7 @@
   align-items: center;
   justify-content: center;
   border: 2px solid var(--sidebar-bg);
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.6);
 }
 
 .user-profile-btn {
