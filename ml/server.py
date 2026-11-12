@@ -52,6 +52,7 @@ class RecommendRequest(BaseModel):
     top_k: Optional[int] = 5
 
 @app.get("/")
+@app.get("/health")
 def health_check():
     return {
         "status": "online",
@@ -62,6 +63,7 @@ def health_check():
     }
 
 @app.post("/predict")
+@app.post("/predict-career")
 def predict_career(req: PredictRequest):
     """Predicts career trajectories from candidate skills or raw text profile."""
     has_input = bool((req.raw_text and req.raw_text.strip()) or 
@@ -76,6 +78,7 @@ def predict_career(req: PredictRequest):
     return result
 
 @app.post("/upload-resume")
+@app.post("/parse-resume")
 async def upload_and_parse_resume(file: UploadFile = File(...)):
     """Uploads a PDF/DOCX/TXT resume, extracts SpaCy entities, and returns predictions."""
     temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_uploads")
